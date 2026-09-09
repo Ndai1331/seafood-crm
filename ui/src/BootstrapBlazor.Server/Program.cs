@@ -19,11 +19,13 @@ builder.Services.Configure<Microsoft.AspNetCore.Components.Server.CircuitOptions
 });
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 RequestClient.Initialize(builder.Configuration);
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<BootstrapBlazor.Server.Services.Seafood.SeafoodApiService>();
+builder.Services.AddScoped<BootstrapBlazor.Server.Services.I18n.IAppLang, BootstrapBlazor.Server.Services.I18n.AppLangService>();
 builder.Services.AddDistributedMemoryCache();
 
 var keyRingPath = builder.Configuration["DataProtection:KeyRingPath"]

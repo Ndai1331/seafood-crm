@@ -28,7 +28,7 @@
                    hides a broken endpoint. *@
                 <div class="alert alert-warning py-2 mb-2">
                     Không đọc được danh sách khoá: @LoadError
-                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="LoadAsync">Thử lại</button>
+                    <Button Color="Color.Secondary" Size="Size.ExtraSmall" Text="Thử lại" OnClick="LoadAsync" />
                 </div>
             }
             else if (IsLoading)
@@ -85,9 +85,9 @@
                                aria-label="Mã PIN mới" autocomplete="new-password" @bind="NewPin" />
                         <input type="password" class="form-control" placeholder="Nhập lại mã PIN"
                                aria-label="Nhập lại mã PIN" autocomplete="new-password" @bind="ConfirmPin" />
-                        <button class="btn btn-primary" @onclick="SavePinAsync" disabled="@IsBusy">
+                        <Button Color="Color.Primary" Icon="fa-solid fa-save" OnClick="SavePinAsync" IsDisabled="@IsBusy">
                             Lưu mã PIN
-                        </button>
+                        </Button>
                     </div>
                 }
                 else

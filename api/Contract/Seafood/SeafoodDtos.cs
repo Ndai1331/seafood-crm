@@ -69,10 +69,31 @@ namespace Contract.Seafood
         public string? MissingDocuments { get; set; }
         public DateTime? Eta { get; set; }
         public DateTime? WarehouseDate { get; set; }
+        public int? WarehouseId { get; set; }
+        public int? TargetMarketId { get; set; }
+        public int? PaymentTermId { get; set; }
+        public DateTime? EstimatePaymentDate { get; set; }
         public string? BlNumber { get; set; }
         public string? ContainerNo { get; set; }
         public string? ContainerType { get; set; }
         public string? Note { get; set; }
+        public string? TruckName { get; set; }
+        public string? LotNumber { get; set; }
+        public string? CustomsDeclarationNo { get; set; }
+        public string? Origin { get; set; }
+        public string? CareMarket { get; set; }
+        public decimal? ActualWeightKg { get; set; }
+        public string? ReceivedQtyNote { get; set; }
+        public string? RewriteQtyNote { get; set; }
+        public DateTime? ArrivalDate { get; set; }
+        public DateTime? PullContainerDate { get; set; }
+        public int? PortStayDays { get; set; }
+        public bool RawFileImported { get; set; }
+        public decimal FeeCommand { get; set; }
+        public decimal FeeCold { get; set; }
+        public decimal FeeLift { get; set; }
+        public decimal FeeCustoms { get; set; }
+        public decimal FeeInfra { get; set; }
         public decimal TotalKg { get; set; }
         public decimal TotalAmountUsd { get; set; }
         public List<InboundLineDto> Lines { get; set; } = new();
@@ -86,6 +107,8 @@ namespace Contract.Seafood
         public decimal QtyKgHandline { get; set; }
         public decimal QtyKgPs { get; set; }
         public decimal QtyKgLand { get; set; }
+        public decimal MahiKg { get; set; }
+        public decimal FinishedLbs { get; set; }
         public decimal PriceUsd { get; set; }
         public decimal InvoiceAmountUsd { get; set; }
         public string? ContainerQty { get; set; }
@@ -99,6 +122,12 @@ namespace Contract.Seafood
         public DateTime ReceivedDate { get; set; }
         public decimal RawMaterialKg { get; set; }
         public decimal RecoveryRatio { get; set; }
+        public decimal FxRateVnd { get; set; }
+        public decimal PurchasePriceVnd { get; set; }
+        public decimal AdjustedPriceVnd { get; set; }
+        public decimal TrimKg { get; set; }
+        public decimal OutputValueUsd { get; set; }
+        public decimal ProfitUsd { get; set; }
         public string? Note { get; set; }
         public List<string> CertificateCodes { get; set; } = new();
         public List<ProductionOutputDto> Outputs { get; set; } = new();
@@ -112,6 +141,8 @@ namespace Contract.Seafood
         public decimal RecoveredKg { get; set; }
         public decimal RawUsedKg { get; set; }
         public decimal YieldRatio { get; set; }
+        public decimal UnitPriceUsd { get; set; }
+        public decimal AmountUsd { get; set; }
         public string? ExportMarket { get; set; }
     }
 
@@ -182,6 +213,11 @@ namespace Contract.Seafood
         public string? ContainerNo { get; set; }
         public string? ContainerType { get; set; }
         public string? Route { get; set; }
+        public DateTime? YardTime { get; set; }
+        public string? ForwarderName { get; set; }
+        public string? TransportName { get; set; }
+        public string? Note { get; set; }
+        public int? CarrierId { get; set; }
     }
 
     public class PaymentInstallmentDto
@@ -207,6 +243,7 @@ namespace Contract.Seafood
         public DateTime ReceivedDate { get; set; }
         public string? Note { get; set; }
         public decimal AllocatedUsd { get; set; }
+        public decimal RemainingUsd { get; set; }
         public List<DepositAllocationDto> Allocations { get; set; } = new();
     }
 
@@ -217,6 +254,58 @@ namespace Contract.Seafood
         public string? ContractNo { get; set; }
         public decimal AmountUsd { get; set; }
         public bool IsExported { get; set; }
+        public DateTime? ExportedAt { get; set; }
+    }
+
+    public class LotAllocationDto
+    {
+        public int Id { get; set; }
+        public int LotId { get; set; }
+        public string? LotNumber { get; set; }
+        public int? SalesContractId { get; set; }
+        public string? ContractNo { get; set; }
+        public int SkuId { get; set; }
+        public string? SkuName { get; set; }
+        public decimal AllocatedKg { get; set; }
+        public decimal YieldAfterAdjust { get; set; }
+        public decimal RawUsedAfterAdjust { get; set; }
+        public string Status { get; set; } = "OK";
+        public string? InternalNote { get; set; }
+        public List<string> Certificates { get; set; } = new();
+    }
+
+    public class AllocationBoardDto
+    {
+        public List<InventoryRowDto> Stock { get; set; } = new();
+        public List<SalesContractDto> OpenContracts { get; set; } = new();
+        public List<LotAllocationDto> Allocations { get; set; } = new();
+    }
+
+    public class ReportFavoriteDto
+    {
+        public int Id { get; set; }
+        public string ReportCode { get; set; } = "";
+        public bool PinnedToDashboard { get; set; }
+    }
+
+    public class OpsReportDto
+    {
+        public decimal PurchasedKg { get; set; }
+        public decimal PurchasedUsd { get; set; }
+        public decimal SoldKg { get; set; }
+        public decimal SoldUsd { get; set; }
+        public List<OrderPnlDto> Orders { get; set; } = new();
+        public List<ReportFavoriteDto> Favorites { get; set; } = new();
+    }
+
+    public class OrderPnlDto
+    {
+        public string InvoiceNo { get; set; } = "";
+        public string? CustomerName { get; set; }
+        public decimal QtyKg { get; set; }
+        public decimal AmountUsd { get; set; }
+        public decimal CostUsd { get; set; }
+        public decimal ProfitUsd { get; set; }
     }
 
     public class DashboardDto
@@ -229,6 +318,7 @@ namespace Contract.Seafood
         public decimal OutstandingPaymentUsd { get; set; }
         public List<PieSliceDto> StockBySku { get; set; } = new();
         public List<PieSliceDto> ExportByMarket { get; set; } = new();
+        public List<ReportFavoriteDto> PinnedReports { get; set; } = new();
     }
 
     public class PieSliceDto

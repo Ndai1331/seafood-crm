@@ -2,60 +2,126 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Báo giá / Hợp đồng</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ (để trống = tự sinh)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.SkuId" placeholder="SKU Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKg" placeholder="KL kg" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyLbs" placeholder="KL lbs" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.UnitPriceUsd" placeholder="Giá USD/kg" /></div>
-        <div class="col-md-2"><Button Color="Color.Secondary" OnClick="SuggestAsync">Gợi ý giá</Button></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu HĐ</Button></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_approveId" placeholder="Id HĐ cần duyệt" /></div>
-        <div class="col-md-2"><Button Color="Color.Success" OnClick="ApproveAsync">Duyệt HĐ</Button></div>
-    </div>
-    @if (_hint != null)
-    {
-        <p class="mt-2 mb-0">Giá gần nhất cùng khách+SKU: <b>@_hint.LastPriceForCustomer</b> (@_hint.LastContractNo). Trung bình khách khác 2 tháng: @_hint.PeerAvgLastTwoMonths</p>
-    }
-</div>
-<Table TItem="SalesContractDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["quotes.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="@L["btn.create"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="SalesContractDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.ContractNo" Text="@L["quotes.contractNo"]" />
+                    <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.CustomerName" Text="@L["customers.name"]" />
+                    <TableColumn TItem="SalesContractDto" TType="int" @bind-Field="@context.Status" Text="@L["quotes.status"]" Width="90" />
+                    <TableColumn TItem="SalesContractDto" TType="decimal" @bind-Field="@context.VarianceVsLastPct" Text="@L["quotes.varianceLast"]" FormatString="N1" Width="110" />
+                    <TableColumn TItem="SalesContractDto" TType="int" @bind-Field="@context.Id" Text="" Width="160">
+                        <Template Context="v">
+                            <div class="d-flex gap-1">
+                                <RowActionButtons OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" ShowDelete="@(v.Row.Status == 0)" />
+                                @if (v.Row.Status == 0 || v.Row.Status == 1)
+                                {
+                                    <Button Color="Color.Success" Size="Size.ExtraSmall" Icon="fa-solid fa-check" Text="@L["btn.approve"]" OnClick="() => ApproveAsync(v.Row)" />
+                                }
+                            </div>
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.ExtraLarge">
+            <ModalDialog Title="@L["quotes.title"]" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-4"><Select TValue="int" Items="_customers" @bind-Value="_form.CustomerId" DisplayText="@L["customers.title"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.ContractNo" DisplayText="@L["quotes.contractNo"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.CustomerContractNo" DisplayText="@L["quotes.customerContract"]" ShowLabel="true" /></div>
+                    </div>
+                    @if (_hint != null)
+                    {
+                        <p class="small text-muted">@L["btn.suggest"]: @_hint.LastPriceForCustomer (@_hint.LastContractNo) · peer @_hint.PeerAvgLastTwoMonths</p>
+                    }
+                    @foreach (var line in _form.Lines)
+                    {
+                        <div class="row g-3 mb-2">
+                            <div class="col-12 col-md-3"><Select TValue="int" Items="_skus" @bind-Value="line.SkuId" DisplayText="SKU" ShowLabel="true" /></div>
+                            <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyKg" ValueChanged="v => line.QtyKg = v ?? 0" Placeholder="kg" /></div>
+                            <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyLbs" ValueChanged="v => line.QtyLbs = v ?? 0" Placeholder="lbs" /></div>
+                            <div class="col-6 col-md-2"><UsdMoneyInput Value="line.UnitPriceUsd" ValueChanged="v => line.UnitPriceUsd = v ?? 0" Placeholder="USD/kg" /></div>
+                            <div class="col-6 col-md-3 d-flex align-items-end">
+                                <Button Color="Color.Secondary" Icon="fa-solid fa-lightbulb" Text="@L["btn.suggest"]" OnClick="() => SuggestAsync(line)" />
+                            </div>
+                        </div>
+                    }
+                    <Button Color="Color.Secondary" Icon="fa-solid fa-plus" Text="@L["btn.addLine"]" OnClick="AddLine" />
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<SalesContractDto> _rows = new();
     private SalesContractDto _form = new();
-    private SalesContractLineDto _line = new();
     private PriceSuggestionDto? _hint;
-    private int _approveId;
+    private List<SelectedItem> _customers = new();
+    private List<SelectedItem> _skus = new();
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.QuotesAsync() ?? new();
-
-    private async Task SuggestAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (_form.CustomerId == 0 || _line.SkuId == 0) return;
-        _hint = await Api.SuggestPriceAsync(_form.CustomerId, _line.SkuId);
-        if (_hint?.LastPriceForCustomer is decimal price) _line.UnitPriceUsd = price;
+        _customers = (await Api.CustomersAsync() ?? new()).Select(c => new SelectedItem(c.Id.ToString(), c.Name)).ToList();
+        _skus = (await Api.ProductsAsync() ?? new()).SelectMany(g => g.Skus).Select(s => new SelectedItem(s.Id.ToString(), s.Name)).ToList();
+        await LoadAsync();
     }
 
-    private async Task SaveAsync()
+    private async Task LoadAsync() => _rows = await Api.QuotesAsync() ?? new();
+    private void AddLine() => _form.Lines.Add(new SalesContractLineDto());
+
+    private async Task OpenCreate()
     {
-        _form.Lines = new List<SalesContractLineDto> { _line };
+        _form = new SalesContractDto { Lines = new List<SalesContractLineDto> { new() } };
+        _hint = null;
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(SalesContractDto row)
+    {
+        _form = row;
+        if (_form.Lines.Count == 0) _form.Lines.Add(new SalesContractLineDto());
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task SuggestAsync(SalesContractLineDto line)
+    {
+        if (_form.CustomerId == 0 || line.SkuId == 0) return;
+        _hint = await Api.SuggestPriceAsync(_form.CustomerId, line.SkuId);
+        if (_hint?.LastPriceForCustomer is decimal price) line.UnitPriceUsd = price;
+    }
+
+    private async Task<bool> SaveAsync()
+    {
         var saved = await Api.SaveQuoteAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return; }
-        await Toast.Success($"Đã lưu {saved.ContractNo}. Lệch vs HĐ cũ {saved.VarianceVsLastPct}% / khách khác {saved.VarianceVsPeersPct}%");
-        _form = new();
-        _line = new();
-        _rows = await Api.QuotesAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success($"{L["msg.saveOk"]} {saved.VarianceVsLastPct}% / {saved.VarianceVsPeersPct}%");
+        await LoadAsync();
+        return true;
     }
 
-    private async Task ApproveAsync()
+    private async Task ApproveAsync(SalesContractDto row)
     {
-        var saved = await Api.ApproveAsync(_approveId);
-        if (saved == null) { await Toast.Error("Không duyệt được"); return; }
-        await Toast.Success($"Đã duyệt {saved.ContractNo}");
-        _rows = await Api.QuotesAsync() ?? new();
+        var saved = await Api.ApproveAsync(row.Id);
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return; }
+        await Toast.Success(L["btn.approve"]);
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(SalesContractDto row)
+    {
+        try { await Api.DeleteQuoteAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
     }
 }

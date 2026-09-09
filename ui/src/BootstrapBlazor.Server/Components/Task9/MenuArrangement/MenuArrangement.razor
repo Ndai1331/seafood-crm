@@ -5,20 +5,18 @@
 
 @using BootstrapBlazor.Components
 @using BootstrapBlazor.Server.Services
+@using BootstrapBlazor.Server.Services.I18n
 
-<PageTitle>Sắp xếp menu</PageTitle>
+@inject IAppLang L
+<PageTitle>@L["nav.menu"]</PageTitle>
 
-<div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h4 class="mb-1"><i class="fa-solid fa-sitemap me-2"></i>Sắp xếp menu</h4>
-            <span class="text-muted">Kéo-thả hoặc dùng nút ▲▼◀▶ để đổi thứ tự module/page, chuyển page sang module khác, hoặc thêm module mới. Nút <i class="fa-solid fa-pen"></i> đổi tên hiển thị, nút <i class="fa-solid fa-trash"></i> xoá khỏi menu (chỉ ẩn sidebar, khôi phục lại được — không xoá trang, URL vẫn vào được nếu có quyền). Lưu để áp dụng (F5 để xem).</span>
-        </div>
-        <div>
-            <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" OnClick="ReloadAsync" IsDisabled="@IsBusy">Tải lại</Button>
-            <Button Color="Color.Primary" Icon="fa-solid fa-floppy-disk" OnClick="SaveAsync" IsDisabled="@(!IsDirty || IsBusy)">Lưu</Button>
-        </div>
-    </div>
+<PageChrome Title="@L["nav.menu"]" Subtitle="Kéo-thả hoặc dùng nút ▲▼◀▶ để đổi thứ tự module/page. Lưu để áp dụng.">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="ReloadAsync" IsDisabled="@IsBusy" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-floppy-disk" Text="@L["btn.save"]" OnClick="SaveAsync" IsDisabled="@(!IsDirty || IsBusy)" />
+    </Actions>
+    <ChildContent>
+    <div class="container-fluid px-0">
 
     <div class="card mb-3">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -81,21 +79,15 @@
                     <div class="menu-arrangement-column-header">
                         <i class="@module.Icon"></i>
                         <span class="fw-bold">@module.Text</span>
-                        <div class="ms-auto btn-group btn-group-sm">
-                            <button type="button" class="btn btn-outline-secondary" title="Đưa module lên"
-                                    disabled="@(mIndex == 0)" @onclick="() => MoveModule(mIndex, -1)">
-                                <i class="fa-solid fa-angle-up"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" title="Đưa module xuống"
-                                    disabled="@(mIndex == Modules.Count - 1)" @onclick="() => MoveModule(mIndex, 1)">
-                                <i class="fa-solid fa-angle-down"></i>
-                            </button>
+                        <div class="ms-auto d-flex gap-1">
+                            <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-up"
+                                    title="Đưa module lên" IsDisabled="@(mIndex == 0)" OnClick="() => MoveModule(mIndex, -1)" />
+                            <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-down"
+                                    title="Đưa module xuống" IsDisabled="@(mIndex == Modules.Count - 1)" OnClick="() => MoveModule(mIndex, 1)" />
                             @if (module.Items.Count == 0 && IsCustomModule(module))
                             {
-                                <button type="button" class="btn btn-outline-danger" title="Xóa module rỗng"
-                                        @onclick="() => RemoveEmptyModule(module)">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                                <Button Color="Color.Danger" Size="Size.ExtraSmall" Icon="fa-solid fa-trash"
+                                        title="Xóa module rỗng" OnClick="() => RemoveEmptyModule(module)" />
                             }
                         </div>
                     </div>
@@ -114,19 +106,14 @@
                                            @ref="RenameInput"
                                            @bind="RenameDraft" @bind:event="oninput"
                                            @onkeydown="e => OnRenameKeyDown(e, pg)" />
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-success" title="Lưu tên mới"
-                                                @onclick="() => CommitRename(pg)">
-                                            <i class="fa-solid fa-check"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" title="Về tên gốc trong code: @pg.DefaultText"
-                                                disabled="@(pg.Text == pg.DefaultText)" @onclick="() => ResetRename(pg)">
-                                            <i class="fa-solid fa-rotate-left"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" title="Huỷ"
-                                                @onclick="CancelRename">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
+                                    <div class="d-flex gap-1">
+                                        <Button Color="Color.Success" Size="Size.ExtraSmall" Icon="fa-solid fa-check"
+                                                title="Lưu tên mới" OnClick="() => CommitRename(pg)" />
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-rotate-left"
+                                                title="@($"Về tên gốc trong code: {pg.DefaultText}")"
+                                                IsDisabled="@(pg.Text == pg.DefaultText)" OnClick="() => ResetRename(pg)" />
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-xmark"
+                                                title="Huỷ" OnClick="CancelRename" />
                                     </div>
                                 }
                                 else
@@ -147,43 +134,33 @@
                                 }
                                 else
                                 {
-                                    <div class="btn-group btn-group-sm ms-auto">
-                                        <button type="button" class="btn btn-outline-secondary" title="Chuyển sang module trước"
-                                                disabled="@(mIndex == 0)" @onclick="() => MovePageToModule(module, pg, -1)">
-                                            <i class="fa-solid fa-angle-left"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" title="Đưa lên"
-                                                disabled="@(pIndex == 0)" @onclick="() => MovePage(module, pIndex, -1)">
-                                            <i class="fa-solid fa-angle-up"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" title="Đưa xuống"
-                                                disabled="@(pIndex == module.Items.Count - 1)" @onclick="() => MovePage(module, pIndex, 1)">
-                                            <i class="fa-solid fa-angle-down"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary" title="Chuyển sang module sau"
-                                                disabled="@(mIndex == Modules.Count - 1)" @onclick="() => MovePageToModule(module, pg, 1)">
-                                            <i class="fa-solid fa-angle-right"></i>
-                                        </button>
+                                    <div class="d-flex gap-1 ms-auto">
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-left"
+                                                title="Chuyển sang module trước" IsDisabled="@(mIndex == 0)"
+                                                OnClick="() => MovePageToModule(module, pg, -1)" />
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-up"
+                                                title="Đưa lên" IsDisabled="@(pIndex == 0)"
+                                                OnClick="() => MovePage(module, pIndex, -1)" />
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-down"
+                                                title="Đưa xuống" IsDisabled="@(pIndex == module.Items.Count - 1)"
+                                                OnClick="() => MovePage(module, pIndex, 1)" />
+                                        <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-angle-right"
+                                                title="Chuyển sang module sau" IsDisabled="@(mIndex == Modules.Count - 1)"
+                                                OnClick="() => MovePageToModule(module, pg, 1)" />
                                     </div>
                                 }
-                                <div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-outline-secondary" title="Đổi tên hiển thị trên menu"
-                                            @onclick="() => StartRename(pg)">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
+                                <div class="d-flex gap-1">
+                                    <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-pen"
+                                            title="Đổi tên hiển thị trên menu" OnClick="() => StartRename(pg)" />
                                     @if (pg.Enabled)
                                     {
-                                        <button type="button" class="btn btn-outline-danger" title="Xoá khỏi menu — chỉ ẩn trên sidebar, khôi phục lại được; trang vẫn vào được bằng URL nếu có quyền"
-                                                @onclick="() => ToggleEnabled(pg)">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
+                                        <Button Color="Color.Danger" Size="Size.ExtraSmall" Icon="fa-solid fa-trash"
+                                                title="Xoá khỏi menu" OnClick="() => ToggleEnabled(pg)" />
                                     }
                                     else
                                     {
-                                        <button type="button" class="btn btn-outline-success" title="Khôi phục lên menu"
-                                                @onclick="() => ToggleEnabled(pg)">
-                                            <i class="fa-solid fa-rotate-left"></i>
-                                        </button>
+                                        <Button Color="Color.Success" Size="Size.ExtraSmall" Icon="fa-solid fa-rotate-left"
+                                                title="Khôi phục lên menu" OnClick="() => ToggleEnabled(pg)" />
                                     }
                                 </div>
                                 }
@@ -194,4 +171,6 @@
             }
         </div>
     }
-</div>
+    </div>
+    </ChildContent>
+</PageChrome>

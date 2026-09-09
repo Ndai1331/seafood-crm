@@ -1,0 +1,48 @@
+@page "/reports"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject IAppLang L
+
+<PageChrome Title="@L["reports.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-thumbtack" Text="@L["btn.pin"]" OnClick="PinAsync" />
+    </Actions>
+    <ChildContent>
+        @if (_data == null)
+        {
+            <div class="text-muted">@L["msg.loading"]</div>
+        }
+        else
+        {
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-3"><div class="kpi-card"><div class="kpi-label">@L["reports.purchased"]</div><div class="kpi-value">@_data.PurchasedKg.ToString("N0") kg</div><div class="small text-muted">$@_data.PurchasedUsd.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-3"><div class="kpi-card"><div class="kpi-label">@L["reports.sold"]</div><div class="kpi-value">@_data.SoldKg.ToString("N0") kg</div><div class="small text-muted">$@_data.SoldUsd.ToString("N0")</div></div></div>
+            </div>
+            <div class="sf-panel p-0 overflow-auto">
+                <Table TItem="OrderPnlDto" Items="_data.Orders" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                    <TableColumns>
+                        <TableColumn TItem="OrderPnlDto" TType="string" @bind-Field="@context.InvoiceNo" Text="@L["orders.invoice"]" />
+                        <TableColumn TItem="OrderPnlDto" TType="string" @bind-Field="@context.CustomerName" Text="@L["customers.name"]" />
+                        <TableColumn TItem="OrderPnlDto" TType="decimal" @bind-Field="@context.QtyKg" Text="kg" FormatString="N1" />
+                        <TableColumn TItem="OrderPnlDto" TType="decimal" @bind-Field="@context.AmountUsd" Text="USD" FormatString="N2" />
+                        <TableColumn TItem="OrderPnlDto" TType="decimal" @bind-Field="@context.ProfitUsd" Text="@L["reports.pnl"]" FormatString="N2" />
+                    </TableColumns>
+                </Table>
+            </div>
+        }
+    </ChildContent>
+</PageChrome>
+
+@code {
+    private OpsReportDto? _data;
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+    private async Task LoadAsync() => _data = await Api.ReportsAsync();
+
+    private async Task PinAsync()
+    {
+        await Api.FavoriteAsync("order-pnl", true);
+        await Toast.Success(L["btn.pin"]);
+    }
+}

@@ -81,34 +81,34 @@
                             <BootstrapInput @bind-Value="@Model.FirstName"
                                 DisplayText="Họ"
                                 ShowLabel="true"
-                                placeholder="Nhập họ" Class="seo-input-size" Size="Size.Large" />
+                                placeholder="Nhập họ" />
                         </div>
 
                         <div class="col-12 col-sm-6">
                             <BootstrapInput @bind-Value="@Model.LastName"
                                 DisplayText="Tên"
                                 ShowLabel="true"
-                                placeholder="Nhập tên" Class="seo-input-size" Size="Size.Large" />
+                                placeholder="Nhập tên" />
                         </div>
 
                         <div class="col-12 col-sm-6">
                             <BootstrapInput @bind-Value="@Model.Email"
                                 DisplayText="Email"
                                 ShowLabel="true"
-                                placeholder="Nhập email" Class="seo-input-size" Size="Size.Large" />
+                                placeholder="Nhập email" />
                         </div>
 
                         <div class="col-12 col-sm-6">
                             <BootstrapInput @bind-Value="@Model.PhoneNumber"
                                 DisplayText="Số điện thoại"
                                 ShowLabel="true"
-                                placeholder="Nhập số điện thoại" Class="seo-input-size" Size="Size.Large" />
+                                placeholder="Nhập số điện thoại" />
                         </div>
 
                         <div class="col-12 col-sm-6">
                             <Select @bind-Value="@Model.Gender"
                                 DisplayText="Giới tính"
-                                ShowLabel="true" Class="seo-input-size" Size="Size.Large">
+                                ShowLabel="true">
                                 <Options>
                                     <SelectOption Value="1" Text="Nam" />
                                     <SelectOption Value="0" Text="Nữ" />
@@ -121,14 +121,14 @@
                             <DateTimePicker @bind-Value="@Model.DOB"
                                 DisplayText="Ngày sinh"
                                 ShowLabel="true"
-                                DateFormat="dd/MM/yyyy" Class="seo-input-size" Size="Size.Large" />
+                                DateFormat="dd/MM/yyyy" />
                         </div>
 
                         <div class="col-12">
                             <BootstrapInput @bind-Value="@Model.Address"
                                 DisplayText="Địa chỉ"
                                 ShowLabel="true"
-                                placeholder="Nhập địa chỉ" Class="seo-input-size" Size="Size.Large" />
+                                placeholder="Nhập địa chỉ" />
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
                                     DisplayText="Mật khẩu mới"
                                     ShowLabel="true"
                                     Type="text"
-                                    placeholder="Nhập mật khẩu mới" Class="seo-input-size" Size="Size.Large" />
+                                    placeholder="Nhập mật khẩu mới" />
                             </div>
 
                             <div class="col-12 col-sm-6">
@@ -169,7 +169,7 @@
                                     DisplayText="Xác nhận mật khẩu"
                                     ShowLabel="true"
                                     Type="text"
-                                    placeholder="Nhập lại mật khẩu" Class="seo-input-size" Size="Size.Large" />
+                                    placeholder="Nhập lại mật khẩu" />
                             </div>
                         </div>
                     </div>
@@ -364,7 +364,7 @@
             }
             <!-- Actions -->
             <div class="form-actions">
-                <Button ButtonType="ButtonType.Submit" Class="seo-input-size btn-save" Size="Size.Large"
+                <Button ButtonType="ButtonType.Submit" Class="btn-save"
                     Color="Color.Primary"
                     Icon="fa-solid fa-save"
                     IsDisabled="@IsLoading">
@@ -374,7 +374,7 @@
                     }
                     Lưu thay đổi
                 </Button>
-                <Button Class="seo-input-size btn-reload" Size="Size.Large"
+                <Button Class="btn-reload"
                     Color="Color.Secondary"
                     Icon="fa-solid fa-rotate-left"
                     OnClick="@OnReload"

@@ -2,29 +2,82 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Điều khoản thanh toán</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã (TT20_80)" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.RatiosJson" placeholder='Tỷ lệ JSON, vd [0.2,0.8]' /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu điều khoản</Button></div>
-    </div>
-</div>
-<Table TItem="PaymentTermDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["terms.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="@L["btn.create"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="PaymentTermDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.Code" Text="@L["catalog.code"]" Width="120" />
+                    <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.Name" Text="@L["catalog.name"]" />
+                    <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.RatiosJson" Text="@L["terms.ratios"]" />
+                    <TableColumn TItem="PaymentTermDto" TType="int?" @bind-Field="@context.DueDays" Text="@L["terms.dueDays"]" Width="90" />
+                    <TableColumn TItem="PaymentTermDto" TType="int" @bind-Field="@context.Id" Text="" Width="90">
+                        <Template Context="v">
+                            <RowActionButtons OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.Large">
+            <ModalDialog Title="@(_form.Id == 0 ? L["btn.create"] : L["btn.edit"])" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6"><BootstrapInput @bind-Value="_form.Code" DisplayText="@L["catalog.code"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-6"><BootstrapInput @bind-Value="_form.Name" DisplayText="@L["catalog.name"]" ShowLabel="true" /></div>
+                        <div class="col-12"><BootstrapInput @bind-Value="_form.RatiosJson" DisplayText="@L["terms.ratios"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-6"><BootstrapInputNumber @bind-Value="_form.DueDays" DisplayText="@L["terms.dueDays"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-6 d-flex align-items-end"><Checkbox @bind-Value="_form.IsLc" DisplayText="@L["terms.lc"]" ShowLabel="true" ShowAfterLabel="true" /></div>
+                    </div>
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<PaymentTermDto> _rows = new();
     private PaymentTermDto _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
-    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentTermsAsync() ?? new();
 
-    private async Task SaveAsync()
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+    private async Task LoadAsync() => _rows = await Api.PaymentTermsAsync() ?? new();
+
+    private async Task OpenCreate()
+    {
+        _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(PaymentTermDto row)
+    {
+        _form = new PaymentTermDto
+        {
+            Id = row.Id, Code = row.Code, Name = row.Name, RatiosJson = row.RatiosJson,
+            DueDays = row.DueDays, IsLc = row.IsLc, IsActive = row.IsActive
+        };
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> SaveAsync()
     {
         var saved = await Api.SavePaymentTermAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu điều khoản"); return; }
-        await Toast.Success("Đã lưu điều khoản");
-        _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
-        _rows = await Api.PaymentTermsAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
+    }
+
+    private async Task DeleteAsync(PaymentTermDto row)
+    {
+        try { await Api.DeletePaymentTermAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
     }
 }

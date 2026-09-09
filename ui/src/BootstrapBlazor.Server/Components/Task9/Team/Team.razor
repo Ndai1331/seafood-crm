@@ -1,9 +1,11 @@
 @page "/team"
 @layout PageLayout
+@inject IAppLang L
 
-<PageTitle>Quản lý Team</PageTitle>
+<PageTitle>@L["nav.team"]</PageTitle>
 
-<DemoBlock Title="Quản lý Team" Name="TeamManager">
+<PageChrome Title="@L["nav.team"]">
+    <ChildContent>
     <div class="team-list-surface">
         <Table TItem="TeamDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
                IsPagination="true" IsStriped="false" IsBordered="false" IsMultipleSelect="true"
@@ -28,4 +30,5 @@
             </TableColumns>
         </Table>
     </div>
-</DemoBlock>
+    </ChildContent>
+</PageChrome>

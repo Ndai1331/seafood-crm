@@ -2,42 +2,144 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Nhập nguyên liệu</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ nhập" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.BlNumber" placeholder="BL" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContainerNo" placeholder="Cont" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Purchaser" placeholder="Người mua" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.MissingDocuments" placeholder="Thiếu chứng từ" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_line.Commodity" placeholder="Hàng (WR/GG)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLongLine" placeholder="kg LL" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgHandline" placeholder="kg HL" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgPs" placeholder="kg PS" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLand" placeholder="kg Land" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.PriceUsd" placeholder="Giá USD" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.InvoiceAmountUsd" placeholder="Thành tiền" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu phiếu nhập</Button></div>
-    </div>
-</div>
-<Table TItem="InboundPurchaseDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
+<PageChrome Title="@L["inbound.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="@L["btn.create"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="InboundPurchaseDto" Items="_rows" IsBordered="true" IsStriped="true" IsPagination="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="InboundPurchaseDto" TType="string" @bind-Field="@context.CustomerName" Text="@L["customers.name"]" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="string" @bind-Field="@context.ContractNo" Text="@L["inbound.contract"]" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="string" @bind-Field="@context.BlNumber" Text="@L["inbound.bl"]" Width="120" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="string" @bind-Field="@context.ContainerNo" Text="@L["inbound.cont"]" Width="120" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="decimal" @bind-Field="@context.TotalKg" Text="kg" Width="90" FormatString="N0" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="decimal" @bind-Field="@context.TotalAmountUsd" Text="USD" Width="110" FormatString="N2" />
+                    <TableColumn TItem="InboundPurchaseDto" TType="int" @bind-Field="@context.Id" Text="" Width="90">
+                        <Template Context="v">
+                            <RowActionButtons OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.ExtraLarge">
+            <ModalDialog Title="@L["inbound.header"]" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <Tab>
+                        <TabItem Text="@L["inbound.header"]">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6"><Select TValue="int?" Items="_customers" @bind-Value="_form.CustomerId" DisplayText="@L["customers.title"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-6"><BootstrapInput @bind-Value="_form.ContractNo" DisplayText="@L["inbound.contract"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.Purchaser" DisplayText="@L["customers.purchaser"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.BlNumber" DisplayText="@L["inbound.bl"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.ContainerNo" DisplayText="@L["inbound.cont"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.Eta" DisplayText="ETA" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.WarehouseDate" DisplayText="@L["inbound.title"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><Select TValue="int?" Items="_warehouses" @bind-Value="_form.WarehouseId" DisplayText="@L["nav.warehouse"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><Select TValue="int?" Items="_terms" @bind-Value="_form.PaymentTermId" DisplayText="@L["nav.paymentTerms"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.CareMarket" DisplayText="CARE" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.Origin" DisplayText="Xuất xứ" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.LotNumber" DisplayText="@L["production.lot"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.TruckName" DisplayText="Xe" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.CustomsDeclarationNo" DisplayText="Số TK" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.ArrivalDate" DisplayText="Hàng đến" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.PullContainerDate" DisplayText="Kéo cont" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><span class="form-label d-block">Ngày lưu cảng</span><div class="form-control-plaintext">@PortStayText</div></div>
+                                <div class="col-12 col-md-4"><VnNumberInput Value="_form.ActualWeightKg" ValueChanged="v => _form.ActualWeightKg = v" Placeholder="KL thực nhận kg" /></div>
+                                <div class="col-12"><BootstrapInput @bind-Value="_form.MissingDocuments" DisplayText="Thiếu CTU" ShowLabel="true" /></div>
+                            </div>
+                        </TabItem>
+                        <TabItem Text="@L["inbound.lines"]">
+                            @for (var i = 0; i < _form.Lines.Count; i++)
+                            {
+                                var idx = i;
+                                var line = _form.Lines[idx];
+                                <div class="row g-3 mb-3 pb-3 border-bottom">
+                                    <div class="col-12 col-md-4"><BootstrapInput @bind-Value="line.Commodity" DisplayText="@L["inbound.commodity"]" ShowLabel="true" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyKgLongLine" ValueChanged="v => line.QtyKgLongLine = v ?? 0" Placeholder="LL kg" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyKgHandline" ValueChanged="v => line.QtyKgHandline = v ?? 0" Placeholder="HL kg" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyKgPs" ValueChanged="v => line.QtyKgPs = v ?? 0" Placeholder="PS kg" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="line.QtyKgLand" ValueChanged="v => line.QtyKgLand = v ?? 0" Placeholder="Land kg" /></div>
+                                    <div class="col-6 col-md-3"><UsdMoneyInput Value="line.PriceUsd" ValueChanged="v => line.PriceUsd = v ?? 0" Placeholder="@L["inbound.price"]" /></div>
+                                    <div class="col-6 col-md-3"><UsdMoneyInput Value="line.InvoiceAmountUsd" ValueChanged="v => line.InvoiceAmountUsd = v ?? 0" Placeholder="@L["inbound.amount"]" /></div>
+                                </div>
+                            }
+                            <Button Color="Color.Secondary" Icon="fa-solid fa-plus" Text="@L["btn.addLine"]" OnClick="AddLine" />
+                        </TabItem>
+                        <TabItem Text="@L["inbound.fees"]">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FeeCommand" ValueChanged="v => _form.FeeCommand = v ?? 0" Placeholder="Phí lấy lệnh" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FeeCold" ValueChanged="v => _form.FeeCold = v ?? 0" Placeholder="Phí điện lạnh" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FeeLift" ValueChanged="v => _form.FeeLift = v ?? 0" Placeholder="Phí nâng hạ" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FeeCustoms" ValueChanged="v => _form.FeeCustoms = v ?? 0" Placeholder="Phí HQ" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FeeInfra" ValueChanged="v => _form.FeeInfra = v ?? 0" Placeholder="Phí hạ tầng" /></div>
+                            </div>
+                        </TabItem>
+                    </Tab>
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<InboundPurchaseDto> _rows = new();
     private InboundPurchaseDto _form = new();
-    private InboundLineDto _line = new();
+    private List<SelectedItem> _customers = new();
+    private List<SelectedItem> _warehouses = new();
+    private List<SelectedItem> _terms = new();
+    private string PortStayText =>
+        _form.ArrivalDate.HasValue && _form.PullContainerDate.HasValue
+            ? Math.Max(0, (_form.PullContainerDate.Value.Date - _form.ArrivalDate.Value.Date).Days).ToString()
+            : "—";
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.InboundAsync() ?? new();
-
-    private async Task SaveAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _form.Lines = new List<InboundLineDto> { _line };
+        var customers = await Api.CustomersAsync() ?? new();
+        _customers = customers.Select(c => new SelectedItem(c.Id.ToString(), $"{c.Code} {c.Name}")).ToList();
+        var warehouses = await Api.CatalogAsync(10) ?? new();
+        _warehouses = warehouses.Select(w => new SelectedItem(w.Id.ToString(), w.Name)).ToList();
+        var terms = await Api.PaymentTermsAsync() ?? new();
+        _terms = terms.Select(t => new SelectedItem(t.Id.ToString(), t.Name)).ToList();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _rows = await Api.InboundAsync() ?? new();
+
+    private void AddLine() => _form.Lines.Add(new InboundLineDto());
+
+    private async Task OpenCreate()
+    {
+        _form = new InboundPurchaseDto { Lines = new List<InboundLineDto> { new() } };
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(InboundPurchaseDto row)
+    {
+        _form = row;
+        if (_form.Lines.Count == 0) _form.Lines.Add(new InboundLineDto());
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> SaveAsync()
+    {
         var saved = await Api.SaveInboundAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được phiếu nhập"); return; }
-        await Toast.Success("Đã lưu phiếu nhập");
-        _form = new();
-        _line = new();
-        _rows = await Api.InboundAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
+    }
+
+    private async Task DeleteAsync(InboundPurchaseDto row)
+    {
+        try { await Api.DeleteInboundAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
     }
 }

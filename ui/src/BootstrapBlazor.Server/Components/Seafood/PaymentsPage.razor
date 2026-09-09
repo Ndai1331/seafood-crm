@@ -2,28 +2,64 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Theo dõi thanh toán</h3>
-<div class="sf-panel">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_id" placeholder="Id đợt TT" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_amount" placeholder="Số nhận USD" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="ReceiveAsync">Ghi nhận đã nhận</Button></div>
-    </div>
-</div>
-<Table TItem="PaymentInstallmentDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["payments.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="PaymentInstallmentDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="PaymentInstallmentDto" TType="string" @bind-Field="@context.InvoiceNo" Text="@L["orders.invoice"]" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="string" @bind-Field="@context.CustomerName" Text="@L["customers.name"]" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="int" @bind-Field="@context.Sequence" Text="#" Width="60" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.Ratio" Text="@L["payments.ratio"]" FormatString="P0" Width="80" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.AmountUsd" Text="USD" FormatString="N2" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.ReceivedAmountUsd" Text="@L["payments.received"]" FormatString="N2" />
+                    <TableColumn TItem="PaymentInstallmentDto" TType="int" @bind-Field="@context.Id" Text="" Width="110">
+                        <Template Context="v">
+                            <Button Color="Color.Primary" Size="Size.ExtraSmall" Icon="fa-solid fa-coins" Text="@L["btn.receive"]" OnClick="() => OpenReceive(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.Large">
+            <ModalDialog Title="@L["btn.receive"]" ShowSaveButton="true" OnSaveAsync="ReceiveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <label class="form-label">USD</label>
+                    <UsdMoneyInput Value="_amount" ValueChanged="v => _amount = v ?? 0" />
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<PaymentInstallmentDto> _rows = new();
     private int _id;
     private decimal _amount;
-    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentsAsync() ?? new();
 
-    private async Task ReceiveAsync()
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+    private async Task LoadAsync() => _rows = await Api.PaymentsAsync() ?? new();
+
+    private async Task OpenReceive(PaymentInstallmentDto row)
+    {
+        _id = row.Id;
+        _amount = row.AmountUsd - row.ReceivedAmountUsd;
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> ReceiveAsync()
     {
         var saved = await Api.ReceivePaymentAsync(_id, _amount);
-        if (saved == null) { await Toast.Error("Không ghi nhận được"); return; }
-        await Toast.Success("Đã ghi nhận thanh toán");
-        _rows = await Api.PaymentsAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
     }
 }

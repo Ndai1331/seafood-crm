@@ -10,11 +10,16 @@ public class UrlAuthorizationService : IUrlAuthorizationService
 {
     private readonly IUserPermissionService _userPermissions;
     private readonly IMenuLayoutProvider _menuLayoutProvider;
+    private readonly BootstrapBlazor.Server.Services.I18n.IAppLang? _lang;
 
-    public UrlAuthorizationService(IUserPermissionService userPermissions, IMenuLayoutProvider menuLayoutProvider)
+    public UrlAuthorizationService(
+        IUserPermissionService userPermissions,
+        IMenuLayoutProvider menuLayoutProvider,
+        BootstrapBlazor.Server.Services.I18n.IAppLang? lang = null)
     {
         _userPermissions = userPermissions;
         _menuLayoutProvider = menuLayoutProvider;
+        _lang = lang;
     }
 
     public async Task<string> GetDefaultPageAsync()
@@ -96,12 +101,12 @@ public class UrlAuthorizationService : IUrlAuthorizationService
                     continue;
                 }
 
-                var menuItem = new MenuItem { Text = entry.Text, Icon = entry.Icon, Url = entry.Url };
+                var menuItem = new MenuItem { Text = T(entry.LangKey, entry.Text), Icon = entry.Icon, Url = entry.Url };
                 if (entry.Children != null)
                 {
                     var children = entry.Children
                         .Where(c => !c.Hidden && permissions.Contains(c.Permission))
-                        .Select(c => new MenuItem { Text = c.Text, Icon = c.Icon, Url = c.Url })
+                        .Select(c => new MenuItem { Text = T(c.LangKey, c.Text), Icon = c.Icon, Url = c.Url })
                         .ToList();
                     if (children.Count > 0)
                     {
@@ -114,10 +119,17 @@ public class UrlAuthorizationService : IUrlAuthorizationService
 
             if (items.Count > 0)
             {
-                menus.Add(new MenuItem { Text = module.Text, Icon = module.Icon, Items = items });
+                menus.Add(new MenuItem { Text = T(module.LangKey, module.Text), Icon = module.Icon, Items = items });
             }
         }
 
         return menus;
+    }
+
+    private string T(string langKey, string fallback)
+    {
+        if (_lang == null || string.IsNullOrWhiteSpace(langKey)) return fallback;
+        var value = _lang[langKey];
+        return value == langKey ? fallback : value;
     }
 }

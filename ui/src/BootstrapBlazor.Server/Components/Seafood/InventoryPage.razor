@@ -1,12 +1,30 @@
 @page "/inventory"
 @layout PageLayout
 @inject SeafoodApiService Api
+@inject IAppLang L
 
-<h3 class="mb-3">Tồn kho &amp; chứng từ</h3>
-<p class="text-muted">So khớp tồn SKU với hợp đồng mở. Nếu đủ hàng nhưng thiếu COA/EUCC/MSC, hệ thống cảnh báo cần mua thêm nguyên liệu đúng giấy tờ.</p>
-<Table TItem="InventoryRowDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["inventory.title"]" Subtitle="@L["inventory.hint"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="InventoryRowDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.LotNumber" Text="@L["inventory.lot"]" />
+                    <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.SkuName" Text="SKU" />
+                    <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.OnHandKg" Text="@L["inventory.onHand"]" FormatString="N1" />
+                    <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.AllocatedKg" Text="@L["inventory.allocated"]" FormatString="N1" />
+                    <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.AvailableKg" Text="@L["inventory.available"]" FormatString="N1" />
+                    <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.Warning" Text="@L["inventory.warning"]" />
+                </TableColumns>
+            </Table>
+        </div>
+    </ChildContent>
+</PageChrome>
 
 @code {
     private List<InventoryRowDto> _rows = new();
-    protected override async Task OnInitializedAsync() => _rows = await Api.InventoryAsync() ?? new();
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+    private async Task LoadAsync() => _rows = await Api.InventoryAsync() ?? new();
 }

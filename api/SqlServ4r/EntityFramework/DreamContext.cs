@@ -63,6 +63,9 @@ namespace SqlServ4r.EntityFramework
         public DbSet<CustomerDeposit> CustomerDeposits { get; set; } = null!;
         public DbSet<DepositAllocation> DepositAllocations { get; set; } = null!;
 
+        public DbSet<LotAllocation> LotAllocations { get; set; } = null!;
+        public DbSet<ReportFavorite> ReportFavorites { get; set; } = null!;
+
         public DreamContext(DbContextOptions<DreamContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -238,6 +241,17 @@ namespace SqlServ4r.EntityFramework
             builder.Entity<DepositAllocation>(entity =>
             {
                 entity.ToTable("deposit_allocations");
+            });
+
+            builder.Entity<LotAllocation>(entity =>
+            {
+                entity.ToTable("lot_allocations");
+            });
+
+            builder.Entity<ReportFavorite>(entity =>
+            {
+                entity.ToTable("report_favorites");
+                entity.HasIndex(p => new { p.UserId, p.ReportCode }).IsUnique();
             });
         }
 

@@ -21,6 +21,23 @@ namespace Domain.Seafood
         [MaxLength(64)] public string? ContainerNo { get; set; }
         [MaxLength(32)] public string? ContainerType { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
+        [MaxLength(128)] public string? TruckName { get; set; }
+        [MaxLength(64)] public string? LotNumber { get; set; }
+        [MaxLength(64)] public string? CustomsDeclarationNo { get; set; }
+        [MaxLength(64)] public string? Origin { get; set; }
+        [MaxLength(64)] public string? CareMarket { get; set; }
+        public decimal? ActualWeightKg { get; set; }
+        [MaxLength(128)] public string? ReceivedQtyNote { get; set; }
+        [MaxLength(128)] public string? RewriteQtyNote { get; set; }
+        public DateTime? ArrivalDate { get; set; }
+        public DateTime? PullContainerDate { get; set; }
+        public int? PortStayDays { get; set; }
+        public bool RawFileImported { get; set; }
+        public decimal FeeCommand { get; set; }
+        public decimal FeeCold { get; set; }
+        public decimal FeeLift { get; set; }
+        public decimal FeeCustoms { get; set; }
+        public decimal FeeInfra { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public List<InboundLine> Lines { get; set; } = new();
     }
@@ -51,6 +68,10 @@ namespace Domain.Seafood
         public DateTime ReceivedDate { get; set; } = DateTime.UtcNow;
         public decimal RawMaterialKg { get; set; }
         public int? TargetMarketId { get; set; }
+        public decimal FxRateVnd { get; set; }
+        public decimal PurchasePriceVnd { get; set; }
+        public decimal AdjustedPriceVnd { get; set; }
+        public decimal TrimKg { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
         public List<ProductionOutput> Outputs { get; set; } = new();
         public List<LotCertificate> Certificates { get; set; } = new();
@@ -66,6 +87,8 @@ namespace Domain.Seafood
         public decimal RecoveredKg { get; set; }
         public decimal RawUsedKg { get; set; }
         public decimal YieldRatio { get; set; }
+        public decimal UnitPriceUsd { get; set; }
+        public decimal AmountUsd { get; set; }
         [MaxLength(64)] public string? ExportMarket { get; set; }
     }
 
@@ -143,7 +166,34 @@ namespace Domain.Seafood
         [MaxLength(32)] public string? ContainerType { get; set; }
         public int? CarrierId { get; set; }
         [MaxLength(256)] public string? Route { get; set; }
+        public DateTime? YardTime { get; set; }
+        [MaxLength(256)] public string? ForwarderName { get; set; }
+        [MaxLength(256)] public string? TransportName { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
+    }
+
+    public class LotAllocation
+    {
+        public int Id { get; set; }
+        public int LotId { get; set; }
+        public ProductionLot? Lot { get; set; }
+        public int? SalesContractId { get; set; }
+        public SalesContract? SalesContract { get; set; }
+        public int SkuId { get; set; }
+        public ProductSku? Sku { get; set; }
+        public decimal AllocatedKg { get; set; }
+        public decimal YieldAfterAdjust { get; set; }
+        public decimal RawUsedAfterAdjust { get; set; }
+        [MaxLength(32)] public string Status { get; set; } = "OK";
+        [MaxLength(512)] public string? InternalNote { get; set; }
+    }
+
+    public class ReportFavorite
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        [MaxLength(64)] public string ReportCode { get; set; } = string.Empty;
+        public bool PinnedToDashboard { get; set; }
     }
 
     public class PaymentInstallment

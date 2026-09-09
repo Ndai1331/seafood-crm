@@ -32,9 +32,8 @@
             {
                 <div class="alert alert-warning py-2 mb-0">
                     Không đọc được cài đặt đăng nhập: @WebAuthnLoadError
-                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="LoadWebAuthnSettingsAsync">
-                        Thử lại
-                    </button>
+                    <Button Color="Color.Secondary" Size="Size.ExtraSmall" Icon="fa-solid fa-rotate" Text="Thử lại"
+                            OnClick="LoadWebAuthnSettingsAsync" />
                 </div>
             }
             else if (WebAuthnStatus == null)
@@ -158,28 +157,24 @@
                         }
                         else
                         {
-                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button"
-                                            class="btn @(AccessFilter == "all" ? "btn-primary" : "btn-outline-secondary")"
-                                            @onclick="@(() => AccessFilter = "all")">
-                                        Tất cả (@UserAccess.Count)
-                                    </button>
-                                    <button type="button"
-                                            class="btn @(AccessFilter == "withkey" ? "btn-primary" : "btn-outline-secondary")"
-                                            @onclick="@(() => AccessFilter = "withkey")">
-                                        Đã có khoá (@WithKeyCount)
-                                    </button>
-                                    <button type="button"
-                                            class="btn @(AccessFilter == "password" ? "btn-primary" : "btn-outline-secondary")"
-                                            @onclick="@(() => AccessFilter = "password")">
-                                        Được cấp mật khẩu (@PasswordGrantedCount)
-                                    </button>
-                                    <button type="button"
-                                            class="btn @(AccessFilter == "locked" ? "btn-primary" : "btn-outline-secondary")"
-                                            @onclick="@(() => AccessFilter = "locked")">
-                                        Không vào được (@LockedOutCount)
-                                    </button>
+                                    <Button Color="@(AccessFilter == "all" ? Color.Primary : Color.Secondary)"
+                                            Size="Size.ExtraSmall"
+                                            Text="@($"Tất cả ({UserAccess.Count})")"
+                                            OnClick="@(() => AccessFilter = "all")" />
+                                    <Button Color="@(AccessFilter == "withkey" ? Color.Primary : Color.Secondary)"
+                                            Size="Size.ExtraSmall"
+                                            Text="@($"Đã có khoá ({WithKeyCount})")"
+                                            OnClick="@(() => AccessFilter = "withkey")" />
+                                    <Button Color="@(AccessFilter == "password" ? Color.Primary : Color.Secondary)"
+                                            Size="Size.ExtraSmall"
+                                            Text="@($"Được cấp mật khẩu ({PasswordGrantedCount})")"
+                                            OnClick="@(() => AccessFilter = "password")" />
+                                    <Button Color="@(AccessFilter == "locked" ? Color.Primary : Color.Secondary)"
+                                            Size="Size.ExtraSmall"
+                                            Text="@($"Không vào được ({LockedOutCount})")"
+                                            OnClick="@(() => AccessFilter = "locked")" />
                                 </div>
                                 <input type="search" class="form-control form-control-sm" style="max-width: 220px;"
                                        placeholder="Tìm tài khoản hoặc tên" autocomplete="off"
