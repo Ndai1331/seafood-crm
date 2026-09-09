@@ -2,40 +2,129 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Đưa vào sản xuất</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.LotNumber" placeholder="Lot number" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.RawMaterialKg" placeholder="NL kg" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_certs" placeholder="Chứng từ (EUCC,COA,MSC)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.SkuId" placeholder="SKU Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RecoveredKg" placeholder="TP thu hồi kg" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RawUsedKg" placeholder="NL dùng kg" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_output.ExportMarket" placeholder="Thị trường" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu lô SX</Button></div>
-    </div>
-    <p class="text-muted mt-2 mb-0">Yield = thành phẩm thu hồi / nguyên liệu. Gắn chứng từ lô để matching xuất khẩu.</p>
-</div>
-<Table TItem="ProductionLotDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["production.title"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="@L["btn.create"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="ProductionLotDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="ProductionLotDto" TType="string" @bind-Field="@context.LotNumber" Text="@L["production.lot"]" />
+                    <TableColumn TItem="ProductionLotDto" TType="decimal" @bind-Field="@context.RawMaterialKg" Text="@L["production.raw"]" FormatString="N1" />
+                    <TableColumn TItem="ProductionLotDto" TType="decimal" @bind-Field="@context.RecoveryRatio" Text="Yield" FormatString="P1" />
+                    <TableColumn TItem="ProductionLotDto" TType="decimal" @bind-Field="@context.ProfitUsd" Text="@L["production.pnl"]" FormatString="N2" />
+                    <TableColumn TItem="ProductionLotDto" TType="int" @bind-Field="@context.Id" Text="" Width="90">
+                        <Template Context="v">
+                            <RowActionButtons OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.ExtraLarge">
+            <ModalDialog Title="@L["production.title"]" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <Tab>
+                        <TabItem Text="@L["inbound.header"]">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.LotNumber" DisplayText="@L["production.lot"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><Select TValue="int?" Items="_inbounds" @bind-Value="_form.InboundPurchaseId" DisplayText="@L["inbound.title"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><VnNumberInput Value="_form.RawMaterialKg" ValueChanged="v => _form.RawMaterialKg = v ?? 0" Placeholder="@L["production.raw"]" /></div>
+                                <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_certs" DisplayText="@L["production.certs"]" ShowLabel="true" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.FxRateVnd" ValueChanged="v => _form.FxRateVnd = v ?? 0" Placeholder="@L["production.fx"]" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.PurchasePriceVnd" ValueChanged="v => _form.PurchasePriceVnd = v ?? 0" Placeholder="Giá mua VND" /></div>
+                            </div>
+                        </TabItem>
+                        <TabItem Text="@L["inbound.lines"]">
+                            @for (var i = 0; i < _form.Outputs.Count; i++)
+                            {
+                                var outp = _form.Outputs[i];
+                                <div class="row g-3 mb-2">
+                                    <div class="col-12 col-md-4"><Select TValue="int" Items="_skus" @bind-Value="outp.SkuId" DisplayText="SKU" ShowLabel="true" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="outp.RecoveredKg" ValueChanged="v => outp.RecoveredKg = v ?? 0" Placeholder="@L["production.recovered"]" /></div>
+                                    <div class="col-6 col-md-2"><VnNumberInput Value="outp.RawUsedKg" ValueChanged="v => outp.RawUsedKg = v ?? 0" Placeholder="@L["production.rawUsed"]" /></div>
+                                    <div class="col-6 col-md-2"><UsdMoneyInput Value="outp.UnitPriceUsd" ValueChanged="v => outp.UnitPriceUsd = v ?? 0" Placeholder="USD" /></div>
+                                    <div class="col-6 col-md-2"><BootstrapInput @bind-Value="outp.ExportMarket" Placeholder="@L["products.market"]" /></div>
+                                </div>
+                            }
+                            <Button Color="Color.Secondary" Icon="fa-solid fa-plus" Text="@L["btn.addLine"]" OnClick="AddOutput" />
+                        </TabItem>
+                        <TabItem Text="@L["production.pnl"]">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4"><VnNumberInput Value="_form.TrimKg" ValueChanged="v => _form.TrimKg = v ?? 0" Placeholder="Rẻo kg" /></div>
+                                <div class="col-12 col-md-4"><VnMoneyInput Value="_form.AdjustedPriceVnd" ValueChanged="v => _form.AdjustedPriceVnd = v ?? 0" Placeholder="Giá điều chỉnh VND" /></div>
+                                <div class="col-12 col-md-4"><div class="form-label">Yield</div><div class="form-control-plaintext">@YieldText</div></div>
+                                <div class="col-12 col-md-4"><div class="form-label">@L["production.pnl"] USD</div><div class="form-control-plaintext">@_form.ProfitUsd.ToString("N2")</div></div>
+                            </div>
+                        </TabItem>
+                    </Tab>
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<ProductionLotDto> _rows = new();
     private ProductionLotDto _form = new();
-    private ProductionOutputDto _output = new();
     private string _certs = "COA";
+    private List<SelectedItem> _inbounds = new();
+    private List<SelectedItem> _skus = new();
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.ProductionAsync() ?? new();
+    protected override async Task OnInitializedAsync()
+    {
+        var inbound = await Api.InboundAsync() ?? new();
+        _inbounds = inbound.Select(x => new SelectedItem(x.Id.ToString(), x.LotNumber ?? x.ContractNo ?? $"#{x.Id}")).ToList();
+        var groups = await Api.ProductsAsync() ?? new();
+        _skus = groups.SelectMany(g => g.Skus).Select(s => new SelectedItem(s.Id.ToString(), s.Name)).ToList();
+        await LoadAsync();
+    }
 
-    private async Task SaveAsync()
+    private async Task LoadAsync() => _rows = await Api.ProductionAsync() ?? new();
+    private void AddOutput() => _form.Outputs.Add(new ProductionOutputDto());
+    private string YieldText
+    {
+        get
+        {
+            var recovered = _form.Outputs.Sum(o => o.RecoveredKg);
+            return _form.RawMaterialKg <= 0 ? "—" : (recovered / _form.RawMaterialKg).ToString("P1");
+        }
+    }
+
+    private async Task OpenCreate()
+    {
+        _form = new ProductionLotDto { Outputs = new List<ProductionOutputDto> { new() }, FxRateVnd = 26300 };
+        _certs = "COA";
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(ProductionLotDto row)
+    {
+        _form = row;
+        _certs = string.Join(",", row.CertificateCodes);
+        if (_form.Outputs.Count == 0) _form.Outputs.Add(new ProductionOutputDto());
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> SaveAsync()
     {
         _form.CertificateCodes = _certs.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        _form.Outputs = new List<ProductionOutputDto> { _output };
         var saved = await Api.SaveProductionAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được lô sản xuất"); return; }
-        await Toast.Success($"Đã lưu lô {saved.LotNumber}, yield {saved.RecoveryRatio:P1}");
-        _form = new();
-        _output = new();
-        _rows = await Api.ProductionAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
+    }
+
+    private async Task DeleteAsync(ProductionLotDto row)
+    {
+        try { await Api.DeleteProductionAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
     }
 }

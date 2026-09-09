@@ -1,0 +1,182 @@
+{
+  "brand": "SEAFOOD CRM",
+  "btn": {
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "refresh": "Refresh",
+    "search": "Search",
+    "approve": "Approve",
+    "suggest": "Suggest price",
+    "addLine": "Add line",
+    "receive": "Receive",
+    "allocate": "Allocate",
+    "close": "Close",
+    "pin": "Pin",
+    "favorite": "Favorite"
+  },
+  "msg": {
+    "saveOk": "Saved",
+    "saveFail": "Could not save",
+    "deleteOk": "Deleted",
+    "deleteFail": "Could not delete",
+    "confirmDelete": "Delete this record?",
+    "loading": "Loading...",
+    "empty": "No data yet"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "overview": "Overview",
+    "reports": "Reports",
+    "master": "Master data",
+    "catalog": "Catalog",
+    "products": "Products / SKU",
+    "customers": "Customers",
+    "paymentTerms": "Payment terms",
+    "inbound": "Inbound",
+    "inboundPurchases": "Raw material intake",
+    "production": "Production",
+    "lots": "Production lots",
+    "warehouse": "Warehouse",
+    "stock": "Stock & certificates",
+    "allocate": "Certificate allocation",
+    "export": "Export",
+    "quotes": "Quotes / Contracts",
+    "orders": "Export orders",
+    "finance": "Finance",
+    "payments": "Payment tracking",
+    "deposits": "Deposits",
+    "system": "Administration",
+    "users": "Users",
+    "team": "Teams",
+    "sso": "Sign-in settings",
+    "permissions": "Permissions",
+    "menu": "Menu layout"
+  },
+  "account": {
+    "profile": "My profile",
+    "password": "Change password",
+    "logout": "Sign out",
+    "openMenu": "Open account menu"
+  },
+  "catalog": {
+    "title": "Shared catalog",
+    "category": "Category",
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "active": "Active"
+  },
+  "products": {
+    "title": "Products / SKU",
+    "group": "Group",
+    "sku": "SKU",
+    "market": "Market",
+    "priceUsd": "USD price",
+    "byproduct": "By-product"
+  },
+  "customers": {
+    "title": "Customers",
+    "code": "Code",
+    "name": "Name",
+    "contact": "Contact",
+    "purchaser": "Purchaser",
+    "kind": "Kind"
+  },
+  "terms": {
+    "title": "Payment terms",
+    "ratios": "Ratio JSON",
+    "dueDays": "Due days",
+    "lc": "LC"
+  },
+  "inbound": {
+    "title": "Raw material intake",
+    "header": "Intake header",
+    "lines": "Lines",
+    "fees": "Fees",
+    "contract": "Purchase contract",
+    "bl": "BL",
+    "cont": "Container",
+    "commodity": "Commodity",
+    "price": "USD price",
+    "amount": "Amount"
+  },
+  "production": {
+    "title": "Production lots",
+    "lot": "Lot number",
+    "raw": "Raw kg",
+    "certs": "Certificates",
+    "recovered": "Recovered kg",
+    "rawUsed": "Raw used kg",
+    "fx": "VND FX rate",
+    "pnl": "P&L"
+  },
+  "inventory": {
+    "title": "Stock & certificates",
+    "hint": "Match on-hand SKU to open contracts. Missing COA/EUCC/MSC triggers a buy-more warning.",
+    "lot": "Lot",
+    "onHand": "On hand (kg)",
+    "allocated": "Allocated",
+    "available": "Available",
+    "warning": "Warning"
+  },
+  "allocate": {
+    "title": "Certificate allocation",
+    "hint": "Assign finished lots to contracts, adjust yield, and flag missing documents.",
+    "openContracts": "Open contracts",
+    "stock": "Available stock",
+    "status": "Status"
+  },
+  "quotes": {
+    "title": "Quotes / Contracts",
+    "contractNo": "Contract no.",
+    "customerContract": "Customer contract",
+    "status": "Status",
+    "varianceLast": "vs last contract",
+    "variancePeer": "vs other customers"
+  },
+  "orders": {
+    "title": "Export orders",
+    "hint": "Enter pounds or kilograms — the app converts both ways (1 lb = 0.45359237 kg).",
+    "invoice": "Invoice",
+    "tbsx": "Production notice",
+    "etd": "ETD",
+    "eta": "ETA"
+  },
+  "payments": {
+    "title": "Payment tracking",
+    "due": "Due",
+    "received": "Received",
+    "ratio": "Ratio"
+  },
+  "deposits": {
+    "title": "Deposits",
+    "amount": "USD amount",
+    "remaining": "Remaining",
+    "note": "Note"
+  },
+  "dashboard": {
+    "title": "Plant overview",
+    "inboundKg": "Inbound this month (kg)",
+    "producedKg": "Produced this month (kg)",
+    "exportKg": "Exported this month (kg)",
+    "onHand": "On hand (kg)",
+    "openUsd": "Open contracts (USD)",
+    "arUsd": "Outstanding AR (USD)",
+    "stockSku": "Stock by SKU",
+    "exportRoute": "Export by route"
+  },
+  "reports": {
+    "title": "Reports",
+    "purchased": "Purchased",
+    "sold": "Sold",
+    "pnl": "Order P&L"
+  },
+  "users": {
+    "title": "User manager",
+    "create": "Create user",
+    "edit": "Edit user"
+  }
+}

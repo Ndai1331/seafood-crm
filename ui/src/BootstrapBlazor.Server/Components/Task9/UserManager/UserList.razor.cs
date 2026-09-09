@@ -35,6 +35,9 @@ public partial class UserList : ComponentBase
     private static IEnumerable<int> PageItemsSource => new int[] { 10, 20, 40, 80, 100 };
     
     private Table<UserWithNavigationPropertiesDto>? TableRef { get; set; }
+    private Modal? _userModal;
+    private int? _editUserId;
+    private bool _editorOpen;
     
     protected override async Task OnInitializedAsync()
     {
@@ -119,14 +122,25 @@ public partial class UserList : ComponentBase
         }
     }
     
-    private void OnCreateClick()
+    private async Task OnCreateClick()
     {
-        NavigationManager.NavigateTo("/user-manager/create");
+        _editUserId = null;
+        _editorOpen = true;
+        if (_userModal != null) await _userModal.Toggle();
     }
-    
-    private void OnEditClick(int id)
+
+    private async Task OnEditClick(int id)
     {
-        NavigationManager.NavigateTo($"/user-manager/edit/{id}");
+        _editUserId = id;
+        _editorOpen = true;
+        if (_userModal != null) await _userModal.Toggle();
+    }
+
+    private async Task OnUserEditorClosedAsync()
+    {
+        _editorOpen = false;
+        if (_userModal != null) await _userModal.Toggle();
+        if (TableRef != null) await TableRef.QueryAsync();
     }
 
     /// <summary>SUPER_ADMIN may log in as any lower role (ADMIN included) but not another SUPER_ADMIN (API also blocks).</summary>

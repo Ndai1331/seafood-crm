@@ -117,6 +117,9 @@ public sealed partial class PageLayout : IDisposable
     [Inject]
     private IJSRuntime? JSRuntime { get; set; }
 
+    [Inject]
+    private BootstrapBlazor.Server.Services.I18n.IAppLang? Lang { get; set; }
+
     public NewUserPasswordDto NewPassword { get; set; } = new NewUserPasswordDto();
     
     /// <summary>
@@ -179,6 +182,8 @@ public sealed partial class PageLayout : IDisposable
         
         // Initialize route ID
         CurrentRouteId = GetRouteId();
+        if (Lang != null)
+            SelectedCulture = Lang.Current == "en" ? "en-US" : "vi-VN";
         
         // Subscribe to location changed event to check authorization on navigation
         if (!_isLocationChangedSubscribed)
@@ -532,16 +537,33 @@ public sealed partial class PageLayout : IDisposable
         }
     }
     
-    private Task SetLang(string cultureName)
-    {
-        if (SelectedCulture != cultureName)
-        {
-            var uri = new Uri(NavigationManager.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.SafeUnescaped);
-            var query = $"?culture={Uri.EscapeDataString(cultureName)}&redirectUri={Uri.EscapeDataString(uri)}";
-            NavigationManager.NavigateTo("/Culture/SetCulture" + query, forceLoad: true);
-        }
+    private Task SetLang(string cultureName) => SwitchLangAsync(cultureName);
 
-        return Task.CompletedTask;
+    private async Task SwitchLangAsync(string cultureName)
+    {
+        if (Lang != null)
+            await Lang.SetLangAsync(cultureName);
+        SelectedCulture = cultureName;
+        var uri = new Uri(NavigationManager.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.SafeUnescaped);
+        var query = $"?culture={Uri.EscapeDataString(cultureName)}&redirectUri={Uri.EscapeDataString(uri)}";
+        NavigationManager.NavigateTo("/Culture/SetCulture" + query, forceLoad: true);
+    }
+
+    private async Task CloseMobileSidebarAsync()
+    {
+        if (JSRuntime != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("eval", @"
+                    const el = document.getElementById('sidebar-offcanvas');
+                    if (el && window.bootstrap?.Offcanvas) {
+                        window.bootstrap.Offcanvas.getOrCreateInstance(el).hide();
+                    }
+                ");
+            }
+            catch { /* ignore */ }
+        }
     }
     
     private async Task ShowModal()

@@ -3,8 +3,10 @@
 @using BootstrapBlazor.Server.Data
 @using BootstrapBlazor.Server.Services
 @layout PageLayout
+@inject IAppLang L
 
-<DemoBlock Title="Quản lý người dùng" Name="UserList">
+<PageChrome Title="@L["users.title"]">
+    <ChildContent>
     <div class="user-list-surface">
         <Table TItem="UserWithNavigationPropertiesDto"
                PageItemsSource="@PageItemsSource"
@@ -25,9 +27,9 @@
                @ref="TableRef">
             <TableToolbarTemplate>
                 <TableToolbarButton TItem="UserWithNavigationPropertiesDto"
-                    Color="Color.Success"
+                    Color="Color.Primary"
                     Icon="fa-solid fa-user-plus"
-                    Text="Tạo mới"
+                    Text="@L["btn.create"]"
                     OnClick="@OnCreateClick"/>
             </TableToolbarTemplate>
             <TableColumns>
@@ -133,4 +135,22 @@
             </TableColumns>
         </Table>
     </div>
-</DemoBlock>
+        <Modal @ref="_userModal" Size="Size.ExtraLarge">
+            <ModalDialog Title="@(_editUserId == null ? L["btn.create"] : L["btn.edit"])" ShowFooter="false">
+                <BodyTemplate>
+                    @if (_editorOpen)
+                    {
+                        @if (_editUserId == null)
+                        {
+                            <CreateUser Embedded="true" OnCompleted="OnUserEditorClosedAsync" />
+                        }
+                        else
+                        {
+                            <EditUser UserId="_editUserId.Value" Embedded="true" OnCompleted="OnUserEditorClosedAsync" />
+                        }
+                    }
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>

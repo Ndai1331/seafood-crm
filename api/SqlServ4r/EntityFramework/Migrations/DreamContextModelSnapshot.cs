@@ -887,6 +887,17 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<int?>("SalesContractId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("YardTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ForwarderName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("TransportName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -1013,6 +1024,64 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<int?>("WarehouseId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("TruckName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("LotNumber")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("CustomsDeclarationNo")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Origin")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("CareMarket")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<decimal?>("ActualWeightKg")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("ReceivedQtyNote")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("RewriteQtyNote")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("ArrivalDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PullContainerDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PortStayDays")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("RawFileImported")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("FeeCommand")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FeeCold")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FeeLift")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FeeCustoms")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FeeInfra")
+                        .HasColumnType("numeric");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -1071,6 +1140,52 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.HasIndex("LotId");
 
                     b.ToTable("lot_certificates", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Seafood.LotAllocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AllocatedKg")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("InternalNote")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<int>("LotId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("RawUsedAfterAdjust")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("SalesContractId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SkuId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<decimal>("YieldAfterAdjust")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LotId");
+
+                    b.HasIndex("SalesContractId");
+
+                    b.HasIndex("SkuId");
+
+                    b.ToTable("lot_allocations", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Seafood.MarketCertificateRule", b =>
@@ -1140,6 +1255,33 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.HasIndex("ExportShipmentId");
 
                     b.ToTable("payment_installments", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Seafood.ReportFavorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("PinnedToDashboard")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ReportCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "ReportCode")
+                        .IsUnique();
+
+                    b.ToTable("report_favorites", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Seafood.PaymentTerm", b =>
@@ -1291,6 +1433,18 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<int?>("TargetMarketId")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("FxRateVnd")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PurchasePriceVnd")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("AdjustedPriceVnd")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TrimKg")
+                        .HasColumnType("numeric");
+
                     b.HasKey("Id");
 
                     b.HasIndex("InboundPurchaseId");
@@ -1326,6 +1480,12 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("YieldRatio")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("UnitPriceUsd")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("AmountUsd")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
@@ -1800,6 +1960,31 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .IsRequired();
 
                     b.Navigation("Lot");
+                });
+
+            modelBuilder.Entity("Domain.Seafood.LotAllocation", b =>
+                {
+                    b.HasOne("Domain.Seafood.ProductionLot", "Lot")
+                        .WithMany()
+                        .HasForeignKey("LotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Seafood.SalesContract", "SalesContract")
+                        .WithMany()
+                        .HasForeignKey("SalesContractId");
+
+                    b.HasOne("Domain.Seafood.ProductSku", "Sku")
+                        .WithMany()
+                        .HasForeignKey("SkuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lot");
+
+                    b.Navigation("SalesContract");
+
+                    b.Navigation("Sku");
                 });
 
             modelBuilder.Entity("Domain.Seafood.PaymentInstallment", b =>

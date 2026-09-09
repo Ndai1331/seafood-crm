@@ -1,0 +1,182 @@
+{
+  "brand": "SEAFOOD CRM",
+  "btn": {
+    "create": "Tạo mới",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "refresh": "Tải lại",
+    "search": "Tìm",
+    "approve": "Duyệt",
+    "suggest": "Gợi ý giá",
+    "addLine": "Thêm dòng",
+    "receive": "Nhận tiền",
+    "allocate": "Phân bổ",
+    "close": "Đóng",
+    "pin": "Ghim",
+    "favorite": "Yêu thích"
+  },
+  "msg": {
+    "saveOk": "Đã lưu",
+    "saveFail": "Không lưu được",
+    "deleteOk": "Đã xóa",
+    "deleteFail": "Không xóa được",
+    "confirmDelete": "Xóa bản ghi này?",
+    "loading": "Đang tải...",
+    "empty": "Chưa có dữ liệu"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "overview": "Tổng quan",
+    "reports": "Báo cáo",
+    "master": "Danh mục",
+    "catalog": "Danh mục chung",
+    "products": "Mặt hàng / SKU",
+    "customers": "Khách hàng",
+    "paymentTerms": "Điều khoản TT",
+    "inbound": "Nhập hàng",
+    "inboundPurchases": "Nhập nguyên liệu",
+    "production": "Sản xuất",
+    "lots": "Đưa vào sản xuất",
+    "warehouse": "Kho",
+    "stock": "Tồn kho & chứng từ",
+    "allocate": "Sắp xếp giấy",
+    "export": "Xuất khẩu",
+    "quotes": "Báo giá / Hợp đồng",
+    "orders": "Đơn hàng xuất khẩu",
+    "finance": "Tài chính",
+    "payments": "Theo dõi thanh toán",
+    "deposits": "Deposit",
+    "system": "Quản trị hệ thống",
+    "users": "Quản lý người dùng",
+    "team": "Quản lý team",
+    "sso": "Cài đặt đăng nhập",
+    "permissions": "Phân quyền",
+    "menu": "Sắp xếp menu"
+  },
+  "account": {
+    "profile": "Thông tin cá nhân",
+    "password": "Đổi mật khẩu",
+    "logout": "Đăng xuất",
+    "openMenu": "Mở menu tài khoản"
+  },
+  "catalog": {
+    "title": "Danh mục chung",
+    "category": "Nhóm",
+    "code": "Mã",
+    "name": "Tên",
+    "description": "Mô tả",
+    "active": "Kích hoạt"
+  },
+  "products": {
+    "title": "Mặt hàng / SKU",
+    "group": "Nhóm",
+    "sku": "SKU",
+    "market": "Thị trường",
+    "priceUsd": "Giá USD",
+    "byproduct": "Phụ phẩm"
+  },
+  "customers": {
+    "title": "Khách hàng",
+    "code": "Mã",
+    "name": "Tên khách",
+    "contact": "Người liên hệ",
+    "purchaser": "Purchaser",
+    "kind": "Loại"
+  },
+  "terms": {
+    "title": "Điều khoản thanh toán",
+    "ratios": "Tỷ lệ JSON",
+    "dueDays": "Số ngày",
+    "lc": "LC"
+  },
+  "inbound": {
+    "title": "Nhập nguyên liệu",
+    "header": "Phiếu nhập",
+    "lines": "Dòng hàng",
+    "fees": "Chi phí",
+    "contract": "Số HĐ nhập",
+    "bl": "BL",
+    "cont": "Cont",
+    "commodity": "Hàng",
+    "price": "Giá USD",
+    "amount": "Thành tiền"
+  },
+  "production": {
+    "title": "Đưa vào sản xuất",
+    "lot": "Số lô",
+    "raw": "NL (kg)",
+    "certs": "Chứng từ",
+    "recovered": "TP thu hồi (kg)",
+    "rawUsed": "NL dùng (kg)",
+    "fx": "Tỷ giá VND",
+    "pnl": "Lãi/lỗ"
+  },
+  "inventory": {
+    "title": "Tồn kho & chứng từ",
+    "hint": "So khớp tồn SKU với hợp đồng mở. Thiếu COA/EUCC/MSC thì cảnh báo mua thêm NL đúng giấy tờ.",
+    "lot": "Lô",
+    "onHand": "Tồn (kg)",
+    "allocated": "Đã gán",
+    "available": "Còn",
+    "warning": "Cảnh báo"
+  },
+  "allocate": {
+    "title": "Sắp xếp giấy",
+    "hint": "Gán lô thành phẩm vào hợp đồng, chỉnh định mức NL, cảnh báo thiếu chứng từ.",
+    "openContracts": "Hợp đồng mở",
+    "stock": "Tồn khả dụng",
+    "status": "Trạng thái"
+  },
+  "quotes": {
+    "title": "Báo giá / Hợp đồng",
+    "contractNo": "Số HĐ",
+    "customerContract": "HĐ khách",
+    "status": "Trạng thái",
+    "varianceLast": "Lệch vs HĐ cũ",
+    "variancePeer": "Lệch vs khách khác"
+  },
+  "orders": {
+    "title": "Đơn hàng xuất khẩu",
+    "hint": "Nhập pound hoặc kg — hệ thống tự quy đổi (1 lb = 0.45359237 kg).",
+    "invoice": "Invoice",
+    "tbsx": "Số TBSX",
+    "etd": "ETD",
+    "eta": "ETA"
+  },
+  "payments": {
+    "title": "Theo dõi thanh toán",
+    "due": "Hạn",
+    "received": "Đã nhận",
+    "ratio": "Tỷ lệ"
+  },
+  "deposits": {
+    "title": "Deposit",
+    "amount": "Số tiền USD",
+    "remaining": "Còn lại",
+    "note": "Ghi chú"
+  },
+  "dashboard": {
+    "title": "Tổng quan nhà máy",
+    "inboundKg": "Nhập tháng này (kg)",
+    "producedKg": "SX tháng này (kg)",
+    "exportKg": "Xuất tháng này (kg)",
+    "onHand": "Tồn kho (kg)",
+    "openUsd": "HĐ mở (USD)",
+    "arUsd": "Công nợ (USD)",
+    "stockSku": "Tồn theo SKU",
+    "exportRoute": "Xuất theo tuyến"
+  },
+  "reports": {
+    "title": "Báo cáo",
+    "purchased": "Hàng đã mua",
+    "sold": "Hàng đã bán",
+    "pnl": "Hiệu quả đơn hàng"
+  },
+  "users": {
+    "title": "Quản lý người dùng",
+    "create": "Tạo người dùng mới",
+    "edit": "Chỉnh sửa người dùng"
+  }
+}

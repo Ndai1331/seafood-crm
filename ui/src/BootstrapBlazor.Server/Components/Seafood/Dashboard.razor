@@ -2,58 +2,92 @@
 @page "/dashboard"
 @layout PageLayout
 @inject SeafoodApiService Api
+@inject IAppLang L
 
-<div class="seafood-dashboard">
-    <h2 class="mb-4">Tổng quan nhà máy</h2>
-    @if (_data == null)
-    {
-        <div class="text-muted">Đang tải...</div>
-    }
-    else
-    {
-        <div class="row g-3 mb-4">
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Nhập tháng này (kg)</div><div class="kpi-value">@_data.InboundKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">SX tháng này (kg)</div><div class="kpi-value">@_data.ProducedKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Xuất tháng này (kg)</div><div class="kpi-value">@_data.ExportKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Tồn kho (kg)</div><div class="kpi-value">@_data.OnHandKg.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">HĐ mở (USD)</div><div class="kpi-value">@_data.OpenContractUsd.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Công nợ (USD)</div><div class="kpi-value">@_data.OutstandingPaymentUsd.ToString("N0")</div></div></div>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="sf-panel">
-                    <h5>Tồn theo SKU</h5>
-                    @foreach (var slice in _data.StockBySku)
-                    {
-                        var pct = Max(_data.StockBySku) == 0 ? 0 : (double)(slice.Value / Max(_data.StockBySku) * 100);
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
-                            <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
-                        </div>
-                    }
-                    @if (!_data.StockBySku.Any()) { <div class="text-muted">Chưa có tồn kho.</div> }
+<PageChrome Title="@L["dashboard.title"]">
+    <ChildContent>
+        @if (_data == null)
+        {
+            <div class="text-muted">@L["msg.loading"]</div>
+        }
+        else
+        {
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.inboundKg"]</div><div class="kpi-value">@_data.InboundKgThisMonth.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.producedKg"]</div><div class="kpi-value">@_data.ProducedKgThisMonth.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.exportKg"]</div><div class="kpi-value">@_data.ExportKgThisMonth.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.onHand"]</div><div class="kpi-value">@_data.OnHandKg.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.openUsd"]</div><div class="kpi-value">@_data.OpenContractUsd.ToString("N0")</div></div></div>
+                <div class="col-6 col-md-2"><div class="kpi-card"><div class="kpi-label">@L["dashboard.arUsd"]</div><div class="kpi-value">@_data.OutstandingPaymentUsd.ToString("N0")</div></div></div>
+            </div>
+            @if (_data.PinnedReports.Count > 0)
+            {
+                <div class="sf-panel mb-3">
+                    <h5>@L["btn.pin"]</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var pin in _data.PinnedReports)
+                        {
+                            <a href="/reports" class="badge text-bg-light text-decoration-none border px-3 py-2">@pin.ReportCode</a>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="sf-panel">
+                        <h5>@L["dashboard.stockSku"]</h5>
+                        @Pie(_data.StockBySku)
+                        @foreach (var slice in _data.StockBySku)
+                        {
+                            var pct = Max(_data.StockBySku) == 0 ? 0 : (double)(slice.Value / Max(_data.StockBySku) * 100);
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
+                                <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
+                            </div>
+                        }
+                        @if (!_data.StockBySku.Any()) { <div class="text-muted">@L["msg.empty"]</div> }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="sf-panel">
+                        <h5>@L["dashboard.exportRoute"]</h5>
+                        @Pie(_data.ExportByMarket)
+                        @foreach (var slice in _data.ExportByMarket)
+                        {
+                            var pct = Max(_data.ExportByMarket) == 0 ? 0 : (double)(slice.Value / Max(_data.ExportByMarket) * 100);
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
+                                <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
+                            </div>
+                        }
+                        @if (!_data.ExportByMarket.Any()) { <div class="text-muted">@L["msg.empty"]</div> }
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="sf-panel">
-                    <h5>Xuất theo tuyến</h5>
-                    @foreach (var slice in _data.ExportByMarket)
-                    {
-                        var pct = Max(_data.ExportByMarket) == 0 ? 0 : (double)(slice.Value / Max(_data.ExportByMarket) * 100);
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
-                            <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
-                        </div>
-                    }
-                    @if (!_data.ExportByMarket.Any()) { <div class="text-muted">Chưa có đơn xuất.</div> }
-                </div>
-            </div>
-        </div>
-    }
-</div>
+        }
+    </ChildContent>
+</PageChrome>
 
 @code {
     private DashboardDto? _data;
     protected override async Task OnInitializedAsync() => _data = await Api.DashboardAsync();
     private static decimal Max(List<PieSliceDto> items) => items.Count == 0 ? 0 : items.Max(x => x.Value);
+
+    private RenderFragment Pie(List<PieSliceDto> slices) => __builder =>
+    {
+        var total = slices.Sum(s => s.Value);
+        if (total <= 0) return;
+        var colors = new[] { "#1a7a7a", "#0b3d4a", "#0e7490", "#14b8a6", "#5eead4", "#134e4a" };
+        var acc = 0m;
+        var stops = new List<string>();
+        for (var i = 0; i < slices.Count; i++)
+        {
+            var start = acc / total * 100;
+            acc += slices[i].Value;
+            var end = acc / total * 100;
+            stops.Add($"{colors[i % colors.Length]} {start:0.#}% {end:0.#}%");
+        }
+        var css = $"conic-gradient({string.Join(",", stops)})";
+        <div class="sf-pie" style="background:@css"></div>
+    };
 }

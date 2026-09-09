@@ -25,6 +25,13 @@ public class CultureController : Controller
                 {
                     Expires = DateTimeOffset.Now.AddYears(1)
                 });
+            var lang = culture.StartsWith("en", StringComparison.OrdinalIgnoreCase) ? "en" : "vi";
+            HttpContext.Response.Cookies.Append("sf-lang", lang, new CookieOptions
+            {
+                Path = "/",
+                Expires = DateTimeOffset.Now.AddYears(1),
+                IsEssential = true
+            });
         }
 
         return LocalRedirect(redirectUri);

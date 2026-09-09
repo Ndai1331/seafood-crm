@@ -8,6 +8,9 @@ namespace BootstrapBlazor.Server.Components.Task9.UserManager;
 
 public partial class CreateUser : ComponentBase
 {
+    [Parameter] public bool Embedded { get; set; }
+    [Parameter] public EventCallback OnCompleted { get; set; }
+
     [Inject]
     private Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider? AuthStateProvider { get; set; }
 
@@ -233,10 +236,7 @@ public partial class CreateUser : ComponentBase
             if (result != null)
             {
                 await ToastService.Success("Thành công", $"Tạo người dùng mới thành công! Mật khẩu: {GeneratedPassword}");
-
-                // Redirect to user list after 1.5 seconds
-                await Task.Delay(1500);
-                NavigationManager.NavigateTo("/user-manager");
+                await FinishAsync();
             }
             else
             {
@@ -257,10 +257,17 @@ public partial class CreateUser : ComponentBase
         }
     }
     
-    private void OnCancel()
+    private async Task FinishAsync()
     {
+        if (OnCompleted.HasDelegate)
+        {
+            await OnCompleted.InvokeAsync();
+            return;
+        }
         NavigationManager.NavigateTo("/user-manager");
     }
+
+    private Task OnCancel() => FinishAsync();
     
     private async Task CopyPasswordToClipboard()
     {

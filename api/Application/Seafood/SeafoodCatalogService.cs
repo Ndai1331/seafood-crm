@@ -44,6 +44,13 @@ namespace Application.Seafood
             return dto;
         }
 
+        public async Task DeleteLookupAsync(int id)
+        {
+            var entity = await _db.CatalogLookups.FindAsync(id) ?? throw new InvalidOperationException("Not found");
+            entity.IsActive = false;
+            await _db.SaveChangesAsync();
+        }
+
         public Task<List<ProductGroupDto>> GetProductsAsync() =>
             _db.ProductGroups.Include(g => g.Skus).OrderBy(g => g.SortOrder)
                 .Select(g => new ProductGroupDto
@@ -56,6 +63,33 @@ namespace Application.Seafood
                         IsByproduct = s.IsByproduct, IsActive = s.IsActive
                     }).ToList()
                 }).ToListAsync();
+
+        public async Task<ProductGroupDto> SaveGroupAsync(ProductGroupDto dto)
+        {
+            ProductGroup entity;
+            if (dto.Id == 0)
+            {
+                entity = new ProductGroup();
+                _db.ProductGroups.Add(entity);
+            }
+            else entity = await _db.ProductGroups.FindAsync(dto.Id) ?? throw new InvalidOperationException("Not found");
+            entity.Code = dto.Code;
+            entity.Name = dto.Name;
+            entity.DefaultMarket = dto.DefaultMarket;
+            await _db.SaveChangesAsync();
+            dto.Id = entity.Id;
+            return dto;
+        }
+
+        public async Task DeleteSkuAsync(int id)
+        {
+            var used = await _db.ProductionOutputs.AnyAsync(x => x.SkuId == id)
+                       || await _db.SalesContractLines.AnyAsync(x => x.SkuId == id);
+            if (used) throw new InvalidOperationException("SKU is in use.");
+            var entity = await _db.ProductSkus.FindAsync(id) ?? throw new InvalidOperationException("Not found");
+            entity.IsActive = false;
+            await _db.SaveChangesAsync();
+        }
 
         public async Task<ProductSkuDto> SaveSkuAsync(ProductSkuDto dto)
         {
@@ -106,6 +140,22 @@ namespace Application.Seafood
             return dto;
         }
 
+        public async Task DeleteCustomerAsync(int id)
+        {
+            var used = await _db.InboundPurchases.AnyAsync(x => x.CustomerId == id)
+                       || await _db.SalesContracts.AnyAsync(x => x.CustomerId == id);
+            var entity = await _db.Customers.FindAsync(id) ?? throw new InvalidOperationException("Not found");
+            if (used)
+            {
+                entity.IsActive = false;
+            }
+            else
+            {
+                _db.Customers.Remove(entity);
+            }
+            await _db.SaveChangesAsync();
+        }
+
         public Task<List<PaymentTermDto>> GetPaymentTermsAsync() =>
             _db.PaymentTerms.OrderBy(x => x.Name).Select(x => new PaymentTermDto
             {
@@ -131,6 +181,15 @@ namespace Application.Seafood
             await _db.SaveChangesAsync();
             dto.Id = entity.Id;
             return dto;
+        }
+
+        public async Task DeletePaymentTermAsync(int id)
+        {
+            var used = await _db.ExportShipments.AnyAsync(x => x.PaymentTermId == id);
+            var entity = await _db.PaymentTerms.FindAsync(id) ?? throw new InvalidOperationException("Not found");
+            if (used) entity.IsActive = false;
+            else _db.PaymentTerms.Remove(entity);
+            await _db.SaveChangesAsync();
         }
     }
 }

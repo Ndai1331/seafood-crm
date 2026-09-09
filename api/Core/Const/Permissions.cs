@@ -26,10 +26,12 @@ namespace Core.Const
         public const string Inbound = "inbound.purchases";
         public const string Production = "production.lots";
         public const string Inventory = "inventory.stock";
+        public const string InventoryAllocate = "inventory.allocate";
         public const string ExportQuotes = "export.quotes";
         public const string ExportOrders = "export.orders";
         public const string FinancePayments = "finance.payments";
         public const string FinanceDeposits = "finance.deposits";
+        public const string Reports = "dashboard.reports";
         public const string UserManager = "system.user-manager";
         public const string TeamManager = "system.team";
         public const string SsoSettings = "system.sso-settings";
@@ -46,10 +48,12 @@ namespace Core.Const
             new(Inbound, ModInbound, "Nhập hàng", "Nhập nguyên liệu", "inbound"),
             new(Production, ModProduction, "Sản xuất", "Đưa vào sản xuất", "production"),
             new(Inventory, ModInventory, "Kho", "Tồn kho & chứng từ", "inventory"),
+            new(InventoryAllocate, ModInventory, "Kho", "Sắp xếp giấy", "inventory/allocate"),
             new(ExportQuotes, ModExport, "Xuất khẩu", "Báo giá / Hợp đồng", "export/quotes"),
             new(ExportOrders, ModExport, "Xuất khẩu", "Đơn hàng xuất khẩu", "export/orders"),
             new(FinancePayments, ModFinance, "Tài chính", "Theo dõi thanh toán", "finance/payments"),
             new(FinanceDeposits, ModFinance, "Tài chính", "Deposit", "finance/deposits"),
+            new(Reports, ModDashboard, "Dashboard", "Báo cáo", "reports"),
             new(UserManager, ModSystem, "Quản trị hệ thống", "Quản lý người dùng", "user-manager"),
             new(TeamManager, ModSystem, "Quản trị hệ thống", "Quản lý team", "team"),
             new(SsoSettings, ModSystem, "Quản trị hệ thống", "Cài đặt đăng nhập", "sso-settings"),

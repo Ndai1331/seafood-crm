@@ -1,6 +1,6 @@
 @inherits LayoutComponentBase
 @inject IOptionsMonitor<WebsiteOptions> WebsiteOption
-
+@inject BootstrapBlazor.Server.Services.I18n.IAppLang L
 
 <BootstrapBlazorRoot>
     <CascadingValue Value="this" IsFixed="true">
@@ -8,801 +8,88 @@
         {
             <div class="impersonation-banner d-flex align-items-center justify-content-center gap-3"
                  style="position:fixed;top:0;left:0;right:0;z-index:2000;background:#b45309;color:#fff;padding:6px 12px;font-weight:600;">
-                <span><i class="fa-solid fa-user-secret me-2"></i>Đang đăng nhập hộ với tư cách <strong>@ImpersonatedUserName</strong>.</span>
+                <span><i class="fa-solid fa-user-secret me-2"></i>@ImpersonatedUserName</span>
                 <button class="btn btn-sm btn-light" @onclick="ExitImpersonationAsync">
-                    <i class="fa-solid fa-right-from-bracket me-1"></i>Thoát
+                    <i class="fa-solid fa-right-from-bracket me-1"></i>@L["account.logout"]
                 </button>
             </div>
         }
-        <!-- Main Layout Container -->
         <div class="container-fluid vh-100 p-0">
             <div class="row h-100 g-0">
-                <!-- Left Sidebar Column - Desktop Only -->
                 <div id="sidebar" class="d-none d-lg-block">
-                    <!-- Fixed Header Area -->
                     <div class="sidebar-header">
                         <NavLink class="text-decoration-none" href="/">
                             <div class="logo-container">
-                                <span class="brand-name">SEAFOOD CRM</span>
+                                <span class="brand-name">@L["brand"]</span>
                             </div>
                         </NavLink>
                     </div>
-                    
-                    <!-- Scrollable Content Area -->
                     <div class="sidebar-scrollable">
                         <div class="sidebar-content h-100">
-                        <nav class="sidebar-nav">
-                            <div class="nav-section">
-                                <ul class="nav flex-column">
-                                    @if (Menus != null && Menus.Any())
-                                    {
-                                        // Add BÁO CÁO section header
-                                        var hasReports = Menus.Any(m => m.Text == "Tools SEO" || m.Text == "Chi phí SEO");
-                                        if (hasReports)
-                                        {
-                                            <li class="nav-section-header">
-                                                <span class="section-header-text">QUẢN LÝ</span>
-                                            </li>
-                                        }
-                                        
-                                        foreach (var menu in Menus)
-                                        {
-                                            if (menu.Text == "Tools SEO" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEO" aria-expanded="false" aria-controls="toolsSEO">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-chart-pie"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsSEO">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Chi phí SEO" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoice" aria-expanded="false" aria-controls="toolsSEOInvoice">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="@menu.Icon me-2"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsSEOInvoice">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Tools HRTA" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsHRTA" aria-expanded="false" aria-controls="toolsHRTA">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-users"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsHRTA">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "SEO Thái" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOThai" aria-expanded="false" aria-controls="toolsSEOThai">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-flag"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsSEOThai">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Tools QC" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsQC" aria-expanded="false" aria-controls="toolsQC">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-circle-check"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsQC">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Tools Assistant" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsAssistant" aria-expanded="false" aria-controls="toolsAssistant">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-layer-group"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsAssistant">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Quản trị hệ thống" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSystem" aria-expanded="false" aria-controls="toolsSystem">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="@menu.Icon me-2"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsSystem">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "ETL Management" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsETL" aria-expanded="false" aria-controls="toolsETL">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-gears"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsETL">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "Dashboard" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsDashboard" aria-expanded="false" aria-controls="toolsDashboard">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="fa-solid fa-gauge-high"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsDashboard">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else if (menu.Text == "SEO Monitoring" && menu.Items != null && menu.Items.Any())
-                                            {
-                                                <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoring" aria-expanded="false" aria-controls="toolsSeoMonitoring">
-                                                        <span class="d-flex align-items-center">
-                                                            <i class="@menu.Icon"></i>
-                                                            <span>@menu.Text</span>
-                                                        </span>
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                        </svg>
-                                                    </NavLink>
-                                                    <div class="collapse" id="toolsSeoMonitoring">
-                                                        <ul class="nav flex-column">
-                                                            @foreach (var child in menu.Items)
-                                                            {
-                                                                <li class="nav-item">
-                                                                    <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                        <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                        <span>@child.Text</span>
-                                                                    </NavLink>
-                                                                </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            }
-                                            else
-                                            {
-                                                var directUrl = SidebarMenuNavigation.ResolveDirectUrl(menu);
-                                                if (directUrl != null)
-                                                {
-                                                    <li class="nav-item">
-                                                        <NavLink class="nav-link d-flex align-items-center py-2" href="@directUrl" Match="NavLinkMatch.All">
-                                                            <i class="@menu.Icon me-2"></i>
-                                                            <span>@menu.Text</span>
-                                                        </NavLink>
-                                                    </li>
-                                                }
-                                                else if (menu.Items != null && menu.Items.Any())
-                                                {
-                                                    var dynamicMenuId = $"sidebarDynamic{Menus.IndexOf(menu)}";
-                                                    <li class="nav-item">
-                                                        <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);"
-                                                                 data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
-                                                                 aria-expanded="false" aria-controls="@dynamicMenuId">
-                                                            <span class="d-flex align-items-center">
-                                                                <i class="@menu.Icon me-2"></i>
-                                                                <span>@menu.Text</span>
-                                                            </span>
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19" />
-                                                            </svg>
-                                                        </NavLink>
-                                                        <div class="collapse" id="@dynamicMenuId">
-                                                            <ul class="nav flex-column">
-                                                                @foreach (var child in menu.Items)
-                                                                {
-                                                                    <li class="nav-item">
-                                                                        <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                            <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                            <span>@child.Text</span>
-                                                                        </NavLink>
-                                                                    </li>
-                                                                }
-                                                            </ul>
-                                                        </div>
-                                                    </li>
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <li class="nav-item">
-                                            <span class="text-muted">Không có menu nào khả dụng</span>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        </nav>
+                            <AppSidebarNav Menus="Menus" IdPrefix="desk" />
                         </div>
                     </div>
                 </div>
 
-                <!-- Offcanvas Sidebar for Mobile -->
                 <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebar-offcanvas" aria-labelledby="sidebar-offcanvas-label">
                     <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="sidebar-offcanvas-label">SEAFOOD CRM</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        <h5 class="offcanvas-title" id="sidebar-offcanvas-label">@L["brand"]</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="@L["btn.close"]"></button>
                     </div>
-                    <div class="offcanvas-body p-0">
-                        <div id="sidebar-mobile">
-                            <!-- Fixed Header Area -->
-                            <div class="sidebar-header">
-                                <NavLink class="text-decoration-none" href="/">
-                                    <div class="logo-container">
-                                        <span class="brand-name">SEAFOOD CRM</span>
-                                    </div>
-                                </NavLink>
+                    <div class="offcanvas-body p-0 d-flex flex-column">
+                        <div id="sidebar-mobile" class="flex-grow-1">
+                            <AppSidebarNav Menus="Menus" IdPrefix="mob" OnNavigated="CloseMobileSidebarAsync" />
+                        </div>
+                        <div class="sf-drawer-footer">
+                            <div class="sf-lang-switch mb-3">
+                                <button type="button" class="@(SelectedCulture.StartsWith("vi") ? "active" : "")" @onclick='() => SwitchLangAsync("vi-VN")'>VI</button>
+                                <button type="button" class="@(SelectedCulture.StartsWith("en") ? "active" : "")" @onclick='() => SwitchLangAsync("en-US")'>EN</button>
                             </div>
-                            
-                            <!-- Scrollable Content Area -->
-                            <div class="sidebar-scrollable">
-                                <div class="sidebar-content h-100">
-                                <nav class="sidebar-nav">
-                                    <div class="nav-section">
-                                        <ul class="nav flex-column">
-                                            @if (Menus != null && Menus.Any())
-                                            {
-                                                // Add BÁO CÁO section header
-                                                var hasReportsMobile = Menus.Any(m => m.Text == "Tools SEO" || m.Text == "Chi phí SEO");
-                                                if (hasReportsMobile)
-                                                {
-                                                    <li class="nav-section-header">
-                                                        <span class="section-header-text">QUẢN LÝ</span>
-                                                    </li>
-                                                }
-                                                
-                                                foreach (var menu in Menus)
-                                                {
-                                                    if (menu.Text == "Tools SEO" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOMobile" aria-expanded="false" aria-controls="toolsSEOMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-chart-pie"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsSEOMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Chi phí SEO" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoiceMobile" aria-expanded="false" aria-controls="toolsSEOInvoiceMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="@menu.Icon me-2"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsSEOInvoiceMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Tools HRTA" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsHRTAMobile" aria-expanded="false" aria-controls="toolsHRTAMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-users"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsHRTAMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "SEO Thái" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOThaiMobile" aria-expanded="false" aria-controls="toolsSEOThaiMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-flag"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsSEOThaiMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Tools QC" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsQCMobile" aria-expanded="false" aria-controls="toolsQCMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-circle-check"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsQCMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Tools Assistant" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsAssistantMobile" aria-expanded="false" aria-controls="toolsAssistantMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-layer-group"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsAssistantMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Quản trị hệ thống" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSystemMobile" aria-expanded="false" aria-controls="toolsSystemMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="@menu.Icon me-2"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsSystemMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "ETL Management" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsETLMobile" aria-expanded="false" aria-controls="toolsETLMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-gears"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsETLMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "Dashboard" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsDashboardMobile" aria-expanded="false" aria-controls="toolsDashboardMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="fa-solid fa-gauge-high"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsDashboardMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else if (menu.Text == "SEO Monitoring" && menu.Items != null && menu.Items.Any())
-                                                    {
-                                                        <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoringMobile" aria-expanded="false" aria-controls="toolsSeoMonitoringMobile">
-                                                                <span class="d-flex align-items-center">
-                                                                    <i class="@menu.Icon"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </span>
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
-                                                                </svg>
-                                                            </NavLink>
-                                                            <div class="collapse" id="toolsSeoMonitoringMobile">
-                                                                <ul class="nav flex-column">
-                                                                    @foreach (var child in menu.Items)
-                                                                    {
-                                                                        <li class="nav-item">
-                                                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                <span>@child.Text</span>
-                                                                            </NavLink>
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        </li>
-                                                    }
-                                                    else
-                                                    {
-                                                        var directUrl = SidebarMenuNavigation.ResolveDirectUrl(menu);
-                                                        if (directUrl != null)
-                                                        {
-                                                            <li class="nav-item">
-                                                                <NavLink class="nav-link d-flex align-items-center py-2" href="@directUrl" Match="NavLinkMatch.All">
-                                                                    <i class="@menu.Icon me-2"></i>
-                                                                    <span>@menu.Text</span>
-                                                                </NavLink>
-                                                            </li>
-                                                        }
-                                                        else if (menu.Items != null && menu.Items.Any())
-                                                        {
-                                                            var dynamicMenuId = $"sidebarDynamicMobile{Menus.IndexOf(menu)}";
-                                                            <li class="nav-item">
-                                                                <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);"
-                                                                         data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
-                                                                         aria-expanded="false" aria-controls="@dynamicMenuId">
-                                                                    <span class="d-flex align-items-center">
-                                                                        <i class="@menu.Icon me-2"></i>
-                                                                        <span>@menu.Text</span>
-                                                                    </span>
-                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19" />
-                                                                    </svg>
-                                                                </NavLink>
-                                                                <div class="collapse" id="@dynamicMenuId">
-                                                                    <ul class="nav flex-column">
-                                                                        @foreach (var child in menu.Items)
-                                                                        {
-                                                                            <li class="nav-item">
-                                                                                <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.All">
-                                                                                    <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
-                                                                                    <span>@child.Text</span>
-                                                                                </NavLink>
-                                                                            </li>
-                                                                        }
-                                                                    </ul>
-                                                                </div>
-                                                            </li>
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <li class="nav-item">
-                                                    <span class="text-muted">Không có menu nào khả dụng</span>
-                                                </li>
-                                            }
-                                        </ul>
-                                    </div>
-                                </nav>
-                                </div>
+                            <div class="d-flex align-items-center gap-2 text-white-50 small">
+                                <i class="fa-solid fa-user"></i>
+                                <span>@CurrentUserName</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Main Content Column -->
                 <div id="main-content" class="overflow-auto main-content-transition">
-                    <!-- Top Navigation Bar with Toggle Button -->
-                    <nav class="navbar navbar-expand-lg bg-white">
-                        <div class="container-fluid px-4 py-3">
-                            <!-- Mobile Toggle Button -->
-                            <button id="sidebar-toggle-mobile" class="d-lg-none me-3" type="button" onclick="toggleMobileSidebar()">
+                    <nav class="navbar navbar-expand-lg sf-topbar">
+                        <div class="container-fluid px-3 px-md-4">
+                            <button id="sidebar-toggle-mobile" class="d-lg-none me-2" type="button" onclick="toggleMobileSidebar()" aria-label="Menu">
                                 <i class="fas fa-bars"></i>
                             </button>
-                            
-                            <!-- Desktop Toggle Button -->
-                            <button id="sidebar-toggle-desktop" class="d-none d-lg-block me-3" type="button" onclick="toggleSidebar()">
+                            <button id="sidebar-toggle-desktop" class="d-none d-lg-block me-2" type="button" onclick="toggleSidebar()" aria-label="Collapse">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            
-                            <!-- Page Title -->
                             <div class="flex-grow-1">
-                                <h1 class="h4 mb-0 fw-bold text-dark">@CurrentPageTitle</h1>
+                                <h1 class="h5 mb-0 fw-semibold sf-topbar-title">@CurrentPageTitle</h1>
                             </div>
-                            
-                            <!-- Top Right User Menu -->
+                            <div class="sf-lang-switch d-none d-md-flex me-3">
+                                <button type="button" class="@(SelectedCulture.StartsWith("vi") ? "active" : "")" @onclick='() => SwitchLangAsync("vi-VN")'>VI</button>
+                                <button type="button" class="@(SelectedCulture.StartsWith("en") ? "active" : "")" @onclick='() => SwitchLangAsync("en-US")'>EN</button>
+                            </div>
                             <div class="top-account-menu d-flex align-items-center">
                                 <span class="top-account-name d-none d-md-inline-flex">@CurrentUserName</span>
                                 <div class="dropdown top-account-dropdown">
-                                    <button class="btn top-account-button"
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            aria-label="Mở menu tài khoản"
-                                            aria-expanded="false">
-                                        <img src="@CurrentUserAvatar"
-                                             alt="@CurrentUserName"
-                                             class="top-account-avatar"
+                                    <button class="btn top-account-button" type="button" data-bs-toggle="dropdown"
+                                            aria-label="@L["account.openMenu"]" aria-expanded="false">
+                                        <img src="@CurrentUserAvatar" alt="@CurrentUserName" class="top-account-avatar"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                                        <span class="top-account-fallback">
-                                            <i class="fa-solid fa-user"></i>
-                                        </span>
+                                        <span class="top-account-fallback"><i class="fa-solid fa-user"></i></span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end top-account-dropdown-menu">
-                                        <li>
-                                            <a class="dropdown-item" href="/my-profile">
-                                                <i class="fa-solid fa-user-pen me-2"></i>Thông tin cá nhân
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="ShowChangePasswordModal">
-                                                <i class="fa-solid fa-key me-2"></i>Đổi mật khẩu
-                                            </a>
-                                        </li>
+                                        <li><a class="dropdown-item" href="/my-profile"><i class="fa-solid fa-user-pen me-2"></i>@L["account.profile"]</a></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);" @onclick="ShowChangePasswordModal"><i class="fa-solid fa-key me-2"></i>@L["account.password"]</a></li>
                                         <li><hr class="dropdown-divider" /></li>
-                                        <li>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="OnLogout">
-                                                <i class="fa-solid fa-sign-out-alt me-2"></i>Đăng xuất
-                                            </a>
-                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:void(0);" @onclick="OnLogout"><i class="fa-solid fa-sign-out-alt me-2"></i>@L["account.logout"]</a></li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </nav>
 
-                    <div class="main-content p-2">
-                        <!-- Page Content -->
+                    <div class="main-content">
                         <div class="page-content" id="@CurrentRouteId">
                             @if (_isPageReady)
                             {
@@ -810,9 +97,9 @@
                             }
                             else
                             {
-                                <div class="d-flex min-vh-100 align-items-center justify-content-center">
+                                <div class="d-flex min-vh-50 align-items-center justify-content-center py-5">
                                     <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Đang tải quyền truy cập...</span>
+                                        <span class="visually-hidden">@L["msg.loading"]</span>
                                     </div>
                                 </div>
                             }
@@ -821,17 +108,17 @@
                 </div>
             </div>
         </div>
-        <!-- Modal for Change Password -->
-        <Modal @ref="Modal" Size="Size.Small" ShowResize="true" IsKeyboard="true">
-            <ModalDialog Title="Đổi mật khẩu" ShowSaveButton="true" OnSaveAsync="OnChangePasswordAsync">
+        <Modal @ref="Modal" Size="Size.Small" IsKeyboard="true">
+            <ModalDialog Title="@L["account.password"]" ShowSaveButton="true" OnSaveAsync="OnChangePasswordAsync">
                 <BodyTemplate>
-                    <BootstrapInput PlaceHolder="Nhập mật khẩu mới" @bind-Value="@NewPassword.NewPassword"
-                                    DisplayText="Mật khẩu mới" ShowLabel="true" />
+                    <BootstrapInput PlaceHolder="@L["account.password"]" @bind-Value="@NewPassword.NewPassword"
+                                    DisplayText="@L["account.password"]" ShowLabel="true" />
                 </BodyTemplate>
             </ModalDialog>
         </Modal>
     </CascadingValue>
 </BootstrapBlazorRoot>
+
 
 <script type="module">
     // Import và init route menu handler module

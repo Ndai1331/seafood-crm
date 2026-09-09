@@ -1,0 +1,54 @@
+@using BootstrapBlazor.Server.Helper
+
+<div class="sf-money-input">
+    <input type="text"
+           class="form-control @CssClass"
+           value="@_display"
+           placeholder="@Placeholder"
+           disabled="@IsDisabled"
+           inputmode="decimal"
+           @oninput="OnInputAsync"
+           @onblur="OnBlurAsync" />
+    <span class="sf-money-affix">₫</span>
+</div>
+
+@code {
+    [Parameter] public decimal? Value { get; set; }
+    [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }
+    [Parameter] public int MaxDecimals { get; set; } = 0;
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+
+    private string _display = string.Empty;
+    private decimal? _lastSyncedValue;
+    private bool _isEditing;
+
+    protected override void OnParametersSet()
+    {
+        if (_isEditing) return;
+        if (Value != _lastSyncedValue)
+        {
+            _lastSyncedValue = Value;
+            _display = VnNumberFormatHelper.Format(Value, MaxDecimals);
+        }
+    }
+
+    private async Task OnInputAsync(ChangeEventArgs e)
+    {
+        _isEditing = true;
+        var raw = e.Value?.ToString() ?? string.Empty;
+        _display = VnNumberFormatHelper.FormatWhileTyping(raw, MaxDecimals);
+        var parsed = VnNumberFormatHelper.ParseDecimal(_display);
+        _lastSyncedValue = parsed;
+        await ValueChanged.InvokeAsync(parsed);
+    }
+
+    private Task OnBlurAsync()
+    {
+        _isEditing = false;
+        _lastSyncedValue = Value;
+        _display = VnNumberFormatHelper.Format(Value, MaxDecimals);
+        return Task.CompletedTask;
+    }
+}

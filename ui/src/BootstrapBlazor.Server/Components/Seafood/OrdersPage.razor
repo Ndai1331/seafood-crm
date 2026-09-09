@@ -2,36 +2,114 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject IAppLang L
 
-<h3 class="mb-3">Đơn hàng xuất khẩu</h3>
-<p class="text-muted">Khối lượng có thể nhập pound hoặc kg — hệ thống tự quy đổi (1 lb = 0.45359237 kg).</p>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.SalesContractId" placeholder="HĐ Id" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.InvoiceNo" placeholder="Invoice" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.PaymentTermId" placeholder="Payment term Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.QtyKg" placeholder="kg" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.QtyLbs" placeholder="lbs" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.AmountUsd" placeholder="USD" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContainerNo" placeholder="Cont" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Route" placeholder="Tuyến" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu đơn XK</Button></div>
-    </div>
-</div>
-<Table TItem="ExportShipmentDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+<PageChrome Title="@L["orders.title"]" Subtitle="@L["orders.hint"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="@L["btn.create"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="sf-panel p-0 overflow-auto">
+            <Table TItem="ExportShipmentDto" Items="_rows" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.InvoiceNo" Text="@L["orders.invoice"]" />
+                    <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.CustomerName" Text="@L["customers.name"]" />
+                    <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.ProductionNoticeNo" Text="@L["orders.tbsx"]" />
+                    <TableColumn TItem="ExportShipmentDto" TType="decimal" @bind-Field="@context.QtyKg" Text="kg" FormatString="N1" />
+                    <TableColumn TItem="ExportShipmentDto" TType="decimal" @bind-Field="@context.AmountUsd" Text="USD" FormatString="N2" />
+                    <TableColumn TItem="ExportShipmentDto" TType="int" @bind-Field="@context.Id" Text="" Width="90">
+                        <Template Context="v">
+                            <RowActionButtons OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.ExtraLarge">
+            <ModalDialog Title="@L["orders.title"]" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4"><Select TValue="int?" Items="_customers" @bind-Value="_form.CustomerId" DisplayText="@L["customers.title"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><Select TValue="int?" Items="_contracts" @bind-Value="_form.SalesContractId" DisplayText="@L["quotes.contractNo"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><Select TValue="int?" Items="_terms" @bind-Value="_form.PaymentTermId" DisplayText="@L["terms.title"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.InvoiceNo" DisplayText="@L["orders.invoice"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.ProductionNoticeNo" DisplayText="@L["orders.tbsx"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInputNumber @bind-Value="_form.Cartons" DisplayText="CTNS" ShowLabel="true" /></div>
+                        <div class="col-6 col-md-3"><VnNumberInput Value="_form.QtyKg" ValueChanged="OnKg" Placeholder="kg" /></div>
+                        <div class="col-6 col-md-3"><VnNumberInput Value="_form.QtyLbs" ValueChanged="OnLbs" Placeholder="lbs" /></div>
+                        <div class="col-12 col-md-3"><UsdMoneyInput Value="_form.AmountUsd" ValueChanged="v => _form.AmountUsd = v ?? 0" Placeholder="USD" /></div>
+                        <div class="col-12 col-md-3"><BootstrapInput @bind-Value="_form.ContainerNo" DisplayText="@L["inbound.cont"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-3"><Select TValue="string" Items="_contTypes" @bind-Value="_form.ContainerType" DisplayText="20/40 RF" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-5"><BootstrapInput @bind-Value="_form.Route" DisplayText="Route" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.ForwarderName" DisplayText="FWD" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><BootstrapInput @bind-Value="_form.TransportName" DisplayText="Nhà xe" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.Etd" DisplayText="@L["orders.etd"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.Eta" DisplayText="@L["orders.eta"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-4"><DateTimePicker TValue="DateTime?" @bind-Value="_form.YardTime" DisplayText="Hạ bãi" ShowLabel="true" /></div>
+                    </div>
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
 
 @code {
+    private Modal? _modal;
     private List<ExportShipmentDto> _rows = new();
     private ExportShipmentDto _form = new();
-    protected override async Task OnInitializedAsync() => _rows = await Api.OrdersAsync() ?? new();
+    private List<SelectedItem> _customers = new();
+    private List<SelectedItem> _contracts = new();
+    private List<SelectedItem> _terms = new();
+    private readonly List<SelectedItem> _contTypes = new() { new("40RF", "40RF"), new("20RF", "20RF") };
 
-    private async Task SaveAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        _customers = (await Api.CustomersAsync() ?? new()).Select(c => new SelectedItem(c.Id.ToString(), c.Name)).ToList();
+        _contracts = (await Api.QuotesAsync() ?? new()).Select(c => new SelectedItem(c.Id.ToString(), c.ContractNo)).ToList();
+        _terms = (await Api.PaymentTermsAsync() ?? new()).Select(t => new SelectedItem(t.Id.ToString(), t.Name)).ToList();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync() => _rows = await Api.OrdersAsync() ?? new();
+
+    private void OnKg(decimal? v)
+    {
+        _form.QtyKg = v ?? 0;
+        if (_form.QtyKg > 0) _form.QtyLbs = decimal.Round(_form.QtyKg / 0.45359237m, 3);
+    }
+
+    private void OnLbs(decimal? v)
+    {
+        _form.QtyLbs = v ?? 0;
+        if (_form.QtyLbs > 0) _form.QtyKg = decimal.Round(_form.QtyLbs * 0.45359237m, 3);
+    }
+
+    private async Task OpenCreate()
+    {
+        _form = new ExportShipmentDto { ContainerType = "40RF" };
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(ExportShipmentDto row)
+    {
+        _form = row;
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> SaveAsync()
     {
         var saved = await Api.SaveOrderAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được đơn xuất"); return; }
-        await Toast.Success($"Đã lưu đơn {saved.InvoiceNo}: {saved.QtyKg:N1} kg / {saved.QtyLbs:N1} lbs");
-        _form = new();
-        _rows = await Api.OrdersAsync() ?? new();
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
+    }
+
+    private async Task DeleteAsync(ExportShipmentDto row)
+    {
+        try { await Api.DeleteOrderAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
     }
 }

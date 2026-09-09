@@ -1,0 +1,78 @@
+@using BootstrapBlazor.Components
+@using BootstrapBlazor.Server.Services
+@inject NavigationManager Nav
+
+<nav class="sidebar-nav" data-prefix="@IdPrefix">
+    <div class="nav-section">
+        <ul class="nav flex-column">
+            @if (Menus == null || !Menus.Any())
+            {
+                <li class="nav-item"><span class="text-muted">—</span></li>
+            }
+            else
+            {
+                var index = 0;
+                foreach (var menu in Menus)
+                {
+                    var collapseId = $"{IdPrefix}-m{index++}";
+                    var directUrl = SidebarMenuNavigation.ResolveDirectUrl(menu);
+                    if (directUrl != null)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link d-flex align-items-center py-2" href="@directUrl" Match="NavLinkMatch.Prefix"
+                                     @onclick="OnNavigate">
+                                <i class="@menu.Icon me-2"></i>
+                                <span>@menu.Text</span>
+                            </NavLink>
+                        </li>
+                    }
+                    else if (menu.Items != null && menu.Items.Any())
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2"
+                                     href="javascript:void(0);"
+                                     data-bs-toggle="collapse"
+                                     data-bs-target="@($"#{collapseId}")"
+                                     aria-expanded="false"
+                                     aria-controls="@collapseId">
+                                <span class="d-flex align-items-center">
+                                    <i class="@menu.Icon me-2"></i>
+                                    <span>@menu.Text</span>
+                                </span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
+                                </svg>
+                            </NavLink>
+                            <div class="collapse" id="@collapseId">
+                                <ul class="nav flex-column">
+                                    @foreach (var child in menu.Items)
+                                    {
+                                        <li class="nav-item">
+                                            <NavLink class="nav-link d-flex align-items-center py-2 ps-4" href="@child.Url" Match="NavLinkMatch.Prefix"
+                                                     @onclick="OnNavigate">
+                                                <i class="@child.Icon me-2" style="font-size: 0.9rem;"></i>
+                                                <span>@child.Text</span>
+                                            </NavLink>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                }
+            }
+        </ul>
+    </div>
+</nav>
+
+@code {
+    [Parameter] public List<MenuItem>? Menus { get; set; }
+    [Parameter] public string IdPrefix { get; set; } = "nav";
+    [Parameter] public EventCallback OnNavigated { get; set; }
+
+    private async Task OnNavigate()
+    {
+        if (OnNavigated.HasDelegate)
+            await OnNavigated.InvokeAsync();
+    }
+}

@@ -1,0 +1,33 @@
+@using BootstrapBlazor.Server.Services.I18n
+@inject IAppLang L
+@inject SwalService Swal
+
+<div class="sf-row-actions">
+    <Button Color="Color.None" Class="btn-action btn-action-edit" Size="Size.ExtraSmall"
+            Icon="fa-solid fa-pen-to-square" title="@L["btn.edit"]" aria-label="@L["btn.edit"]"
+            OnClick="OnEdit" />
+    @if (ShowDelete)
+    {
+        <Button Color="Color.None" Class="btn-action btn-action-delete" Size="Size.ExtraSmall"
+                Icon="fa-solid fa-trash-can" title="@L["btn.delete"]" aria-label="@L["btn.delete"]"
+                OnClick="ConfirmDeleteAsync" />
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public bool ShowDelete { get; set; } = true;
+
+    private async Task ConfirmDeleteAsync()
+    {
+        var ok = await Swal.ShowModal(new SwalOption
+        {
+            Category = SwalCategory.Question,
+            Title = L["btn.delete"],
+            Content = L["msg.confirmDelete"],
+            ShowClose = true
+        });
+        if (ok) await OnDelete.InvokeAsync();
+    }
+}

@@ -116,7 +116,7 @@ namespace Application.Identity.RoleManager
             var name = role.ToUpperInvariant();
             if (name is RoleNames.Admin or RoleNames.SuperAdmin) return all;
 
-            var codes = new HashSet<string> { Permissions.Dashboard };
+            var codes = new HashSet<string> { Permissions.Dashboard, Permissions.Reports };
             if (name == RoleNames.Purchasing)
             {
                 codes.UnionWith(new[] { Permissions.Inbound, Permissions.MasterCatalog, Permissions.MasterCustomers, Permissions.Inventory });
@@ -127,14 +127,14 @@ namespace Application.Identity.RoleManager
             }
             else if (name == RoleNames.Warehouse)
             {
-                codes.UnionWith(new[] { Permissions.Inventory, Permissions.Inbound, Permissions.Production });
+                codes.UnionWith(new[] { Permissions.Inventory, Permissions.InventoryAllocate, Permissions.Inbound, Permissions.Production });
             }
             else if (name == RoleNames.Sales)
             {
                 codes.UnionWith(new[]
                 {
                     Permissions.ExportQuotes, Permissions.ExportOrders, Permissions.MasterCustomers,
-                    Permissions.MasterProducts, Permissions.Inventory
+                    Permissions.MasterProducts, Permissions.Inventory, Permissions.InventoryAllocate, Permissions.Reports
                 });
             }
             else if (name == RoleNames.Accounting)

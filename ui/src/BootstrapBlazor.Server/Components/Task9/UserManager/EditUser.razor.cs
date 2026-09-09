@@ -8,6 +8,9 @@ namespace BootstrapBlazor.Server.Components.Task9.UserManager;
 
 public partial class EditUser : ComponentBase
 {
+    [Parameter] public bool Embedded { get; set; }
+    [Parameter] public EventCallback OnCompleted { get; set; }
+
     [Parameter]
     public int UserId { get; set; }
     
@@ -407,9 +410,7 @@ public partial class EditUser : ComponentBase
             if (result != null)
             {
                 await ToastService.Success("Thành công", "Cập nhật người dùng thành công!");
-                
-                // Navigate back to list
-                NavigationManager.NavigateTo("/user-manager");
+                await FinishAsync();
             }
             else
             {
@@ -430,15 +431,19 @@ public partial class EditUser : ComponentBase
         }
     }
     
-    private void OnCancel()
+    private async Task FinishAsync()
     {
+        if (OnCompleted.HasDelegate)
+        {
+            await OnCompleted.InvokeAsync();
+            return;
+        }
         NavigationManager.NavigateTo("/user-manager");
     }
-    
-    private void OnBackToList()
-    {
-        NavigationManager.NavigateTo("/user-manager");
-    }
+
+    private Task OnCancel() => FinishAsync();
+
+    private Task OnBackToList() => FinishAsync();
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

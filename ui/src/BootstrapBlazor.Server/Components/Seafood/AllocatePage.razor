@@ -1,0 +1,134 @@
+@page "/inventory/allocate"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject IAppLang L
+
+<PageChrome Title="@L["allocate.title"]" Subtitle="@L["allocate.hint"]">
+    <Actions>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" Text="@L["btn.refresh"]" OnClick="LoadAsync" />
+        <Button Color="Color.Primary" Icon="fa-solid fa-link" Text="@L["btn.allocate"]" OnClick="OpenCreate" />
+    </Actions>
+    <ChildContent>
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+                <div class="sf-panel">
+                    <h5>@L["allocate.openContracts"]</h5>
+                    @foreach (var c in _board.OpenContracts)
+                    {
+                        <div class="border rounded p-2 mb-2">
+                            <strong>@c.ContractNo</strong> · @c.CustomerName
+                            <ul class="mb-0 small">
+                                @foreach (var line in c.Lines)
+                                {
+                                    <li>@line.SkuName — @line.QtyKg.ToString("N0") kg</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (!_board.OpenContracts.Any()) { <div class="text-muted">@L["msg.empty"]</div> }
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="sf-panel">
+                    <h5>@L["allocate.stock"]</h5>
+                    @foreach (var s in _board.Stock)
+                    {
+                        <div class="border rounded p-2 mb-2 small">
+                            <strong>@s.LotNumber</strong> · @s.SkuName · @s.AvailableKg.ToString("N0") kg
+                            <div class="text-muted">@string.Join(", ", s.Certificates)</div>
+                            @if (!string.IsNullOrEmpty(s.Warning)) { <div class="text-warning">@s.Warning</div> }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="sf-panel p-0 overflow-auto mt-3">
+            <Table TItem="LotAllocationDto" Items="_board.Allocations" IsBordered="true" IsStriped="true" AutoGenerateColumns="false">
+                <TableColumns>
+                    <TableColumn TItem="LotAllocationDto" TType="string" @bind-Field="@context.LotNumber" Text="@L["inventory.lot"]" />
+                    <TableColumn TItem="LotAllocationDto" TType="string" @bind-Field="@context.ContractNo" Text="@L["quotes.contractNo"]" />
+                    <TableColumn TItem="LotAllocationDto" TType="string" @bind-Field="@context.SkuName" Text="SKU" />
+                    <TableColumn TItem="LotAllocationDto" TType="decimal" @bind-Field="@context.AllocatedKg" Text="kg" FormatString="N1" />
+                    <TableColumn TItem="LotAllocationDto" TType="string" @bind-Field="@context.Status" Text="@L["allocate.status"]" />
+                    <TableColumn TItem="LotAllocationDto" TType="int" @bind-Field="@context.Id" Text="" Width="90">
+                        <Template Context="v">
+                            <RowActionButtons ShowDelete="true" OnEdit="() => OpenEdit(v.Row)" OnDelete="() => DeleteAsync(v.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+        <Modal @ref="_modal" Size="Size.Large">
+            <ModalDialog Title="@L["btn.allocate"]" ShowSaveButton="true" OnSaveAsync="SaveAsync"
+                         SaveButtonText="@L["btn.save"]" CloseButtonText="@L["btn.cancel"]">
+                <BodyTemplate>
+                    <div class="row g-3">
+                        <div class="col-12"><Select TValue="int" Items="_lots" @bind-Value="_form.LotId" DisplayText="@L["inventory.lot"]" ShowLabel="true" OnSelectedItemChanged="OnLotChanged" /></div>
+                        <div class="col-12"><Select TValue="int?" Items="_contracts" @bind-Value="_form.SalesContractId" DisplayText="@L["quotes.contractNo"]" ShowLabel="true" /></div>
+                        <div class="col-12 col-md-6"><VnNumberInput Value="_form.AllocatedKg" ValueChanged="v => _form.AllocatedKg = v ?? 0" Placeholder="kg" /></div>
+                        <div class="col-12 col-md-6"><VnNumberInput Value="_form.YieldAfterAdjust" ValueChanged="v => _form.YieldAfterAdjust = v ?? 0" Placeholder="Yield" /></div>
+                        <div class="col-12"><BootstrapInput @bind-Value="_form.InternalNote" DisplayText="Note" ShowLabel="true" /></div>
+                    </div>
+                </BodyTemplate>
+            </ModalDialog>
+        </Modal>
+    </ChildContent>
+</PageChrome>
+
+@code {
+    private Modal? _modal;
+    private AllocationBoardDto _board = new();
+    private LotAllocationDto _form = new();
+    private List<SelectedItem> _lots = new();
+    private List<SelectedItem> _contracts = new();
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _board = await Api.AllocationBoardAsync() ?? new();
+        _lots = _board.Stock.Select(s => new SelectedItem(s.LotId.ToString(), $"{s.LotNumber} · {s.SkuName}")).DistinctBy(x => x.Value).ToList();
+        _contracts = _board.OpenContracts.Select(c => new SelectedItem(c.Id.ToString(), c.ContractNo)).ToList();
+    }
+
+    private Task OnLotChanged(SelectedItem _)
+    {
+        SyncSku();
+        return Task.CompletedTask;
+    }
+
+    private void SyncSku()
+    {
+        var stock = _board.Stock.FirstOrDefault(s => s.LotId == _form.LotId);
+        if (stock != null) _form.SkuId = stock.SkuId;
+    }
+
+    private async Task OpenCreate()
+    {
+        _form = new LotAllocationDto();
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task OpenEdit(LotAllocationDto row)
+    {
+        _form = row;
+        if (_modal != null) await _modal.Toggle();
+    }
+
+    private async Task<bool> SaveAsync()
+    {
+        SyncSku();
+        var saved = await Api.AllocateLotAsync(_form);
+        if (saved == null) { await Toast.Error(L["msg.saveFail"]); return false; }
+        await Toast.Success(L["msg.saveOk"]);
+        await LoadAsync();
+        return true;
+    }
+
+    private async Task DeleteAsync(LotAllocationDto row)
+    {
+        try { await Api.DeleteAllocationAsync(row.Id); await Toast.Success(L["msg.deleteOk"]); await LoadAsync(); }
+        catch { await Toast.Error(L["msg.deleteFail"]); }
+    }
+}
