@@ -45,7 +45,8 @@ static class ServiceCollectionExtensions
 
         services.Configure<HubOptions>(option => option.MaximumReceiveMessageSize = null);
 
-        services.AddHostedService<MockOnlineContributor>();
+        // Demo UniverSheet ticker; not needed for Seafood CRM.
+        // services.AddHostedService<MockOnlineContributor>();
         // services.AddHostedService<MockReceiveSocketServerService>();
         // services.AddHostedService<MockSendReceiveSocketServerService>();
         // services.AddHostedService<MockCustomProtocolSocketServerService>();
