@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: seafood-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-seafood}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-seafood}
+      POSTGRES_DB: ${POSTGRES_DB:-seafood_crm}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-seafood} -d ${POSTGRES_DB:-seafood_crm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: seafood-api
+    ports:
+      - "5093:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      ConnectionStrings__MyApp: Host=postgres;Port=5432;Database=${POSTGRES_DB:-seafood_crm};Username=${POSTGRES_USER:-seafood};Password=${POSTGRES_PASSWORD:-seafood}
+      Jwt__Issuer: SeafoodCrm
+      Jwt__Audience: SeafoodCrm
+      Jwt__Key: ${JWT_KEY:-seafood-crm-dev-jwt-key-change-in-production-32b}
+      Bootstrap__AdminUser: ${BOOTSTRAP_ADMIN_USER:-admin}
+      Bootstrap__AdminPassword: ${BOOTSTRAP_ADMIN_PASSWORD:-Admin@123}
+      Enable__Swagger: "True"
+      WebAuthn__ServerDomain: localhost
+      WebAuthn__ServerName: Seafood CRM
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: seafood-ui
+    ports:
+      - "8080:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      RemoteServices__BaseUrl: http://api:80/api/
+      BootstrapBlazorOptions__DefaultCultureInfo: vi-VN
+      BootstrapBlazorOptions__FallbackCulture: vi
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:

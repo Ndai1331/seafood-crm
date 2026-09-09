@@ -1,0 +1,11 @@
+{
+  "BaseUrl": "http://localhost:3001",
+  "ApiKey": null,
+  "IsEnabled": true,
+  "GatewayEnabled": true,
+  "GatewayUrl": "http://localhost:18790",
+  "GatewayToken": null,
+  "GatewayType": "goclaw",
+  "PreferredModel": "gemma3:12b",
+  "ProviderKeys": null
+}

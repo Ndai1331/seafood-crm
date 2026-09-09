@@ -1,0 +1,11 @@
+# Task9 API
+
+> .NET REST API backend with Clean Architecture pattern. Provides JWT authentication, domain management, SEO cost tracking, and data services for the Task9 platform.
+
+## Core
+
+- [README](README.md): Project overview and API documentation.
+
+## Optional
+
+- [Build History](Build.md): Version history and deployment notes.

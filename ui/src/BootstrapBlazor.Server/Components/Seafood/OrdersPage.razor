@@ -1,0 +1,37 @@
+@page "/export/orders"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Đơn hàng xuất khẩu</h3>
+<p class="text-muted">Khối lượng có thể nhập pound hoặc kg — hệ thống tự quy đổi (1 lb = 0.45359237 kg).</p>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.SalesContractId" placeholder="HĐ Id" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.InvoiceNo" placeholder="Invoice" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.PaymentTermId" placeholder="Payment term Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.QtyKg" placeholder="kg" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.QtyLbs" placeholder="lbs" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.AmountUsd" placeholder="USD" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContainerNo" placeholder="Cont" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Route" placeholder="Tuyến" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu đơn XK</Button></div>
+    </div>
+</div>
+<Table TItem="ExportShipmentDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<ExportShipmentDto> _rows = new();
+    private ExportShipmentDto _form = new();
+    protected override async Task OnInitializedAsync() => _rows = await Api.OrdersAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SaveOrderAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu được đơn xuất"); return; }
+        await Toast.Success($"Đã lưu đơn {saved.InvoiceNo}: {saved.QtyKg:N1} kg / {saved.QtyLbs:N1} lbs");
+        _form = new();
+        _rows = await Api.OrdersAsync() ?? new();
+    }
+}

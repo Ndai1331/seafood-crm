@@ -1,0 +1,77 @@
+.colored-pill-select ::deep .dropdown-toggle {
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    background: #fff;
+    min-height: 2.375rem;
+    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+}
+
+.colored-pill-select ::deep .dropdown-toggle input.form-control {
+    display: none;
+}
+
+.colored-pill-select ::deep .dropdown-toggle .form-control {
+    border: none;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* Dropdown escapes table cell clip; scroll long option lists */
+.colored-pill-select ::deep .dropdown-menu {
+    z-index: 1080;
+    max-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #fff;
+    min-width: 10rem;
+}
+
+.colored-pill-select ::deep .dropdown-menu-body {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.colored-pill-select ::deep .dropdown-menu-body .dropdown-item {
+    padding: 6px 10px;
+    color: #212529;
+    background: #fff;
+}
+
+.colored-pill-select ::deep .dropdown-menu-body .dropdown-item.active,
+.colored-pill-select ::deep .dropdown-menu-body .dropdown-item:hover {
+    background: #f1f3f4;
+    color: #212529;
+}
+
+.colored-pill-select ::deep .dropdown-menu-body .dropdown-item .colored-pill {
+    color: inherit;
+}
+
+.colored-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.colored-pill-placeholder {
+    color: #adb5bd;
+    font-weight: 500;
+    background: transparent !important;
+}
+
+/* Allow dropdown to overflow table cells */
+::deep .domain-inventory-table td,
+::deep .table td:has(.colored-pill-select) {
+    overflow: visible;
+}

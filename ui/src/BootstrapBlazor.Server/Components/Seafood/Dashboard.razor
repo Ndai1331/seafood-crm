@@ -1,0 +1,59 @@
+@page "/"
+@page "/dashboard"
+@layout PageLayout
+@inject SeafoodApiService Api
+
+<div class="seafood-dashboard">
+    <h2 class="mb-4">Tổng quan nhà máy</h2>
+    @if (_data == null)
+    {
+        <div class="text-muted">Đang tải...</div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Nhập tháng này (kg)</div><div class="kpi-value">@_data.InboundKgThisMonth.ToString("N0")</div></div></div>
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">SX tháng này (kg)</div><div class="kpi-value">@_data.ProducedKgThisMonth.ToString("N0")</div></div></div>
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Xuất tháng này (kg)</div><div class="kpi-value">@_data.ExportKgThisMonth.ToString("N0")</div></div></div>
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Tồn kho (kg)</div><div class="kpi-value">@_data.OnHandKg.ToString("N0")</div></div></div>
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">HĐ mở (USD)</div><div class="kpi-value">@_data.OpenContractUsd.ToString("N0")</div></div></div>
+            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Công nợ (USD)</div><div class="kpi-value">@_data.OutstandingPaymentUsd.ToString("N0")</div></div></div>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="sf-panel">
+                    <h5>Tồn theo SKU</h5>
+                    @foreach (var slice in _data.StockBySku)
+                    {
+                        var pct = Max(_data.StockBySku) == 0 ? 0 : (double)(slice.Value / Max(_data.StockBySku) * 100);
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
+                            <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
+                        </div>
+                    }
+                    @if (!_data.StockBySku.Any()) { <div class="text-muted">Chưa có tồn kho.</div> }
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="sf-panel">
+                    <h5>Xuất theo tuyến</h5>
+                    @foreach (var slice in _data.ExportByMarket)
+                    {
+                        var pct = Max(_data.ExportByMarket) == 0 ? 0 : (double)(slice.Value / Max(_data.ExportByMarket) * 100);
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small"><span>@slice.Label</span><span>@slice.Value.ToString("N0") kg</span></div>
+                            <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
+                        </div>
+                    }
+                    @if (!_data.ExportByMarket.Any()) { <div class="text-muted">Chưa có đơn xuất.</div> }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private DashboardDto? _data;
+    protected override async Task OnInitializedAsync() => _data = await Api.DashboardAsync();
+    private static decimal Max(List<PieSliceDto> items) => items.Count == 0 ? 0 : items.Max(x => x.Value);
+}

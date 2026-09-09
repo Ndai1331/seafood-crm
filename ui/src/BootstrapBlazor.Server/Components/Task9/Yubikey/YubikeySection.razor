@@ -1,0 +1,123 @@
+@namespace BootstrapBlazor.Server.Components.Task9.Yubikey
+
+@* The security-key card on the profile page. Self-contained so the profile page stays a page and
+   does not grow a second job. *@
+
+@if (FeatureEnabled)
+{
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon icon-totp">
+                <i class="fa-solid fa-fingerprint"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h3 class="form-card-title">Khoá bảo mật</h3>
+                <p class="form-card-subtitle">
+                    Khoá vật lý YubiKey, dùng thay mã Authenticator khi đăng nhập
+                </p>
+            </div>
+            <span class="totp-status @(Keys.Count > 0 ? "enabled" : "disabled")">
+                @(Keys.Count > 0 ? $"{Keys.Count} khoá" : "Chưa có khoá")
+            </span>
+        </div>
+
+        <div class="form-card-body">
+            @if (LoadError is not null)
+            {
+                @* An unreadable list is not the same as an empty one, and showing "loading" forever
+                   hides a broken endpoint. *@
+                <div class="alert alert-warning py-2 mb-2">
+                    Không đọc được danh sách khoá: @LoadError
+                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="LoadAsync">Thử lại</button>
+                </div>
+            }
+            else if (IsLoading)
+            {
+                <div class="text-muted">Đang tải danh sách khoá...</div>
+            }
+            else if (Keys.Count == 0)
+            {
+                <div class="text-muted mb-3">Bạn chưa đăng ký khoá bảo mật nào.</div>
+
+                <div style="max-width: 380px;">
+                    <YubikeyPrompt RequirePin="false"
+                                   IdleLead="Cắm khoá vào máy rồi bấm nút bên dưới."
+                                   IdleAction="Đăng ký khoá"
+                                   OnCaptured="EnrollAsync" />
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    @foreach (var key in Keys)
+                    {
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fa-solid fa-key text-muted"></i>
+                            <div class="flex-grow-1">
+                                <div>
+                                    @key.DeviceName
+                                    <span class="small text-muted">· @key.PublicId</span>
+                                </div>
+                                <div class="small text-muted">
+                                    Cấp @key.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                    @(key.LastUsedAt.HasValue
+                                        ? $" · Dùng gần nhất {key.LastUsedAt.Value.ToLocalTime():dd/MM/yyyy HH:mm}"
+                                        : " · Chưa xác nhận lần nào")
+                                </div>
+                            </div>
+                            <Button ButtonType="ButtonType.Button" Color="Color.Danger"
+                                    Icon="fa-solid fa-trash" IsDisabled="@IsBusy"
+                                    OnClick="@(() => DeleteAsync(key))">
+                                Gỡ
+                            </Button>
+                        </div>
+                    }
+                </div>
+
+                @if (!HasPin)
+                {
+                    <div class="alert alert-info py-2">
+                        Đặt mã PIN trước khi dùng khoá để đăng nhập.
+                    </div>
+
+                    <div class="d-flex flex-column gap-2" style="max-width: 340px;">
+                        <input type="password" class="form-control" placeholder="Mã PIN mới, từ 4-20 ký tự"
+                               aria-label="Mã PIN mới" autocomplete="new-password" @bind="NewPin" />
+                        <input type="password" class="form-control" placeholder="Nhập lại mã PIN"
+                               aria-label="Nhập lại mã PIN" autocomplete="new-password" @bind="ConfirmPin" />
+                        <button class="btn btn-primary" @onclick="SavePinAsync" disabled="@IsBusy">
+                            Lưu mã PIN
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="small text-muted mb-3">
+                        Khoá đã sẵn sàng. Lần đăng nhập tới sẽ cần mã PIN và một cú chạm.
+                    </div>
+
+                    @* A second key is the whole recovery plan: lose the only one and an
+                       administrator has to intervene before this account can sign in again. *@
+                    <details>
+                        <summary class="small text-muted" style="cursor: pointer;">Đăng ký thêm khoá dự phòng</summary>
+                        <div style="max-width: 380px;" class="mt-2">
+                            <YubikeyPrompt RequirePin="false"
+                                           IdleLead="Cắm khoá dự phòng vào máy rồi bấm nút bên dưới."
+                                           IdleAction="Đăng ký khoá dự phòng"
+                                           OnCaptured="EnrollAsync" />
+                        </div>
+                    </details>
+                }
+            }
+
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="small mt-2 @(MessageIsError ? "text-danger" : "text-success")">@Message</div>
+            }
+
+            <div class="small text-muted mt-2">
+                Nên giữ 2 khoá. Mất hết khoá thì phải nhờ quản trị viên gỡ mới đăng nhập lại được.
+            </div>
+        </div>
+    </div>
+}

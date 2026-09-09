@@ -1,0 +1,1424 @@
+@page "/login"
+@layout TutorialsLoginLayout
+@using BootstrapBlazor.Server.Services
+@using BootstrapBlazor.Server.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.JSInterop
+@using BootstrapBlazor.Server.Data
+
+<HeadContent>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .main:has(.sso-login-page) {
+            height: calc(100vh);
+            padding: 0 !important;
+        }
+    </style>
+</HeadContent>
+
+<div class="sso-login-page">
+    @* LEFT — brand panel with Stripe-inspired gradient mesh (hidden on mobile) *@
+    <aside class="brand-panel">
+        <div class="brand-top">
+            <div class="brand-logo">
+                <span class="brand-mark">SF</span>
+                <span class="brand-logo-text">Seafood CRM</span>
+            </div>
+        </div>
+        <div class="brand-headline">
+            <h1>CRM nhà máy chế biến cá ngừ.</h1>
+            <p>Đăng nhập để theo dõi nhập kho, sản xuất, xuất khẩu và thanh toán.</p>
+        </div>
+        <div class="brand-bottom">
+            <span class="brand-dot"></span>
+            <span>Hệ thống đang hoạt động · Seafood CRM</span>
+        </div>
+    </aside>
+
+    @* RIGHT — form panel *@
+    <main class="form-panel">
+        @if (requiresSecurityKey || requiresKeyEnrollment)
+        {
+            <div class="login-box animate-slide-up">
+                <div class="link-step animate-fade-in">
+                    <div class="link-step-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                    <p class="login-kicker">Xác thực hai lớp</p>
+
+                    @if (requiresKeyEnrollment)
+                    {
+                        @* Registration runs right here. Sending people to the profile page was a
+                           dead end: enforcement is exactly what stops them reaching that page.
+
+                           All three steps live on this screen, and the session only appears after
+                           the last one. Handing it over at the touch left half-provisioned
+                           accounts: a key with no PIN is turned away at the passwordless door, and
+                           a key with no authenticator has no way back the day it breaks. *@
+                        <div class="enroll-steps">Bước @EnrollStepNumber / @EnrollStepTotal</div>
+
+                        @if (!string.IsNullOrEmpty(enrollError))
+                        {
+                            <div class="sso-error-banner animate-fade-in">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>@enrollError</span>
+                            </div>
+                        }
+
+                        @if (enrollStage == EnrollStage.Key)
+                        {
+                            <h2>Đăng ký khoá bảo mật</h2>
+                            <p class="link-step-lead">
+                                Hệ thống yêu cầu mọi tài khoản phải có khoá. Cắm YubiKey vào máy
+                                rồi chạm để đăng ký.
+                            </p>
+
+                            <YubikeyPrompt RequirePin="false"
+                                           IdleLead="Cắm khoá vào máy rồi bấm nút bên dưới."
+                                           IdleAction="Chạm khoá để đăng ký"
+                                           OnCaptured="EnrollYubikeyAsync" />
+                        }
+                        else if (enrollStage == EnrollStage.Pin)
+                        {
+                            <h2>Đặt mã PIN cho khoá</h2>
+                            <p class="link-step-lead">
+                                PIN là lớp thứ hai của khoá: nhặt được khoá mà không có PIN thì
+                                không vào được. Từ 4 đến 20 ký tự.
+                            </p>
+
+                            <div class="form-field">
+                                <label class="field-label" for="enroll-pin">Mã PIN</label>
+                                <div class="field-input-wrapper">
+                                    <i class="fa-solid fa-lock field-icon"></i>
+                                    <input id="enroll-pin" type="password" class="field-input"
+                                           placeholder="Từ 4 - 20 ký tự" autocomplete="new-password"
+                                           @bind="enrollPin" @bind:event="oninput" />
+                                </div>
+                            </div>
+
+                            <div class="form-field">
+                                <label class="field-label" for="enroll-pin-confirm">Nhập lại PIN</label>
+                                <div class="field-input-wrapper">
+                                    <i class="fa-solid fa-lock field-icon"></i>
+                                    <input id="enroll-pin-confirm" type="password" class="field-input"
+                                           placeholder="Nhập lại đúng mã trên" autocomplete="new-password"
+                                           @bind="enrollPinConfirm" @bind:event="oninput"
+                                           @onkeydown="OnEnrollPinKeyDown" />
+                                </div>
+                            </div>
+
+                            <button type="button" class="login-submit-btn" disabled="@enrollBusy"
+                                    @onclick="SubmitEnrollPinAsync">
+                                @(enrollBusy ? "Đang lưu..." : "Đặt PIN và tiếp tục")
+                            </button>
+                        }
+                        else if (enrollStage == EnrollStage.Authenticator)
+                        {
+                            <h2>Gắn ứng dụng Authenticator</h2>
+                            <p class="link-step-lead">
+                                Đây là đường dự phòng khi mất khoá. Mở Google Authenticator (hoặc
+                                app tương đương), quét mã dưới đây rồi nhập 6 số nó hiện ra.
+                            </p>
+
+                            @if (totpSetup == null)
+                            {
+                                <p class="link-step-lead">Đang tạo mã QR...</p>
+                            }
+                            else
+                            {
+                                <div class="enroll-qr">
+                                    <QRCode Content="@totpSetup.ProvisioningUri" Width="170"></QRCode>
+                                </div>
+                                <p class="sso-domain-hint">
+                                    Không quét được? Nhập tay: <code>@totpSetup.Base32Secret</code>
+                                </p>
+
+                                <div class="form-field">
+                                    <label class="field-label" for="enroll-totp">Mã Authenticator</label>
+                                    <div class="field-input-wrapper">
+                                        <i class="fa-solid fa-mobile-screen-button field-icon"></i>
+                                        <input id="enroll-totp" type="text" class="field-input"
+                                               placeholder="Nhập mã 6 số" inputmode="numeric" maxlength="6"
+                                               autocomplete="one-time-code"
+                                               @bind="enrollTotpCode" @bind:event="oninput"
+                                               @onkeydown="OnEnrollTotpKeyDown" />
+                                    </div>
+                                </div>
+
+                                <button type="button" class="login-submit-btn" disabled="@enrollBusy"
+                                        @onclick="SubmitEnrollTotpAsync">
+                                    @(enrollBusy ? "Đang xác thực..." : "Xác thực và vào hệ thống")
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <h2>Lưu mã dự phòng</h2>
+                            <p class="link-step-lead">
+                                Mất cả khoá lẫn điện thoại thì đây là đường cuối cùng. Mỗi mã dùng
+                                được một lần — chụp lại hoặc cất vào nơi an toàn ngay bây giờ.
+                            </p>
+
+                            <div class="recovery-codes">
+                                @* Not named "code": Razor reads @code as the directive. *@
+                                @foreach (var oneCode in recoveryCodes)
+                                {
+                                    <code>@oneCode</code>
+                                }
+                            </div>
+
+                            <button type="button" class="login-submit-btn" @onclick="FinishEnrollmentAsync">
+                                Tôi đã lưu — vào hệ thống
+                            </button>
+                        }
+                    }
+                    else if (activeSecondFactor == "passkey")
+                    {
+                        <h2>Xác nhận bằng passkey</h2>
+                        <p class="link-step-lead">
+                            Touch ID, Windows Hello hoặc passkey trên điện thoại — trình duyệt sẽ mở
+                            hộp thoại xác nhận.
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(webAuthnError))
+                        {
+                            <div class="sso-error-banner animate-fade-in">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span>@webAuthnError</span>
+                            </div>
+                        }
+
+                        @if (webAuthnSupported)
+                        {
+                            @* Native id on purpose: the ceremony must start inside the browser's
+                               own click, so JS binds to this exact button. *@
+                            <button type="button" id="webauthn-login-key" class="login-submit-btn"
+                                    disabled="@isWebAuthnBusy">
+                                <i class="fa-solid fa-fingerprint"></i>
+                                <span class="ms-2">@(isWebAuthnBusy ? "Đang chờ xác nhận..." : "Dùng passkey")</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning py-2">
+                                Trình duyệt này không hỗ trợ passkey. Dùng một cách khác bên dưới.
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <h2>Chạm vào khoá bảo mật</h2>
+                        <YubikeyPrompt TemporaryToken="@securityKeyToken"
+                                       RequirePin="@yubikeyPinRequired"
+                                       IdleLead="Cắm khoá vào máy rồi bấm nút bên dưới."
+                                       IdleAction="Đăng nhập với YubiKey"
+                                       OnPinSubmitted="VerifyYubikeyPinAsync"
+                                       OnCaptured="VerifyYubikeyOtpAsync" />
+                    }
+
+                    @if (!requiresKeyEnrollment && OtherSecondFactors.Any())
+                    {
+                        @* Only drawn when there genuinely IS another way — a lone link leading to
+                           a dead end is worse than none. The list is server-filtered; this only
+                           subtracts the door already showing and, below, passkey on browsers that
+                           cannot run it.
+
+                           One centred row of icon chips rather than a stack of full sentences: the
+                           names were longer than the step they belong to, and each one sat on its
+                           own line, so the block outweighed the button it was a fallback for. The
+                           full name stays in the tooltip. *@
+                        <div class="factor-switch">
+                            <span class="factor-switch-label">Mất khoá?</span>
+                            @foreach (var factor in OtherSecondFactors)
+                            {
+                                <button type="button" class="factor-chip" title="@DescribeFactor(factor)"
+                                        @onclick="() => SwitchSecondFactor(factor)">
+                                    <i class="@FactorIcon(factor)"></i>
+                                    <span>@ShortFactor(factor)</span>
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    @* Gone once the key is registered: leaving mid-wizard would strand the
+                       account with a key it cannot sign in with. *@
+                    @if (!requiresKeyEnrollment || enrollStage == EnrollStage.Key)
+                    {
+                        <button class="link-step-skip" @onclick="ResetSecurityKeyStep">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Quay lại</span>
+                        </button>
+                    }
+
+                    @if (requiresKeyEnrollment && enrollStage == EnrollStage.Key)
+                    {
+                        <p class="sso-domain-hint">Chưa có khoá? Liên hệ quản trị viên để được cấp.</p>
+                    }
+                </div>
+            </div>
+        }
+        else if (passwordlessOpen)
+        {
+            <div class="login-box animate-slide-up">
+                <div class="link-step animate-fade-in">
+                    <div class="link-step-icon"><i class="fa-solid fa-key"></i></div>
+                    <p class="login-kicker">Đăng nhập bằng khoá</p>
+
+                    <YubikeyPrompt PinFirst="false"
+                                   IdleLead="Cắm khoá vào máy rồi bấm nút bên dưới. Không cần tài khoản hay mật khẩu."
+                                   IdleAction="Chạm khoá để đăng nhập"
+                                   OnCaptured="PasswordlessTouchAsync"
+                                   OnPinSubmitted="PasswordlessPinAsync" />
+
+                    @if (showTraditionalLogin)
+                    {
+                        <button type="button" class="link-step-skip" @onclick="ClosePasswordless">
+                            Đăng nhập bằng mật khẩu
+                        </button>
+                    }
+                    else
+                    {
+                        @* Passwords are off for the organisation, but individual accounts can be
+                           granted the door — that is how somebody without a key signs in once to
+                           register one. The API still refuses every account that was not granted
+                           it, so this only opens the form. *@
+                        <button type="button" class="link-step-skip" @onclick="OpenGrantedPasswordDoor">
+                            Tài khoản được cấp phép dùng mật khẩu
+                        </button>
+                    }
+                </div>
+
+                <div class="login-footer">
+                    <p>&copy; @DateTime.Now.Year Task9.pro · Internal workspace</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="login-box animate-slide-up">
+                <div class="login-header">
+                    <div class="mobile-brand-icon">T9</div>
+                    <p class="login-kicker">Đăng nhập hệ thống</p>
+                    <h2>Chào mừng trở lại</h2>
+                    <p class="brand-tagline">Sử dụng tài khoản được cấp quyền để tiếp tục.</p>
+                </div>
+
+                    @if (!showTraditionalLogin && !securityKeyFeatureEnabled)
+                    {
+                        @* Both doors off at once — unreachable through the settings page, whose
+                           guard refuses disabling passwords while the key feature is off. Someone
+                           edited the table directly; say so instead of an empty screen. *@
+                        <div class="alert alert-danger">
+                            Không có phương thức đăng nhập nào đang bật. Liên hệ quản trị viên — mở
+                            lại bằng: <code>UPDATE webauthn_settings SET allow_password_login = 1;</code>
+                        </div>
+                    }
+
+                    @* Password form. Hidden when an admin has switched password login off — the API
+                       refuses it too, so this is presentation, not the control. *@
+                    @if (showTraditionalLogin)
+                    {
+                        <div class="traditional-login-form">
+                            @if (!requiresTwoFactor)
+                            {
+                                <div class="form-field">
+                                    <label class="field-label" for="login-email">Tài khoản</label>
+                                    <div class="field-input-wrapper">
+                                        <i class="fa-regular fa-user field-icon"></i>
+                                        <input id="login-email"
+                                               type="text"
+                                               class="field-input"
+                                               placeholder="Nhập tài khoản"
+                                               @bind="email"
+                                               @bind:event="oninput"
+                                               @onkeydown="HandleKeyDown" />
+                                    </div>
+                                </div>
+
+                                @* The password box appears only for an account that may actually
+                                   use one. While the organisation-wide switch is off, showing it to
+                                   everybody meant a person without the exception typed a password,
+                                   got turned away, and read it as "I mistyped" — which is exactly
+                                   what happened on the first day this shipped. *@
+                                @if (passwordDoorOpen)
+                                {
+                                    <div class="form-field">
+                                        <label class="field-label" for="login-password">Mật khẩu</label>
+                                        <div class="field-input-wrapper">
+                                            <i class="fa-solid fa-lock field-icon"></i>
+                                            <input id="login-password"
+                                                   type="@(showPassword ? "text" : "password")"
+                                                   class="field-input"
+                                                   placeholder="Nhập mật khẩu"
+                                                   @bind="password"
+                                                   @bind:event="oninput"
+                                                   @onkeydown="HandleKeyDown" />
+                                            <button class="password-toggle" @onclick="TogglePasswordVisibility" type="button">
+                                                <i class="fa-regular @(showPassword ? "fa-eye-slash" : "fa-eye")"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                else if (!string.IsNullOrEmpty(passwordDoorError))
+                                {
+                                    <div class="alert alert-warning py-2 mb-2">@passwordDoorError</div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="form-field">
+                                    <label class="field-label" for="login-totp">Mã Authenticator</label>
+                                    <div class="field-input-wrapper">
+                                        <i class="fa-solid fa-shield-halved field-icon"></i>
+                                        <input id="login-totp"
+                                               type="text"
+                                               inputmode="numeric"
+                                               maxlength="6"
+                                               class="field-input"
+                                               placeholder="Nhập mã 6 số"
+                                               @bind="totpCode"
+                                               @bind:event="oninput"
+                                               @onkeydown="HandleKeyDown" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="field-label" for="login-recovery">Recovery code</label>
+                                    <div class="field-input-wrapper">
+                                        <i class="fa-solid fa-key field-icon"></i>
+                                        <input id="login-recovery"
+                                               type="text"
+                                               class="field-input"
+                                               placeholder="Nhập khi mất thiết bị"
+                                               @bind="recoveryCode"
+                                               @bind:event="oninput"
+                                               @onkeydown="HandleKeyDown" />
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!requiresTwoFactor && passwordDoorOpen)
+                            {
+                                <div class="login-options-row">
+                                    <label class="remember-me">
+                                        <input type="checkbox" @bind="rememberMe" />
+                                        <span class="remember-box"><i class="fa-solid fa-check"></i></span>
+                                        <span class="remember-text">Ghi nhớ đăng nhập</span>
+                                    </label>
+                                </div>
+                            }
+
+                            @* Two buttons, one step each: ask whether this account has a door,
+                               then sign in through it. With passwords on for everyone the first
+                               step never appears — the door opens as the screen loads. *@
+                            @if (passwordDoorOpen)
+                            {
+                                <button class="login-submit-btn" @onclick="OnLogin" disabled="@isLogging">
+                                    @if (isLogging)
+                                    {
+                                        <span class="btn-spinner"></span>
+                                        <span>Đang đăng nhập...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@(requiresTwoFactor ? "Xác thực" : "Đăng nhập")</span>
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    }
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="login-submit-btn" @onclick="CheckPasswordDoorAsync"
+                                        type="button" disabled="@isCheckingPasswordDoor">
+                                    @if (isCheckingPasswordDoor)
+                                    {
+                                        <span class="btn-spinner"></span>
+                                        <span>Đang kiểm tra...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Tiếp tục</span>
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    }
+                                </button>
+                            }
+                            @if (requiresTwoFactor)
+                            {
+                                <button class="login-submit-btn mt-2" style="background:#f1f5f9;color:#0f172a;" @onclick="ResetTwoFactorStep" type="button" disabled="@isLogging">
+                                    <span>Quay lại đăng nhập</span>
+                                </button>
+                            }
+                            else if (securityKeyFeatureEnabled)
+                            {
+                                @* Only while no other step is in flight — offering a second door
+                                   mid-verification is how people end up abandoning a half-finished
+                                   one. Phase 7 turns this into a proper chooser. *@
+                                <div class="login-divider">
+                                    <span>hoặc</span>
+                                </div>
+                                <button class="login-submit-btn" style="background:#f1f5f9;color:#0f172a;"
+                                        type="button" @onclick="OpenPasswordlessAsync" disabled="@isLogging">
+                                    <i class="fa-solid fa-key"></i>
+                                    <span class="ms-2">Đăng nhập bằng khoá bảo mật</span>
+                                </button>
+                            }
+                        </div>
+                    }
+
+                @* Footer *@
+                <div class="login-footer">
+                    <p>&copy; @DateTime.Now.Year Task9.pro · Internal workspace</p>
+                </div>
+        </div>
+        }
+    </main>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string totpCode = "";
+    private string recoveryCode = "";
+    private string temporaryToken = "";
+    private bool showPassword = false;
+    private bool rememberMe = true;
+    private bool isLogging = false;
+    private bool requiresTwoFactor = false;
+    private bool requiresSecurityKey = false;
+    private bool requiresKeyEnrollment = false;
+    private string securityKeyToken = "";
+    private bool yubikeyPinRequired = true;
+    private string? webAuthnError = null;
+    private bool isWebAuthnBusy = false;
+    private bool webAuthnSupported = true;
+    private bool hasStartedCeremony = false;
+    private IJSObjectReference? webAuthnModule;
+    private DotNetObjectReference<Template1>? webAuthnRef;
+    private string? boundCeremonyKind;
+
+    /// <summary>Stable id so JS can attach a native click listener to this exact button.</summary>
+    private const string SecurityKeyButtonId = "webauthn-login-key";
+    /// <summary>
+    /// Whether to draw the password form. The API refuses a password sign-in on its own when an
+    /// admin has switched it off, so this only decides what the screen shows. It starts true and
+    /// only ever goes false on an explicit answer from the server: a login screen with nothing on
+    /// it is worse than one offering a form that turns out to be refused.
+    /// </summary>
+    private bool showTraditionalLogin = true;
+
+    /// <summary>
+    /// Whether the password box is drawn. Open from the start while the organisation-wide switch
+    /// is on; while it is off, it opens only after the server confirms THIS account was granted
+    /// the exception, so nobody is handed a field that will refuse them.
+    /// </summary>
+    private bool passwordDoorOpen = true;
+    private bool isCheckingPasswordDoor = false;
+    private string? passwordDoorError;
+
+    /// <summary>Whether the key feature is on at all — decides if the passwordless door is drawn.</summary>
+    private bool securityKeyFeatureEnabled = false;
+
+    /// <summary>The passwordless screen is open. Nothing has been proven yet when it opens.</summary>
+    private bool passwordlessOpen = false;
+
+    /// <summary>
+    /// The screens of login-screen enrollment, in the order they are owed. Nothing is a session
+    /// until the last one: a key alone is not a usable account.
+    /// </summary>
+    private enum EnrollStage { Key, Pin, Authenticator, RecoveryCodes }
+
+    private EnrollStage enrollStage = EnrollStage.Key;
+
+    /// <summary>Spends the steps after the key is registered. Not a session — that comes last.</summary>
+    private string setupToken = string.Empty;
+    private bool setupNeedsPin;
+    private bool setupNeedsAuthenticator;
+    private string enrollPin = string.Empty;
+    private string enrollPinConfirm = string.Empty;
+    private string enrollTotpCode = string.Empty;
+    private string? enrollError;
+    private bool enrollBusy;
+    private TotpSetupResponseDto? totpSetup;
+    private List<string> recoveryCodes = new();
+
+    /// <summary>Issued by the authenticator step, handed over once the codes are acknowledged.</summary>
+    private TokenDto? pendingSession;
+
+    private int EnrollStepTotal => 1 + (setupNeedsPin ? 1 : 0) + (setupNeedsAuthenticator ? 1 : 0);
+
+    private int EnrollStepNumber => enrollStage switch
+    {
+        EnrollStage.Key => 1,
+        EnrollStage.Pin => 2,
+        _ => EnrollStepTotal
+    };
+
+    /// <summary>Handed over by the touch step, spent by the PIN step. Never a session on its own.</summary>
+    private string passwordlessToken = string.Empty;
+
+    /// <summary>
+    /// The factors that can finish the sign-in stopped at the key step, exactly as the server
+    /// sent them. The server built and filtered this list; rendering is all this side does.
+    /// </summary>
+    private List<string> availableSecondFactors = new();
+
+    /// <summary>Which factor's screen is showing at the key step. "yubikey" or "passkey" —
+    /// choosing the authenticator jumps to the existing TOTP form instead.</summary>
+    private string activeSecondFactor = "yubikey";
+
+    /// <summary>
+    /// localStorage key remembering which door of the login screen was used last, so the screen
+    /// opens on it next time. Only ever picks the tab — every verification still runs in full.
+    /// </summary>
+    private const string LoginDoorStorageKey = "seafood-login-door";
+
+    [Inject]
+    [NotNull]
+    private ToastService? Toast { get; set; }
+
+    [Inject]
+    [NotNull]
+    private NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    [NotNull]
+    private IUserManagerService? UserManagerService { get; set; }
+
+    [Inject]
+    private IUrlAuthorizationService? AuthorizationService { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    private ITotpApiService? TotpApiService { get; set; }
+
+    [Inject]
+    private IWebAuthnApiService? WebAuthnApiService { get; set; }
+
+    [Inject]
+    private IYubikeyApiService? YubikeyApiService { get; set; }
+
+    [Inject]
+    [NotNull]
+    private IJSRuntime? JSRuntime { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (YubikeyApiService == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var status = await YubikeyApiService.GetFeatureStatusAsync();
+
+            // Only an explicit "off" from the server hides the form. A missing status or a failed
+            // call leaves it visible, because the alternative is a screen with no way in at all.
+            showTraditionalLogin = status?.AllowPasswordLogin ?? true;
+            securityKeyFeatureEnabled = status?.Enabled ?? false;
+
+            // Passwords on for everyone: the box is there from the start, exactly as before this
+            // feature existed. Off: the box waits until the account has been checked by name.
+            passwordDoorOpen = showTraditionalLogin;
+
+            // Nothing else can get in, so open the key door without making them ask for it.
+            if (!showTraditionalLogin && securityKeyFeatureEnabled)
+            {
+                passwordlessOpen = true;
+            }
+            else if (securityKeyFeatureEnabled)
+            {
+                // Open on the door used last time. Deliberately HERE, after the feature flags are
+                // known: the first render happens while this method is still awaiting, so a check
+                // in OnAfterRenderAsync(firstRender) races the fetch above and loses — verified in
+                // a live browser before this was moved. During prerender the JS call throws and the
+                // catch below leaves the password form up; the interactive circuit runs it again.
+                // Only ever picks the opening screen — every verification still runs in full.
+                var door = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", LoginDoorStorageKey);
+                if (door == "key")
+                {
+                    passwordlessOpen = true;
+                }
+            }
+        }
+        catch
+        {
+            // A failed status call leaves the password form up; a blocked or prerender-stage
+            // localStorage read keeps the default door. Both defaults are the safe ones.
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // No auto-start. The ceremony must run inside a real click, so all this does is make sure
+        // the button is wired and we know whether the device supports WebAuthn at all.
+        if (requiresSecurityKey || requiresKeyEnrollment)
+        {
+            if (!hasStartedCeremony)
+            {
+                hasStartedCeremony = true;
+                webAuthnSupported = await IsWebAuthnSupportedAsync();
+                StateHasChanged();
+            }
+
+            // Only while its button is actually in the DOM — the YubiKey screen has nothing to
+            // bind, and a bind against a missing element just fails once per render.
+            if (activeSecondFactor == "passkey" && requiresSecurityKey)
+            {
+                await BindSecurityKeyButtonAsync();
+            }
+        }
+
+        if (firstRender)
+        {
+            // Check for SSO callback parameters in URL
+            var uri = new Uri(NavigationManager.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+            // SSO landed on an account that still owes a security key. Drop straight into the same
+            // step the password path uses — the ceremony and the copy are identical from here.
+            if (query.TryGetValue("sso_key_step", out var keyStep)
+                && query.TryGetValue("sso_key_token", out var keyToken)
+                && !string.IsNullOrEmpty(keyToken.ToString()))
+            {
+                requiresKeyEnrollment = keyStep.ToString() == "enroll";
+                requiresSecurityKey = !requiresKeyEnrollment;
+                securityKeyToken = keyToken.ToString();
+                hasStartedCeremony = false;
+                webAuthnError = null;
+                StateHasChanged();
+                return;
+            }
+
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task HandleKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter") return;
+
+        // Enter runs the step that is actually on screen, not always the sign-in.
+        if (passwordDoorOpen)
+        {
+            await OnLogin();
+        }
+        else
+        {
+            await CheckPasswordDoorAsync();
+        }
+    }
+
+    /// <summary>
+    /// Asks the server whether this account may use a password at all, and only then draws the
+    /// box. Presentation, not the control: the sign-in endpoint re-checks the same permission
+    /// after the password, so a hand-crafted request gains nothing by skipping this.
+    /// </summary>
+    private async Task CheckPasswordDoorAsync()
+    {
+        if (isCheckingPasswordDoor) return;
+
+        var account = (email ?? string.Empty).Trim();
+        if (account.Length == 0)
+        {
+            passwordDoorError = "Nhập tài khoản trước.";
+            return;
+        }
+
+        isCheckingPasswordDoor = true;
+        passwordDoorError = null;
+        StateHasChanged();
+
+        try
+        {
+            var door = WebAuthnApiService == null
+                ? null
+                : await WebAuthnApiService.CheckPasswordDoorAsync(account);
+
+            passwordDoorOpen = door?.Allowed ?? false;
+            passwordDoorError = passwordDoorOpen
+                ? null
+                : "Tài khoản này chưa được cấp quyền đăng nhập bằng mật khẩu. Dùng khoá bảo mật, "
+                + "hoặc nhờ quản trị viên cấp quyền ở trang Cài đặt đăng nhập.";
+        }
+        catch
+        {
+            // Closed on failure: a box that cannot work is worse than a clear refusal.
+            passwordDoorOpen = false;
+            passwordDoorError = "Không kiểm tra được quyền đăng nhập bằng mật khẩu. Thử lại sau.";
+        }
+        finally
+        {
+            isCheckingPasswordDoor = false;
+            StateHasChanged();
+        }
+    }
+
+    async Task OnLogin()
+    {
+        if (isLogging) return;
+        isLogging = true;
+        StateHasChanged();
+
+        try
+        {
+            if (requiresTwoFactor)
+            {
+                await VerifyTwoFactorLogin();
+                return;
+            }
+
+            var userModel = new UserModel() { UserName = email, Password = password };
+            var result = await UserManagerService.SignInAsync(userModel, rememberMe);
+            if ((result?.RequiresSecurityKey == true || result?.RequiresSecurityKeyEnrollment == true)
+                && !string.IsNullOrEmpty(result.TemporaryToken))
+            {
+                requiresSecurityKey = result.RequiresSecurityKey;
+                requiresKeyEnrollment = result.RequiresSecurityKeyEnrollment;
+                securityKeyToken = result.TemporaryToken;
+                availableSecondFactors = result.AvailableSecondFactors ?? new List<string>();
+                // Default to the strongest door the person actually holds. A passkey-only account
+                // must not open on the YubiKey prompt it can never satisfy.
+                activeSecondFactor = availableSecondFactors.Contains("yubikey") || availableSecondFactors.Count == 0
+                    ? "yubikey"
+                    : availableSecondFactors[0];
+                webAuthnError = null;
+                hasStartedCeremony = false;
+                password = "";
+                StateHasChanged();
+                return;
+            }
+
+            if (result?.RequiresTwoFactor == true && !string.IsNullOrEmpty(result.TemporaryToken))
+            {
+                requiresTwoFactor = true;
+                temporaryToken = result.TemporaryToken;
+                totpCode = "";
+                recoveryCode = "";
+                await Toast.Show(new ToastOption()
+                {
+                    Title = "Vui lòng nhập mã Authenticator.",
+                    Category = ToastCategory.Information,
+                    Delay = 3000,
+                    ForceDelay = true
+                });
+            }
+            else if (!string.IsNullOrEmpty(result?.AccessToken))
+            {
+                await NavigateToDefaultPage();
+            }
+            else
+            {
+                await Toast.Show(new ToastOption()
+                {
+                    Title = "Tài khoản hoặc mật khẩu không đúng.",
+                    Category = ToastCategory.Error,
+                    Delay = 5000,
+                    ForceDelay = true
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            // The API's own words, not a blanket "wrong password". A refusal because password
+            // login is switched off for this account read as a typo, so people retyped a correct
+            // password until they gave up and called an admin.
+            await Toast.Show(new ToastOption()
+            {
+                Title = ApiErrorMessage.Describe(ex, "Tài khoản hoặc mật khẩu không đúng."),
+                Category = ToastCategory.Error,
+                Delay = 5000,
+                ForceDelay = true
+            });
+        }
+        finally
+        {
+            isLogging = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task VerifyTwoFactorLogin()
+    {
+        if (TotpApiService == null || string.IsNullOrWhiteSpace(temporaryToken))
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(totpCode) && string.IsNullOrWhiteSpace(recoveryCode))
+        {
+            await Toast.Show(new ToastOption()
+            {
+                Title = "Vui lòng nhập mã Authenticator hoặc recovery code.",
+                Category = ToastCategory.Warning,
+                Delay = 4000,
+                ForceDelay = true
+            });
+            return;
+        }
+
+        var result = await TotpApiService.VerifyLoginAsync(temporaryToken, totpCode, recoveryCode);
+        if (!string.IsNullOrWhiteSpace(result?.AccessToken))
+        {
+            await NavigateToDefaultPage();
+            return;
+        }
+
+        await Toast.Show(new ToastOption()
+        {
+            Title = "Mã xác thực không đúng.",
+            Category = ToastCategory.Error,
+            Delay = 5000,
+            ForceDelay = true
+        });
+    }
+
+    /// <summary>
+    /// Wires the button so the ceremony starts inside the browser's own click. Rebinds when the
+    /// step changes, because the two steps run different ceremonies from the same button.
+    /// </summary>
+    private async Task BindSecurityKeyButtonAsync()
+    {
+        var kind = requiresKeyEnrollment ? "enroll" : "login";
+        if (boundCeremonyKind == kind || !webAuthnSupported || string.IsNullOrEmpty(securityKeyToken))
+        {
+            return;
+        }
+
+        try
+        {
+            var module = await GetWebAuthnModuleAsync();
+            webAuthnRef ??= DotNetObjectReference.Create(this);
+
+            if (await module.InvokeAsync<bool>("bindCeremony", SecurityKeyButtonId, kind, securityKeyToken, webAuthnRef))
+            {
+                boundCeremonyKind = kind;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[AuthFlow] could not bind the security-key button: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Called back from JS when the ceremony finishes. On success the session token has already
+    /// been issued by the API, so all that is left is to store it and move on.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnWebAuthnCeremonyFinished(WebAuthnCeremonyOutcome outcome)
+    {
+        isWebAuthnBusy = false;
+
+        if (outcome.Ok && outcome.Token != null && !string.IsNullOrWhiteSpace(outcome.Token.AccessToken))
+        {
+            if (WebAuthnApiService != null)
+            {
+                await WebAuthnApiService.PersistSessionAsync(outcome.Token, "webauthn");
+            }
+
+            await NavigateToDefaultPage();
+            return;
+        }
+
+        webAuthnError = outcome.Ok
+            ? "Đăng ký xong nhưng chưa nhận được phiên đăng nhập. Hãy đăng nhập lại."
+            : DescribeWebAuthnError(new WebAuthnBrowserResult { Error = outcome.Error, Message = outcome.Message });
+
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Checks the PIN and, on success, opens the touch step. Returns the message to show, or null
+    /// when it passed — the prompt component owns the screen, this owns the API call.
+    /// </summary>
+    private async Task<string?> VerifyYubikeyPinAsync(string pin)
+    {
+        if (YubikeyApiService == null) return "Chưa sẵn sàng. Tải lại trang rồi thử lại.";
+
+        try
+        {
+            var result = await YubikeyApiService.VerifyPinAsync(securityKeyToken, pin);
+            if (result?.Ok == true) return null;
+            return result?.Error ?? "Mã PIN không đúng.";
+        }
+        catch (Exception ex)
+        {
+            return ApiErrorMessage.Describe(ex, "Không xác thực được khoá.");
+        }
+    }
+
+    /// <summary>Hands the captured OTP to the API and stores the session it returns.</summary>
+    private async Task<string?> VerifyYubikeyOtpAsync(string otp)
+    {
+        if (YubikeyApiService == null) return "Chưa sẵn sàng. Tải lại trang rồi thử lại.";
+
+        TokenDto? token;
+        try
+        {
+            token = await YubikeyApiService.VerifyOtpAsync(securityKeyToken, otp);
+        }
+        catch (Exception ex)
+        {
+            return ApiErrorMessage.Describe(ex, "Không xác thực được khoá.");
+        }
+
+        if (token == null || string.IsNullOrWhiteSpace(token.AccessToken))
+        {
+            return "Xác thực xong nhưng chưa nhận được phiên đăng nhập. Hãy thử lại.";
+        }
+
+        if (WebAuthnApiService != null)
+        {
+            await WebAuthnApiService.PersistSessionAsync(token, "yubikey");
+        }
+
+        await NavigateToDefaultPage();
+        return null;
+    }
+
+    /// <summary>
+    /// Step one: register the touched key. The reply says what the account still owes — a PIN, an
+    /// authenticator, or nothing — and only "nothing" comes with a session.
+    /// </summary>
+    private async Task<string?> EnrollYubikeyAsync(string otp)
+    {
+        if (YubikeyApiService == null) return "Chưa sẵn sàng. Tải lại trang rồi thử lại.";
+
+        YubikeyEnrollResultDto? result;
+        try
+        {
+            result = await YubikeyApiService.EnrollAtLoginAsync(securityKeyToken, otp);
+        }
+        catch (Exception ex)
+        {
+            return ApiErrorMessage.Describe(ex, "Không đăng ký được khoá.");
+        }
+
+        if (result == null)
+        {
+            return "Đã đăng ký khoá nhưng máy chủ không trả lời. Hãy đăng nhập lại.";
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Token?.AccessToken))
+        {
+            await EnterWithSessionAsync(result.Token!);
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(result.SetupToken))
+        {
+            return "Đã đăng ký khoá nhưng chưa mở được bước tiếp theo. Hãy đăng nhập lại.";
+        }
+
+        setupToken = result.SetupToken!;
+        setupNeedsPin = result.NeedsPin;
+        setupNeedsAuthenticator = result.NeedsAuthenticator;
+        await MoveToNextEnrollStageAsync(result.NeedsPin, result.NeedsAuthenticator);
+        return null;
+    }
+
+    private async Task OnEnrollPinKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SubmitEnrollPinAsync();
+    }
+
+    private async Task OnEnrollTotpKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SubmitEnrollTotpAsync();
+    }
+
+    /// <summary>Step two: the PIN. Checked here only for the pair matching — the API owns the rest.</summary>
+    private async Task SubmitEnrollPinAsync()
+    {
+        if (enrollBusy || YubikeyApiService == null) return;
+
+        if (enrollPin != enrollPinConfirm)
+        {
+            enrollError = "Hai lần nhập PIN không khớp nhau.";
+            return;
+        }
+
+        enrollBusy = true;
+        enrollError = null;
+        StateHasChanged();
+
+        try
+        {
+            var progress = await YubikeyApiService.SetPinAtLoginAsync(setupToken, enrollPin, enrollPinConfirm);
+            if (progress == null)
+            {
+                enrollError = "Máy chủ không trả lời. Hãy thử lại.";
+                return;
+            }
+
+            enrollPin = "";
+            enrollPinConfirm = "";
+
+            if (!string.IsNullOrWhiteSpace(progress.Token?.AccessToken))
+            {
+                await EnterWithSessionAsync(progress.Token!);
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(progress.SetupToken))
+            {
+                setupToken = progress.SetupToken!;
+            }
+
+            await MoveToNextEnrollStageAsync(progress.NeedsPin, progress.NeedsAuthenticator);
+        }
+        catch (Exception ex)
+        {
+            enrollError = ApiErrorMessage.Describe(ex, "Không đặt được mã PIN.");
+        }
+        finally
+        {
+            enrollBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>Step three: prove the authenticator app really holds the secret.</summary>
+    private async Task SubmitEnrollTotpAsync()
+    {
+        if (enrollBusy || TotpApiService == null) return;
+
+        if (string.IsNullOrWhiteSpace(enrollTotpCode))
+        {
+            enrollError = "Nhập mã 6 số ứng dụng đang hiện.";
+            return;
+        }
+
+        enrollBusy = true;
+        enrollError = null;
+        StateHasChanged();
+
+        try
+        {
+            var result = await TotpApiService.ConfirmAtLoginAsync(setupToken, enrollTotpCode);
+            enrollTotpCode = "";
+
+            if (result == null || string.IsNullOrWhiteSpace(result.Token?.AccessToken))
+            {
+                enrollError = "Đã bật Authenticator nhưng chưa nhận được phiên. Hãy đăng nhập lại.";
+                return;
+            }
+
+            // The session is held back one more screen: recovery codes are shown exactly once,
+            // and navigating away with them unread is the same as never having them.
+            recoveryCodes = result.RecoveryCodes;
+            pendingSession = result.Token;
+            enrollStage = EnrollStage.RecoveryCodes;
+        }
+        catch (Exception ex)
+        {
+            enrollError = ApiErrorMessage.Describe(ex, "Mã xác thực không đúng.");
+        }
+        finally
+        {
+            enrollBusy = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task FinishEnrollmentAsync()
+    {
+        if (pendingSession != null)
+        {
+            await EnterWithSessionAsync(pendingSession);
+        }
+    }
+
+    /// <summary>Which screen is owed next, and fetching the QR before the authenticator one shows.</summary>
+    private async Task MoveToNextEnrollStageAsync(bool needsPin, bool needsAuthenticator)
+    {
+        setupNeedsPin = needsPin;
+        setupNeedsAuthenticator = needsAuthenticator;
+        enrollError = null;
+
+        if (needsPin)
+        {
+            enrollStage = EnrollStage.Pin;
+            StateHasChanged();
+            return;
+        }
+
+        enrollStage = EnrollStage.Authenticator;
+        StateHasChanged();
+
+        if (totpSetup == null && TotpApiService != null)
+        {
+            try
+            {
+                totpSetup = await TotpApiService.SetupAtLoginAsync(setupToken);
+            }
+            catch (Exception ex)
+            {
+                enrollError = ApiErrorMessage.Describe(ex, "Không tạo được mã QR.");
+            }
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task EnterWithSessionAsync(TokenDto token)
+    {
+        if (WebAuthnApiService != null)
+        {
+            await WebAuthnApiService.PersistSessionAsync(token, "yubikey");
+        }
+
+        await NavigateToDefaultPage();
+    }
+
+    /// <summary>
+    /// Step one of a passwordless sign-in: hand the OTP over and keep the token it answers with.
+    /// Nothing is proven yet — the token only says a registered key was touched.
+    /// </summary>
+    private async Task<string?> PasswordlessTouchAsync(string otp)
+    {
+        if (YubikeyApiService == null) return "Chưa sẵn sàng. Tải lại trang rồi thử lại.";
+
+        try
+        {
+            var result = await YubikeyApiService.PasswordlessTouchAsync(otp);
+            if (string.IsNullOrWhiteSpace(result?.TemporaryToken))
+            {
+                return "Nhận được khoá nhưng chưa mở được bước tiếp theo. Hãy chạm khoá lại.";
+            }
+
+            passwordlessToken = result.TemporaryToken;
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ApiErrorMessage.Describe(ex, "Không xác thực được khoá.");
+        }
+    }
+
+    /// <summary>Step two: the PIN. Only this one comes back with a session.</summary>
+    private async Task<string?> PasswordlessPinAsync(string pin)
+    {
+        if (YubikeyApiService == null) return "Chưa sẵn sàng. Tải lại trang rồi thử lại.";
+
+        TokenDto? token;
+        try
+        {
+            token = await YubikeyApiService.PasswordlessPinAsync(passwordlessToken, pin);
+        }
+        catch (Exception ex)
+        {
+            // The touch token is single-use and the API has now spent it, so the next attempt
+            // starts from a fresh touch rather than another guess against the same one.
+            passwordlessToken = string.Empty;
+            return ApiErrorMessage.Describe(ex, "Không xác thực được khoá.");
+        }
+
+        passwordlessToken = string.Empty;
+
+        if (token == null || string.IsNullOrWhiteSpace(token.AccessToken))
+        {
+            return "Xác thực xong nhưng chưa nhận được phiên đăng nhập. Hãy thử lại.";
+        }
+
+        if (WebAuthnApiService != null)
+        {
+            await WebAuthnApiService.PersistSessionAsync(token, "yubikey");
+        }
+
+        await NavigateToDefaultPage();
+        return null;
+    }
+
+    private async Task OpenPasswordlessAsync()
+    {
+        passwordlessOpen = true;
+        await RememberDoorAsync("key");
+    }
+
+    /// <summary>
+    /// Shows the password form while the organisation-wide switch is off. Presentation only: the
+    /// sign-in endpoint checks the per-account permission itself and turns everybody else away,
+    /// so revealing the form here grants nothing.
+    /// </summary>
+    private void OpenGrantedPasswordDoor()
+    {
+        showTraditionalLogin = true;
+        passwordlessOpen = false;
+
+        // Only the account field. The password box follows once the server says this account was
+        // granted the exception — see CheckPasswordDoorAsync.
+        passwordDoorOpen = false;
+        passwordDoorError = null;
+    }
+
+    private async Task ClosePasswordless()
+    {
+        passwordlessOpen = false;
+        passwordlessToken = string.Empty;
+        await RememberDoorAsync("password");
+    }
+
+    /// <summary>Best-effort: a store that refuses to write only costs the convenience.</summary>
+    private async Task RememberDoorAsync(string door)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", LoginDoorStorageKey, door);
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task<bool> IsWebAuthnSupportedAsync()
+    {
+        try
+        {
+            var module = await GetWebAuthnModuleAsync();
+            return await module.InvokeAsync<bool>("isSupported");
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"[AuthFlow] WebAuthn support probe failed: {ex.Message}");
+            return false;
+        }
+    }
+
+    private async Task<IJSObjectReference> GetWebAuthnModuleAsync() =>
+        webAuthnModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", WebAuthnModulePath.Value);
+
+    /// <summary>
+    /// The DOM error name is the only thing that tells these cases apart, which is why the JS side
+    /// returns failures as data instead of throwing.
+    /// </summary>
+    private static string DescribeWebAuthnError(WebAuthnBrowserResult result) => result.Error switch
+    {
+        "NotAllowedError" => "Không nhận được thao tác chạm khoá. Thử lại.",
+        "InvalidStateError" => "Khoá này đã được đăng ký. Dùng khoá khác.",
+        "NotSupportedError" => "Thiết bị không hỗ trợ khoá bảo mật.",
+        "SecurityError" => "Sai địa chỉ truy cập. Hãy vào đúng địa chỉ chính thức của hệ thống.",
+        "AbortError" => "Thao tác đã bị huỷ. Bấm nút để thử lại.",
+        "OperationError" => "Không tìm thấy khoá bảo mật nào trên máy này. Cắm khoá rồi thử lại.",
+        "ApiError" => string.IsNullOrWhiteSpace(result.Message) ? "Máy chủ từ chối." : result.Message!,
+        "CeremonyTimeout" => "Trình duyệt không mở được hộp thoại khoá bảo mật. Thường do một tiện ích "
+            + "quản lý mật khẩu đang chiếm quyền: thử lại trong cửa sổ ẩn danh, hoặc tắt tiện ích đó.",
+        // Naming the raw error beats a generic sentence: it is the only clue a support ticket carries.
+        _ => $"Không xác thực được khoá ({result.Error}). Thử lại hoặc liên hệ admin."
+    };
+
+    /// <summary>
+    /// One switch point for every change of door at the key step, so no path forgets the cleanup.
+    /// Leaving the YubiKey screen disposes YubikeyPrompt, whose DisposeAsync disarms the keystroke
+    /// capture — skip that and the capturer keeps swallowing keys under whatever form comes next.
+    /// Choosing the authenticator jumps to the existing TOTP form carrying the SAME temporary
+    /// token: the API accepts a key-step token there precisely so this switch needs no new sign-in.
+    /// </summary>
+    private void SwitchSecondFactor(string kind)
+    {
+        webAuthnError = null;
+
+        if (kind == "totp")
+        {
+            requiresSecurityKey = false;
+            requiresTwoFactor = true;
+            temporaryToken = securityKeyToken;
+            securityKeyToken = "";
+            boundCeremonyKind = null;
+            hasStartedCeremony = false;
+            totpCode = "";
+            recoveryCode = "";
+            return;
+        }
+
+        activeSecondFactor = kind;
+        // The webauthn button binding is per-render; force a fresh bind when coming back.
+        boundCeremonyKind = null;
+    }
+
+    /// <summary>The doors on offer other than the one showing — what "use another way" lists.
+    /// Passkey drops out on a browser that cannot run the ceremony.</summary>
+    private IEnumerable<string> OtherSecondFactors =>
+        availableSecondFactors.Where(f => f != activeSecondFactor && (f != "passkey" || webAuthnSupported));
+
+    /// <summary>The full name — tooltip only, so the chip itself stays one word wide.</summary>
+    private static string DescribeFactor(string kind) => kind switch
+    {
+        "yubikey" => "Khoá YubiKey",
+        "passkey" => "Passkey (Touch ID / Windows Hello)",
+        "totp" => "Mã Google Authenticator",
+        _ => kind
+    };
+
+    private static string ShortFactor(string kind) => kind switch
+    {
+        "yubikey" => "YubiKey",
+        "passkey" => "Passkey",
+        "totp" => "Authenticator",
+        _ => kind
+    };
+
+    private static string FactorIcon(string kind) => kind switch
+    {
+        "yubikey" => "fa-solid fa-key",
+        "passkey" => "fa-solid fa-fingerprint",
+        "totp" => "fa-solid fa-mobile-screen-button",
+        _ => "fa-solid fa-shield-halved"
+    };
+
+    /// <summary>Back to the password form with nothing left over from the attempt just abandoned.</summary>
+    private void ResetSecurityKeyStep()
+    {
+        isWebAuthnBusy = false;
+        requiresSecurityKey = false;
+        requiresKeyEnrollment = false;
+        enrollStage = EnrollStage.Key;
+        setupToken = string.Empty;
+        setupNeedsPin = false;
+        setupNeedsAuthenticator = false;
+        enrollPin = string.Empty;
+        enrollPinConfirm = string.Empty;
+        enrollTotpCode = string.Empty;
+        enrollError = null;
+        totpSetup = null;
+        recoveryCodes = new();
+        pendingSession = null;
+        securityKeyToken = "";
+        availableSecondFactors = new List<string>();
+        activeSecondFactor = "yubikey";
+        boundCeremonyKind = null;
+        webAuthnError = null;
+        hasStartedCeremony = false;
+        password = "";
+    }
+
+    private void ResetTwoFactorStep()
+    {
+        requiresTwoFactor = false;
+        temporaryToken = "";
+        totpCode = "";
+        recoveryCode = "";
+    }
+
+    private async Task NavigateToDefaultPage()
+    {
+        if (AuthorizationService != null)
+        {
+            await Task.Delay(100);
+            var defaultPage = await AuthorizationService.GetDefaultPageAsync();
+            if (!string.IsNullOrEmpty(defaultPage))
+            {
+                NavigationManager.NavigateTo($"/{defaultPage}");
+                return;
+            }
+        }
+        NavigationManager.NavigateTo("/");
+    }
+}

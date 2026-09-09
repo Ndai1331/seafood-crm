@@ -1,0 +1,31 @@
+@page "/team"
+@layout PageLayout
+
+<PageTitle>Quản lý Team</PageTitle>
+
+<DemoBlock Title="Quản lý Team" Name="TeamManager">
+    <div class="team-list-surface">
+        <Table TItem="TeamDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
+               IsPagination="true" IsStriped="false" IsBordered="false" IsMultipleSelect="true"
+               ShowColumnList="false"
+               ShowToolbar="true" ShowDefaultButtons="true" ShowEditButton="false" ShowExtendButtons="true" ShowLoading="true"
+               ShowSearch="true" ShowCardView="false" ShowAdvancedSearch="false"
+               OnQueryAsync="@OnQueryAsync"
+               OnSaveAsync="@OnSaveAsync"
+               OnDeleteAsync="@OnDeleteAsync"
+               @ref="TableRef">
+            <TableColumns>
+                <TableColumn @bind-Field="@context.Code" Text="Mã team" Width="180">
+                    <Template Context="value">
+                        <span class="code-chip">@value.Value</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn @bind-Field="@context.Name" Text="Tên team" Width="320" TextWrap="true">
+                    <Template Context="value">
+                        <span class="team-name">@value.Value</span>
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</DemoBlock>

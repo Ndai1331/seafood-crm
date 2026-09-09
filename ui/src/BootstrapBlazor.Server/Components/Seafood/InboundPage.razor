@@ -1,0 +1,43 @@
+@page "/inbound"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Nhập nguyên liệu</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ nhập" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.BlNumber" placeholder="BL" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContainerNo" placeholder="Cont" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Purchaser" placeholder="Người mua" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.MissingDocuments" placeholder="Thiếu chứng từ" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_line.Commodity" placeholder="Hàng (WR/GG)" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLongLine" placeholder="kg LL" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgHandline" placeholder="kg HL" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgPs" placeholder="kg PS" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLand" placeholder="kg Land" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.PriceUsd" placeholder="Giá USD" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.InvoiceAmountUsd" placeholder="Thành tiền" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu phiếu nhập</Button></div>
+    </div>
+</div>
+<Table TItem="InboundPurchaseDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
+
+@code {
+    private List<InboundPurchaseDto> _rows = new();
+    private InboundPurchaseDto _form = new();
+    private InboundLineDto _line = new();
+
+    protected override async Task OnInitializedAsync() => _rows = await Api.InboundAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        _form.Lines = new List<InboundLineDto> { _line };
+        var saved = await Api.SaveInboundAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu được phiếu nhập"); return; }
+        await Toast.Success("Đã lưu phiếu nhập");
+        _form = new();
+        _line = new();
+        _rows = await Api.InboundAsync() ?? new();
+    }
+}

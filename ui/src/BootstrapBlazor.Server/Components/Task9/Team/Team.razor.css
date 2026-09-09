@@ -1,0 +1,217 @@
+/* ============================================================
+   Team table — same design language as User Manager (UserList.razor.css):
+   quiet uppercase header, comfortable row density, modern toolbar/search,
+   monospace code chip. ::deep reaches into the child <Table> component markup.
+   ============================================================ */
+
+.team-list-surface {
+    --tl-border: #e7eaf0;
+    --tl-header-bg: #f8fafc;
+    --tl-header-fg: #64748b;
+    --tl-text: #334155;
+    --tl-row-hover: #f5f8fc;
+}
+
+/* ---- Header: quiet, uppercase ---- */
+.team-list-surface ::deep .table > thead > tr > th {
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.045em;
+    font-weight: 600;
+    color: var(--tl-header-fg);
+    background: var(--tl-header-bg);
+    border-bottom: 2px solid var(--tl-border);
+    padding: 0.7rem 0.85rem;
+    white-space: nowrap;
+}
+
+/* ---- Cells: comfortable density ---- */
+.team-list-surface ::deep .table > tbody > tr > td {
+    padding: 0.65rem 0.85rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+    color: var(--tl-text);
+    border-bottom: 1px solid var(--tl-border);
+}
+
+.team-list-surface ::deep .table > tbody > tr:hover > td {
+    background: var(--tl-row-hover);
+}
+
+.team-list-surface ::deep .table > tbody > tr:last-child > td {
+    border-bottom: none;
+}
+
+/* ---- Mã team chip (monospace, matches Mã NV on User Manager) ---- */
+.code-chip {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+}
+
+.team-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* ============================================================
+   Toolbar + search — modern, quiet chrome (same tokens as User Manager)
+
+   IMPORTANT: Bootstrap's `.btn-group`/`.btn-toolbar` give child buttons
+   `flex: 1 1 auto`, so once THIS container also becomes `display:flex`,
+   any button that wraps onto its own line stretches to fill 100% width
+   (this was the "Xóa" full-width bug). Every toolbar button is pinned
+   to `flex: 0 0 auto` below to stop that.
+   ============================================================ */
+.team-list-surface ::deep .table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.5rem;
+    column-gap: 0.5rem;
+    margin-bottom: 0.85rem;
+}
+
+/* Uniform sizing for every toolbar button (Thêm/Sửa/Xóa + Làm mới/Xem/Cột) */
+.team-list-surface ::deep .table-toolbar .btn {
+    flex: 0 0 auto;
+    width: auto;
+    height: 36px;
+    padding: 0 0.85rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    box-shadow: none;
+}
+
+/* Primary CTA (Thêm mới / Add) — the only solid-colored button */
+.team-list-surface ::deep .table-toolbar .btn-success {
+    background: #16a34a;
+    border-color: #16a34a;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+.team-list-surface ::deep .table-toolbar .btn-success:hover {
+    background: #15803d;
+    border-color: #15803d;
+}
+
+/* Sửa (Edit) — ghost blue, not a solid block */
+.team-list-surface ::deep .table-toolbar .btn-primary {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.team-list-surface ::deep .table-toolbar .btn-primary:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+.team-list-surface ::deep .table-toolbar .btn-primary:disabled {
+    background: #f8fafc;
+    color: #cbd5e1;
+    border-color: #e2e8f0;
+}
+
+/* Xóa (Delete) — ghost red, not a solid block */
+.team-list-surface ::deep .table-toolbar .btn-danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.team-list-surface ::deep .table-toolbar .btn-danger:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+.team-list-surface ::deep .table-toolbar .btn-danger:disabled {
+    background: #f8fafc;
+    color: #cbd5e1;
+    border-color: #e2e8f0;
+}
+
+/* Secondary toolbar buttons (Làm mới / Xem / Cột) → soft ghost */
+.team-list-surface ::deep .table-toolbar .btn-secondary {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.team-list-surface ::deep .table-toolbar .btn-secondary:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+.team-list-surface ::deep .table-toolbar .btn:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* ---- Search input + joined action buttons ---- */
+.team-list-surface ::deep .table-toolbar .input-group {
+    border-radius: 10px;
+}
+
+.team-list-surface ::deep .table-toolbar-search {
+    height: 36px;
+    border-color: #e2e8f0;
+    font-size: 0.8125rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.team-list-surface ::deep .table-toolbar-search:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none;
+    position: relative;
+    z-index: 3;
+}
+
+.team-list-surface ::deep .table-toolbar .input-group .btn {
+    height: 36px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-color: #e2e8f0;
+}
+.team-list-surface ::deep .table-toolbar .input-group .btn-primary {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25);
+}
+.team-list-surface ::deep .table-toolbar .input-group .btn-primary:hover {
+    background: #4338ca;
+    border-color: #4338ca;
+}
+.team-list-surface ::deep .table-toolbar .input-group .btn-secondary {
+    background: #ffffff;
+    color: #475569;
+    box-shadow: none;
+}
+.team-list-surface ::deep .table-toolbar .input-group .btn-secondary:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+/* ---- Row action buttons (built-in Edit/Delete extend buttons) ---- */
+.team-list-surface ::deep .table-cell .btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .team-list-surface ::deep .table-toolbar .btn-secondary {
+        transition: none;
+    }
+}

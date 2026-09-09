@@ -1,0 +1,120 @@
+@namespace BootstrapBlazor.Server.Components.Task9.Yubikey
+
+@* The three screens between a correct password and a session, plus the same touch step reused
+   when someone confirms a newly provisioned key from their profile. *@
+
+<div class="yk-prompt">
+
+    @if (Stage == PromptStage.Idle)
+    {
+        <div class="yk-illus">
+            <YubikeyIllustration />
+        </div>
+        <p class="yk-lead">@IdleLead</p>
+
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="yk-error" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>@Error</span>
+            </div>
+        }
+
+        <button type="button" class="yk-btn" @onclick="StartAsync" disabled="@Busy">
+            <i class="fa-solid fa-key"></i>
+            <span>@IdleAction</span>
+        </button>
+    }
+    else if (Stage == PromptStage.Pin)
+    {
+        <p class="yk-lead">
+            @(PinFirst
+                ? "Nhập mã PIN của thiết bị YubiKey để xác minh tài khoản"
+                : "Đã nhận khoá. Nhập mã PIN của thiết bị để vào hệ thống.")
+        </p>
+
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="yk-error" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>@Error</span>
+            </div>
+        }
+
+        <input type="password" class="yk-input" placeholder="Từ 4-20 ký tự" autocomplete="off"
+               aria-label="Mã PIN" @bind="Pin" @bind:event="oninput"
+               @onkeydown="OnPinKeyDown" disabled="@Busy" @ref="_pinInput" />
+
+        <button type="button" class="yk-btn" @onclick="SubmitPinAsync" disabled="@Busy">
+            @(PinFirst ? "Xác minh và tiếp tục" : "Vào hệ thống")
+        </button>
+        <button type="button" class="yk-btn yk-btn-ghost" @onclick="CancelAsync" disabled="@Busy">
+            Huỷ xác minh
+        </button>
+    }
+    else
+    {
+        <div class="yk-shield">
+            <YubikeyShield />
+        </div>
+
+        @if (!string.IsNullOrEmpty(Error))
+        {
+            <div class="yk-error" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>@Error</span>
+            </div>
+        }
+
+        <ol class="yk-steps">
+            <li class="yk-step yk-done">
+                <span class="yk-bullet"><i class="fa-solid fa-check"></i></span>
+                <span>
+                    <span class="yk-step-title">@FirstStepTitle</span>
+                    <span class="yk-step-sub">Chạm YubiKey ngay bây giờ.</span>
+                </span>
+            </li>
+            <li class="yk-step @(Stage == PromptStage.Complete ? "yk-done" : "yk-active")">
+                <span class="yk-bullet">
+                    @if (Stage == PromptStage.Complete)
+                    {
+                        <i class="fa-solid fa-check"></i>
+                    }
+                    else
+                    {
+                        <span>2</span>
+                    }
+                </span>
+                <span>
+                    <span class="yk-step-title">@SecondStepTitle</span>
+                    @* The counter is the whole point of this screen: it proves the keystrokes are
+                       arriving, which a spinner never could. *@
+                    <span class="yk-step-sub">Đèn sẽ nhấp nháy khi đang nhập (@Captured ký tự)</span>
+                </span>
+            </li>
+            <li class="yk-step @(Stage == PromptStage.Complete ? "yk-done" : "")">
+                <span class="yk-bullet">
+                    @if (Stage == PromptStage.Complete)
+                    {
+                        <i class="fa-solid fa-check"></i>
+                    }
+                    else
+                    {
+                        <span>3</span>
+                    }
+                </span>
+                <span>
+                    <span class="yk-step-title">Hoàn tất</span>
+                    <span class="yk-step-sub">
+                        @(Stage == PromptStage.Complete ? "Đang đưa bạn vào hệ thống…" : "Xác minh thành công")
+                    </span>
+                </span>
+            </li>
+        </ol>
+
+        @if (Stage != PromptStage.Complete)
+        {
+            <button type="button" class="yk-btn yk-btn-ghost" @onclick="CancelAsync">Huỷ xác minh</button>
+        }
+    }
+</div>

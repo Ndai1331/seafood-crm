@@ -1,0 +1,12 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ui/ .
+RUN dotnet publish src/BootstrapBlazor.Server/BootstrapBlazor.Server.csproj -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+EXPOSE 80
+ENV ASPNETCORE_URLS=http://+:80
+ENV LANG=C.UTF-8
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "BootstrapBlazor.Server.dll"]

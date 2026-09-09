@@ -1,0 +1,29 @@
+@page "/finance/payments"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Theo dõi thanh toán</h3>
+<div class="sf-panel">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_id" placeholder="Id đợt TT" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_amount" placeholder="Số nhận USD" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="ReceiveAsync">Ghi nhận đã nhận</Button></div>
+    </div>
+</div>
+<Table TItem="PaymentInstallmentDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<PaymentInstallmentDto> _rows = new();
+    private int _id;
+    private decimal _amount;
+    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentsAsync() ?? new();
+
+    private async Task ReceiveAsync()
+    {
+        var saved = await Api.ReceivePaymentAsync(_id, _amount);
+        if (saved == null) { await Toast.Error("Không ghi nhận được"); return; }
+        await Toast.Success("Đã ghi nhận thanh toán");
+        _rows = await Api.PaymentsAsync() ?? new();
+    }
+}

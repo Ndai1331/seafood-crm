@@ -1,0 +1,152 @@
+/* Tokens deliberately mirror Pages/Login/Template1.razor.css so the prompt looks native on the
+   login screen and on the profile page alike. */
+.yk-prompt {
+    --yk-primary: #533afd;
+    --yk-primary-deep: #4434d4;
+    --yk-primary-press: #2e2b8c;
+    --yk-ink: #0d253d;
+    --yk-ink-mute: #64748d;
+    --yk-hairline: #e3e8ee;
+    --yk-hairline-input: #a8c3de;
+    --yk-ruby: #ea2261;
+    --yk-good: #0e9f6e;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    /* The host page renders its own heading directly above; without this the illustration crowds
+       the text underneath it. */
+    margin-top: 10px;
+    text-align: center;
+    color: var(--yk-ink);
+}
+
+.yk-illus {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--yk-hairline);
+    background: rgba(83, 58, 253, .05);
+    color: var(--yk-primary);
+}
+
+.yk-illus svg { display: block; width: 100%; height: auto; }
+
+.yk-lead { margin: 0; font-size: 14.5px; color: var(--yk-ink-mute); }
+
+.yk-shield { display: grid; place-items: center; color: var(--yk-good); }
+
+.yk-input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid var(--yk-hairline-input);
+    border-radius: 9px;
+    font: inherit;
+    font-size: 15px;
+    transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.yk-input:focus {
+    outline: none;
+    border-color: var(--yk-primary);
+    box-shadow: 0 0 0 3px rgba(83, 58, 253, .22);
+}
+
+.yk-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 9999px;
+    background: var(--yk-primary);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background .16s ease, transform .06s ease;
+}
+
+.yk-btn:hover:not(:disabled) { background: var(--yk-primary-deep); }
+.yk-btn:active:not(:disabled) { transform: translateY(1px); background: var(--yk-primary-press); }
+.yk-btn:disabled { opacity: .55; cursor: not-allowed; }
+.yk-btn:focus-visible { outline: 3px solid rgba(83, 58, 253, .4); outline-offset: 2px; }
+
+.yk-btn-ghost { background: rgba(13, 37, 61, .06); color: #273951; }
+.yk-btn-ghost:hover:not(:disabled) { background: rgba(13, 37, 61, .11); }
+
+.yk-error {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    text-align: left;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: rgba(234, 34, 97, .09);
+    color: var(--yk-ruby);
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+/* ---- the three steps ---- */
+.yk-steps { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; text-align: left; }
+
+.yk-step {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    padding-bottom: 20px;
+    position: relative;
+}
+
+.yk-step:last-child { padding-bottom: 0; }
+
+.yk-step::before {
+    content: '';
+    position: absolute;
+    left: 16.5px;
+    top: 32px;
+    bottom: 4px;
+    width: 1.5px;
+    background: var(--yk-hairline);
+}
+
+.yk-step:last-child::before { display: none; }
+
+.yk-bullet {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13.5px;
+    font-weight: 700;
+    border: 1.5px solid var(--yk-hairline);
+    color: var(--yk-ink-mute);
+    background: #fff;
+    position: relative;
+    z-index: 1;
+}
+
+.yk-done .yk-bullet { background: var(--yk-good); border-color: var(--yk-good); color: #fff; }
+
+.yk-active .yk-bullet {
+    border-color: var(--yk-primary);
+    color: var(--yk-primary);
+    box-shadow: 0 0 0 4px rgba(83, 58, 253, .18);
+}
+
+.yk-step-title { display: block; font-weight: 600; font-size: 14.5px; color: var(--yk-ink-mute); }
+.yk-done .yk-step-title, .yk-active .yk-step-title { color: var(--yk-ink); }
+
+.yk-step-sub { display: block; font-size: 13.5px; color: var(--yk-ink-mute); font-variant-numeric: tabular-nums; }
+
+.yk-active .yk-step-title { animation: yk-pulse 1.5s ease-in-out infinite; }
+
+@keyframes yk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .yk-active .yk-step-title { animation: none; }
+}

@@ -1,0 +1,233 @@
+/* NCC Catalog Tab — Component Styles */
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+.ncc-toolbar .border-top { border-color: #e9ecef !important; }
+.ncc-filter-label { font-size: 12px; font-weight: 600; color: #64748b; white-space: nowrap; }
+.ncc-input-sm { height: 36px !important; font-size: 14px !important; }
+.ncc-input-xs { height: 32px !important; font-size: 13px !important; max-width: 110px; }
+.ncc-btn { height: 36px !important; font-size: 13px !important; padding: 0 14px !important; white-space: nowrap; }
+.ncc-file-input { font-size: 13px !important; padding: 4px 8px !important; }
+
+/* ── Fetch progress bar ──────────────────────────────────── */
+.ncc-fetch-progress {
+    background: #f0f6ff;
+    border: 1px solid #cfe2ff;
+    border-radius: 6px;
+    font-size: 12px;
+}
+.ncc-fetch-progress .progress { border-radius: 2px; background: #dde8ff; }
+
+/* ── Staged preview panel ────────────────────────────────── */
+.ncc-staged-preview {
+    background: #fffbeb;
+    border: 1px dashed #f59e0b;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+}
+.ncc-staged-preview .dpe-tbl-wrap { border: 1px solid #fde68a; border-radius: 4px; }
+
+/* ── Table styling — inherit seo-table base, only override row states ── */
+.ncc-catalog-tbl thead th { white-space: nowrap; }
+
+/* ── Row states ──────────────────────────────────────────── */
+.ncc-catalog-tbl tbody tr.ncc-row-unqualified td {
+    opacity: 0.5;
+}
+.ncc-catalog-tbl tbody tr.ncc-row-selected td {
+    background: #dbeafe !important;
+    box-shadow: inset 3px 0 0 #2563eb;
+}
+
+/* ── Status badges ───────────────────────────────────────── */
+.ncc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+.ncc-badge-done     { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.ncc-badge-pending  { background: #fef9c3; color: #854d0e; border: 1px solid #facc15; }
+.ncc-badge-fetching { background: #dbeafe; color: #1e3a8a; border: 1px solid #60a5fa; }
+.ncc-badge-error    { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+/* ── Audit flag dots ─────────────────────────────────────── */
+.ncc-audit-flags { display: inline-flex; gap: 4px; }
+.ncc-audit-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: default;
+}
+.ncc-audit-dot.ok   { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.ncc-audit-dot.warn { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.ncc-audit-dot.err  { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+/* ── Delta indicators ────────────────────────────────────── */
+.ncc-delta { font-size: 12px; margin-left: 4px; font-weight: 600; }
+.ncc-delta-up   { color: #16a34a; }
+.ncc-delta-down { color: #dc2626; }
+
+/* ── Negotiation price cell ──────────────────────────────── */
+.ncc-neg-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.ncc-neg-score {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    background: #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    min-width: 26px;
+    text-align: center;
+}
+.ncc-neg-target {
+    color: #059669;
+    font-weight: 600;
+    font-size: 12px;
+}
+.ncc-neg-reject {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+/* Verdict overlays on the cell */
+.ncc-neg-cell.ncc-neg-good   { background: #f0fdf4; border-color: #86efac; }
+.ncc-neg-cell.ncc-neg-warn   { background: #fffbeb; border-color: #fde68a; }
+.ncc-neg-cell.ncc-neg-over   { background: #fef2f2; border-color: #fca5a5; }
+
+/* ── Purchase history: verdict badges ────────────────────── */
+.ncc-verdict {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 8px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.ncc-verdict-good    { background: #dcfce7; color: #166534; }
+.ncc-verdict-ok      { background: #dbeafe; color: #1e40af; }
+.ncc-verdict-warn    { background: #fef9c3; color: #92400e; }
+.ncc-verdict-over    { background: #fee2e2; color: #b91c1c; }
+.ncc-verdict-unknown { background: #f1f5f9; color: #94a3b8; }
+
+/* ── Purchase history: summary stat cards ────────────────── */
+.ncc-stat-card {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 6px 14px; border-radius: 8px;
+    background: #f8fafc; border: 1px solid #e2e8f0; min-width: 90px;
+}
+.ncc-stat-val  { font-size: 15px; font-weight: 800; color: #111827; }
+.ncc-stat-lbl  { font-size: 10px; color: #6b7280; font-weight: 500; margin-top: 1px; }
+.ncc-stat-good { background: #f0fdf4; border-color: #86efac; }
+.ncc-stat-good .ncc-stat-val { color: #166534; }
+.ncc-stat-warn { background: #fef2f2; border-color: #fca5a5; }
+.ncc-stat-warn .ncc-stat-val { color: #b91c1c; }
+
+/* ── Step badges (Step 1 / 2 / 3 circles) ───────────────── */
+.ncc-step-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #2563eb; color: #fff;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+
+/* ── Domain text styling ─────────────────────────────────── */
+.ncc-domain-text {
+    font-family: 'SF Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+/* ── Row states (global fallback) ────────────────────────── */
+.ncc-row-selected td { background: #dbeafe !important; }
+
+/* ── Add-sheet modal ─────────────────────────────────────── */
+.ncc-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 1040; backdrop-filter: blur(2px);
+}
+.ncc-modal-box {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050; width: 480px; max-width: calc(100vw - 32px);
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+.ncc-modal-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px 12px; border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+.ncc-modal-body { padding: 18px; }
+
+/* ── Peer benchmark panel ────────────────────────────────────── */
+.ncc-peer-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.25);
+    z-index: 1040;
+}
+.ncc-peer-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 420px; max-width: 95vw;
+    background: #fff; z-index: 1050;
+    box-shadow: -6px 0 32px rgba(0,0,0,0.14);
+    display: flex; flex-direction: column;
+    animation: ncc-panel-in 0.2s ease;
+}
+@keyframes ncc-panel-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+.ncc-peer-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 10px; padding: 14px 16px 12px;
+    border-bottom: 1px solid #e5e7eb; flex-shrink: 0;
+}
+.ncc-peer-domain {
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 13px; font-weight: 700; color: #0f172a;
+}
+.ncc-peer-body {
+    flex: 1; overflow-y: auto; padding: 16px;
+}
+
+/* price tier cards */
+.ncc-peer-tiers {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.ncc-peer-tier {
+    border-radius: 8px; padding: 10px 8px; text-align: center;
+    border: 1px solid transparent;
+}
+.ncc-tier-p25 { background: #f0fdf4; border-color: #86efac; }
+.ncc-tier-p50 { background: #eff6ff; border-color: #93c5fd; }
+.ncc-tier-p75 { background: #fff7ed; border-color: #fdba74; }
+.ncc-tier-label {
+    font-size: 10px; color: #6b7280; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+}
+.ncc-tier-value {
+    font-size: 15px; font-weight: 700; color: #111827;
+}
+
+/* peer-btn in table cell */
+.ncc-peer-btn {
+    padding: 1px 6px; font-size: 13px;
+    background: none; border: none; cursor: pointer;
+    opacity: 0.6; transition: opacity 0.15s;
+}
+.ncc-peer-btn:hover { opacity: 1; }

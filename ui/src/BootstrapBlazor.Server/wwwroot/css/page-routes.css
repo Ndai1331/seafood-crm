@@ -1,0 +1,3010 @@
+/* ============================================
+   Page Route-Specific Styles
+   Common styles và route-specific styles
+   ============================================ */
+
+/* ============================================
+   COMMON STYLES - Áp dụng cho tất cả pages
+   ============================================ */
+
+/* Common page content styles */
+.page-content {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+/* Common filter section styles */
+.page-content .row.g-3 {
+    margin-bottom: 1.5rem;
+}
+
+/* Common button styles */
+.page-content .btn {
+    transition: all 0.2s ease;
+}
+
+/* Common table container styles */
+.page-content .table-container {
+    overflow-x: auto;
+    max-width: 100%;
+    background-color: transparent !important; /* Không có background */
+    box-shadow: none !important; /* Không có shadow */
+}
+
+/* Common DemoBlock styles */
+.page-content ::deep .demo-block {
+    margin-bottom: 2rem;
+}
+
+/* Common form styles */
+.page-content ::deep .form-group {
+    margin-bottom: 1rem;
+}
+
+/* ============================================
+   ROUTE-SPECIFIC STYLES
+   ============================================ */
+
+/* Default page (root) */
+#page-default {
+    /* Add specific styles for default page if needed */
+}
+
+/* ============================================
+   REPORT PAGES
+   ============================================ */
+
+/* Report SEO Performance - /report-seo-performance */
+#page-report-seo-performance {
+    /* Specific styles for BaoCaoSEOTong */
+}
+
+#page-report-seo-performance .row.g-3 {
+    /* Override common styles if needed */
+}
+
+/* ============================================
+   TABLE STYLES FOR REPORT SEO PERFORMANCE
+   Route-specific: Chỉ áp dụng cho / và /report-seo-performance
+   ============================================ */
+
+/* Table Headers - Figma Design: Dark Blue Background #2d69b6 */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain thead th,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain thead th,
+#page-report-seo-performance-by-pic .table-domain thead th {
+    background-color: #2d69b6 !important; /* Figma: bg-[#2d69b6] */
+    color: #ffffff !important; /* Figma: text-white */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    text-align: center !important; /* Figma: text-center */
+    border: none !important; /* Không có border dọc */
+    border-bottom: none !important; /* Không có border dưới header */
+    letter-spacing: 0px !important; /* Figma: tracking-[0px] */
+    text-transform: none !important; /* Không uppercase */
+}
+
+/* Table Body - Figma Design - Chỉ border ngang, không có border dọc */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td,
+#page-report-seo-performance-by-pic .table-domain tbody td {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    border-left: none !important; /* Không có border dọc trái */
+    border-right: none !important; /* Không có border dọc phải */
+    border-top: none !important; /* Không có border ngang trên */
+    border-bottom: 1px solid #ebf3ff !important; /* Chỉ có border ngang dưới - Figma: bg-[#ebf3ff] */
+    vertical-align: middle;
+    text-align: center !important; /* Figma: text-center */
+    background-color: #ffffff !important; /* Figma: bg-white - mặc định tất cả cột là trắng */
+    color: #000000 !important; /* Figma: text-black */
+}
+
+/* Đảm bảo các cột không phải pic-name có background trắng */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td:not(.pic-name),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td:not(.pic-name) {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Volume column - Blue text #1d7bf5 */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.volume,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.volume {
+    color: #1d7bf5 !important; /* Figma: text-[#1d7bf5] */
+}
+
+/* Số ngày lên Top Keyword column - Green text #00a76f */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.total-on-top,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.total-on-top {
+    color: #00a76f !important; /* Figma: text-[#00a76f] */
+}
+
+/* Keyword column - Black text */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.keyword,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.keyword {
+    color: #000000 !important; /* Figma: text-black */
+}
+
+/* Row border separator - Figma Design - Chỉ border ngang */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr {
+    position: relative;
+    border-left: none !important; /* Không có border dọc */
+    border-right: none !important; /* Không có border dọc */
+    border-top: none !important; /* Không có border ngang trên */
+    border-bottom: 1px solid #ebf3ff !important; /* Chỉ có border ngang dưới - Figma: bg-[#ebf3ff] */
+}
+
+/* NGƯỜI PHỤ TRÁCH column - Figma Design: Background #cae1ff cho report-seo-performance-by-pic, #ebf3ff cho các route khác */
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name {
+    background-color: #cae1ff !important; /* Figma: bg-[#cae1ff] */
+}
+
+/* Background color for td with rowspan in first column - override pic-name */
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name[rowspan],
+#page-report-seo-performance-by-pic .table-domain tbody td:first-child[rowspan] {
+    background-color: #CBE0FF !important;
+    background: #CBE0FF !important;
+}
+
+#page-default .table-domain tbody td.pic-name,
+#page-report-seo-performance .table-domain tbody td.pic-name {
+    background-color: #CBE0FF !important; /* Figma: bg-[#ebf3ff] */
+    background: #CBE0FF !important;
+}
+
+/* Common styles cho pic-name */
+#page-default .table-domain tbody td.pic-name,
+#page-report-seo-performance .table-domain tbody td.pic-name,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 22px !important;
+    color: #000000 !important;
+    text-align: center !important;
+    border-bottom: 1px solid #ffffff !important;
+    padding: 10px !important; /* Figma: p-[10px] */
+    vertical-align: middle;
+    width: 163px !important; /* Figma: w-[163px] */
+    border-left: none !important; /* Không có border dọc */
+    border-right: none !important; /* Không có border dọc */
+    border-top: none !important; /* Không có border ngang trên */
+}
+
+/* Row đầu tiên của group - border-radius dưới bên trái */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:first-child td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:first-child td.pic-name {
+    border-radius: 0 0 0 20px !important; /* rounded-bl-[20px] - bottom-left: 20px */
+}
+
+/* Row cuối cùng của group - border-radius trên và dưới bên trái */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:last-child td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:last-child td.pic-name {
+    border-radius: 20px 0 0 20px !important; /* rounded-bl-[20px] rounded-tl-[20px] - top-left: 20px, bottom-left: 20px */
+}
+
+/* Row duy nhất - cả trên và dưới bên trái */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:only-child td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:only-child td.pic-name {
+    border-radius: 20px 0 0 20px !important; /* rounded-bl-[20px] rounded-tl-[20px] - top-left: 20px, bottom-left: 20px */
+}
+
+/* Sử dụng class để xác định border-radius chính xác hơn */
+/* Group đầu tiên (không phải cuối cùng) - chỉ bottom-left */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-first:not(.pic-group-last),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-first:not(.pic-group-last) {
+    border-radius: 0 0 0 20px !important; /* bottom-left: 20px */
+}
+
+/* Group cuối cùng (không phải đầu tiên) - cả top-left và bottom-left */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-last:not(.pic-group-first),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-last:not(.pic-group-first) {
+    border-radius: 20px 0 0 20px !important; /* top-left: 20px, bottom-left: 20px */
+    border-top: 1px solid #FFF !important; /* Border-bottom cho group cuối cùng */
+}
+
+/* Group duy nhất hoặc group giữa - xử lý bởi JavaScript */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-first.pic-group-last,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name.pic-group-first.pic-group-last {
+    border-radius: 20px 0 0 20px !important; /* top-left: 20px, bottom-left: 20px */
+}
+
+/* Row giữa (không phải đầu tiên, không phải cuối cùng) - border-radius top-left và bottom-left */
+/* Với rowspan, cell chỉ tồn tại ở row đầu tiên, nhưng span qua nhiều rows
+   Áp dụng border-radius cho các row giữa */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:not(:first-child):not(:last-child) td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:not(:first-child):not(:last-child) td.pic-name {
+    border-top-left-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+}
+
+/* Border-radius cho cột đầu tiên (td có rowspan) theo yêu cầu */
+/* Hàng đầu tiên của bảng (group đầu tiên), td có rowspan: chỉ border-bottom-left-radius */
+#page-report-seo-performance .table-domain tbody tr.pic-group-start td.pic-name.pic-group-first {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Các hàng tiếp theo (các group khác), td có rowspan: border-bottom-left-radius và border-bottom-right-radius */
+/* Vì td có rowspan, nó chỉ tồn tại ở hàng đầu tiên của group, nhưng hiển thị qua nhiều hàng */
+#page-report-seo-performance .table-domain tbody td.pic-name:not(.pic-group-first) {
+    border-top-left-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Border cho cột thứ nhất (pic-name) - từ row thứ 2 trở đi trong cùng một rowspan group */
+/* Áp dụng border-left, border-top và border-bottom cho các row thứ 2 trở đi (không phải row đầu tiên của group) */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-middle td.pic-name,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-middle td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.pic-name {
+    border-left: 1px solid #EBF3FF !important; /* Border-left cho row thứ 2 trở đi */
+    border-top: 1px solid #EBF3FF !important; /* Border-top cho row thứ 2 trở đi */
+    border-bottom: 1px solid #EBF3FF !important; /* Border-bottom cho row thứ 2 trở đi (trừ row cuối cùng) */
+}
+
+/* Row cuối cùng của group (nhưng không phải group cuối cùng) - chỉ có border-left và border-top, không có border-bottom */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.pic-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.pic-name {
+    border-bottom: none !important; /* Không có border-bottom cho row cuối cùng của group */
+}
+
+/* Border phân cách 1px giữa các row trong cùng một group */
+/* Cột thứ 2 (keyword) - border-bottom màu #EBF3FF */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.keyword,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.keyword {
+    border-bottom: 1px solid #EBF3FF !important; /* Border màu #EBF3FF cho cột thứ 2 (keyword) */
+}
+
+/* Cột cuối (detail-cell) - border-bottom màu trắng */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.detail-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.detail-cell {
+    border-bottom: 1px solid #ffffff !important; /* Border màu trắng cho td end (detail-cell) */
+}
+
+/* Border #EBF3FF cho các cột giữa (volume, total-on-top, domains-cell), trừ row cuối cùng của group */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.volume,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.total-on-top,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.domains-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.volume,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.total-on-top,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row:not(.pic-group-row-end) td.domains-cell {
+    border-bottom: 1px solid #EBF3FF !important; /* Divider giữa các row - màu #EBF3FF cho các cột giữa */
+}
+
+/* Đảm bảo row cuối cùng của group không có border-bottom cho các cột từ cột thứ 2 trở về sau */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end td:not(.pic-name),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end td:not(.pic-name) {
+    border-bottom: none !important;
+}
+
+/* Border-bottom cho row cuối cùng của group (nếu không phải group cuối cùng) */
+/* Cột thứ 2 (keyword) - border-bottom màu #EBF3FF */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.keyword,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.keyword {
+    border-bottom: 1px solid #EBF3FF !important; /* Border màu #EBF3FF cho cột thứ 2 (keyword) */
+}
+
+/* Cột cuối (detail-cell) - border-bottom màu trắng */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.detail-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.detail-cell {
+    border-bottom: 1px solid #ffffff !important; /* Border màu trắng cho td end (detail-cell) */
+}
+
+/* Border #EBF3FF cho các cột giữa ở row cuối cùng của group (nếu không phải group cuối cùng) */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.volume,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.total-on-top,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.domains-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.volume,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.total-on-top,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr.pic-group-row-end:not(.pic-group-end) td.domains-cell {
+    border-bottom: 1px solid #EBF3FF !important; /* Divider giữa các groups - màu #EBF3FF cho các cột giữa */
+}
+
+/* Override border-radius cho cell có rowspan > 1
+   Sử dụng CSS để "cắt" border-radius ở phần trên cho các row giữa */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name[rowspan]:not([rowspan="1"]),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name[rowspan]:not([rowspan="1"]) {
+    /* Border-radius sẽ được xử lý bởi JavaScript */
+    /* CSS này chỉ để đảm bảo không có border-radius mặc định */
+}
+
+/* Đảm bảo các cột không phải pic-name luôn có background trắng */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.keyword,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.volume,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains,
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td:not(.pic-name),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.keyword,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.volume,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td:not(.pic-name) {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Table container - Loại bỏ border dọc và shadow */
+#page-default .table-container,
+#page-report-seo-performance .table-container,
+#page-report-seo-performance-by-pic .table-container {
+    box-shadow: none !important; /* Không có shadow */
+    background-color: transparent !important; /* Không có background */
+}
+
+/* Table container - Loại bỏ border dọc */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-collapse: collapse;
+}
+
+/* Alternating Row Colors - Tất cả rows có background trắng, chỉ cột pic-name có background #ebf3ff */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(even):not(.grouped-row),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(even):not(.grouped-row) {
+    background-color: transparent !important; /* Transparent để td tự quyết định background */
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(odd):not(.grouped-row),
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(odd):not(.grouped-row) {
+    background-color: transparent !important; /* Transparent để td tự quyết định background */
+}
+
+/* Đảm bảo tất cả td trong row có background trắng, trừ pic-name */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr td,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody tr td {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Override cho pic-name - background #cae1ff cho route report-seo-performance-by-pic */
+#page-report-seo-performance-by-pic .table-domain tbody tr td.pic-name {
+    background-color: #cae1ff !important; /* Figma: bg-[#cae1ff] */
+}
+
+/* Background color for td with rowspan in first column */
+#page-report-seo-performance-by-pic .table-domain tbody td.pic-name[rowspan],
+#page-report-seo-performance-by-pic .table-domain tbody td:first-child[rowspan] {
+    background-color: #CBE0FF !important;
+    background: #CBE0FF !important;
+}
+
+/* Override cho pic-name - background #ebf3ff cho các route khác */
+#page-default .table-domain tbody tr td.pic-name,
+#page-report-seo-performance .table-domain tbody tr td.pic-name {
+    background-color: #CBE0FF !important; /* Figma: bg-[#ebf3ff] */
+    background: #CBE0FF !important;
+}
+
+/* Tab styling cho report-seo-performance-by-pic - Figma Design */
+/* Tab active: "HIỆU SUẤT SEO THEO ĐỘ KHÓ" - màu xanh #1d7bf5 */
+#page-report-seo-performance-by-pic .tabs .tabs-item-wrap.active .tabs-item {
+    color: #1d7bf5 !important; /* Figma: text-[#1d7bf5] */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px !important;
+    font-weight: 500 !important; /* Medium */
+    line-height: 22px !important;
+}
+
+/* Tab inactive: "SO SÁNH NHÂN VIÊN" - màu đen */
+#page-report-seo-performance-by-pic .tabs .tabs-item-wrap:not(.active) .tabs-item {
+    color: #000000 !important; /* Figma: text-black */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px !important;
+    font-weight: 400 !important; /* Regular */
+    line-height: 22px !important;
+}
+
+/* Row backgrounds - một số rows có background #f8fbff */
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(odd) {
+    background-color: #ffffff !important; /* White background */
+}
+
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(even) {
+    background-color: #f8fbff !important; /* Very light blue background */
+}
+
+/* Override cho các td trong rows để đảm bảo background đúng */
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(even) td:not(.pic-name) {
+    background-color: #f8fbff !important; /* Very light blue background */
+}
+
+#page-report-seo-performance-by-pic .table-domain tbody tr:nth-child(odd) td:not(.pic-name) {
+    background-color: #ffffff !important; /* White background */
+}
+
+/* Số ngày lên Top Keyword column - Green text #00a76f */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.total-on-top,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.total-on-top {
+    color: #00a76f !important; /* Figma: text-[#00a76f] */
+}
+
+/* Domains cell - hiển thị domain, số ngày và top ranks */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell {
+    text-align: left !important; /* Figma: text-left */
+    padding: 15px 10px !important;
+    vertical-align: top !important;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-item,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-item {
+    margin-bottom: 8px;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-item:last-child,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-item:last-child {
+    margin-bottom: 0;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name {
+    margin-bottom: 4px;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name a,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name a {
+    color: #1d7bf5 !important; /* Figma: text-[#1d7bf5] - màu xanh cho link */
+    text-decoration: none;
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name a:hover,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-name a:hover {
+    text-decoration: underline;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-days,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-days {
+    color: #000000 !important; /* Figma: text-black */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    margin-bottom: 4px;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-tops,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .domain-tops {
+    margin-top: 4px;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .top-entry,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.domains-cell .top-entry {
+    color: #000000 !important; /* Figma: text-black */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+}
+
+/* Chi tiết cell - link "Xem chi tiết" */
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell {
+    text-align: center !important;
+    padding: 15px 10px !important;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell .detail-link,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell .detail-link {
+    color: #00a76f !important; /* Figma: text-[#00a76f] */
+    text-decoration: underline !important; /* Figma: underline */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    cursor: pointer;
+}
+
+#page-default .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell .detail-link:hover,
+#page-report-seo-performance .table-domain,
+#page-report-seo-performance-by-pic .table-domain tbody td.detail-cell .detail-link:hover {
+    color: #008a5e !important; /* Darker green on hover */
+}
+
+/* Popover styling - Figma design: card với gradient, rounded corners */
+.domain-detail-popover.popover,
+.domain-detail-popover.bs-popover {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95)) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 0 !important;
+    max-width: 300px !important;
+}
+
+.domain-detail-popover .popover-body {
+    padding: 16px !important;
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.domain-detail-popover .popover-domain-item {
+    margin-bottom: 12px;
+}
+
+.domain-detail-popover .popover-domain-item:last-child {
+    margin-bottom: 0;
+}
+
+.domain-detail-popover .popover-domain-days {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #000000;
+    margin-bottom: 8px;
+}
+
+.domain-detail-popover .popover-top-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.domain-detail-popover .popover-top-entry {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #000000;
+    text-align: left;
+}
+
+.domain-detail-popover .popover-top-label {
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.domain-detail-popover .popover-top-value {
+    font-weight: 600;
+}
+
+/* Report SEO Performance by PIC - /report-seo-performance-by-pic */
+#page-report-seo-performance-by-pic {
+    /* Specific styles for BaoCaoSEOTheoPIC */
+}
+
+/* Report Detail SEO Performance - /report-detail-seo-performance */
+#page-report-detail-seo-performance {
+    /* Specific styles for BaoCaoSEOChiTiet */
+}
+
+/* Table Header Styling - tương tự các màn hình khác */
+#page-report-detail-seo-performance .table-freeze thead th {
+    background-color: #2d69b6 !important; /* Figma: bg-[#2d69b6] */
+    color: #ffffff !important; /* Figma: text-white */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    text-align: center !important; /* Figma: text-center */
+    border: none !important;
+    letter-spacing: 0px !important; /* Figma: tracking-[0px] */
+}
+
+/* Table Body Cell Styling */
+#page-report-detail-seo-performance .table-freeze tbody td {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    /* Chỉ có border ngang, không có border dọc */
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #ebf3ff !important; /* Figma: border ngang với màu #ebf3ff */
+    background-color: #ffffff !important; /* Figma: bg-white */
+    color: #000000 !important; /* Figma: text-black */
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Sticky columns - giữ background đúng */
+#page-report-detail-seo-performance .table-freeze tbody td.sticky,
+#page-report-detail-seo-performance .table-freeze tbody td.sticky2 {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #ebf3ff !important;
+}
+
+/* Table Container - không background, không shadow */
+#page-report-detail-seo-performance .table-container {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Report Detail SEO Performance BOD - /report-detail-seo-performance-bod */
+#page-report-detail-seo-performance-bod {
+    /* Specific styles for BaoCaoSEOChiTietBOD */
+}
+
+/* Report Brand Keyword - /report-brand-keyword */
+#page-report-brand-keyword {
+    /* Specific styles for ReportBrandKeyword */
+}
+
+/* Market Share SEO - /market-share-seo */
+#page-market-share-seo {
+    /* Specific styles for MarketShareSeo */
+}
+
+/* ============================================
+   MANAGEMENT PAGES
+   ============================================ */
+
+/* Keyword Manager - /keyword-manager */
+#page-keyword-manager {
+    /* Specific styles for KeywordManager */
+}
+
+/* User Manager - /user-manager */
+#page-user-manager {
+    /* Specific styles for UserManager */
+}
+
+/* User Manager Edit - /user-manager/edit/{UserId} */
+#page-user-manager-edit {
+    /* Toggle container - theo Figma design */
+}
+
+#page-user-manager-edit .toggle-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 54px !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    background-color: #EBF3FF !important;
+    border-radius: 10px !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* Toggle label - theo Figma design */
+#page-user-manager-edit .toggle-label {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 22px !important;
+    color: #212B36 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+}
+
+#page-user-manager-edit .toggle-label-small {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 18px !important;
+    color: #637381 !important;
+}
+
+/* Đảm bảo text trong MultiSelect không bị che */
+#page-user-manager-edit .dropdown-toggle.seo-input-size {
+    overflow: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+}
+
+/* Styling cho MultiSelect tags - theo thiết kế */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-items,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-items {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important; /* Khoảng cách nhỏ giữa các tag */
+    overflow: visible !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-top: 12px !important; /* Padding-top để tag không bị che bởi label floating */
+    padding-bottom: 0 !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    min-height: 22px !important; /* Đảm bảo có đủ chiều cao cho tag */
+}
+
+/* Đảm bảo dropdown-toggle không cắt tag */
+#page-user-manager-edit .dropdown-toggle.seo-input-size,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size {
+    overflow: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+
+/* Tag item - background xanh, border-radius, padding */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-item,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    background-color: #007AFF !important; /* Màu xanh */
+    border-radius: 20px !important; /* Pill shape */
+    padding: 4px 8px !important; /* Padding bên trong tag */
+    margin: 0 !important;
+    height: auto !important;
+    max-height: 22px !important;
+    line-height: 22px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #FFFFFF !important; /* Text màu trắng */
+    border: none !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Tag group - chứa text và icon X */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-item-group,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-item-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0 !important; /* Không có khoảng cách giữa text và icon X */
+    overflow: visible !important;
+    white-space: nowrap !important;
+    background-color: #007AFF !important; /* Màu xanh */
+    border-radius: 20px !important; /* Pill shape */
+    padding: 4px 8px !important; /* Padding bên trong tag */
+    margin: 0 !important;
+    height: auto !important;
+    max-height: 22px !important;
+    line-height: 22px !important;
+    border: none !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Text trong tag */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-item-group .multi-select-item,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-item-group .multi-select-item {
+    background-color: transparent !important; /* Không có background riêng */
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #FFFFFF !important; /* Text màu trắng */
+    border: none !important; /* Không có border */
+    border-width: 0 !important;
+    border-style: none !important;
+    border-color: transparent !important;
+}
+
+/* Nút close (icon X) - nhỏ, màu đậm, liền mạch với text */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-close,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-close {
+    border: none !important;
+    margin: 0 !important;
+    margin-left: 4px !important; /* Khoảng cách nhỏ giữa text và icon X */
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    min-height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    background-color: transparent !important;
+    cursor: pointer !important;
+}
+
+/* Icon X bên trong nút close */
+#page-user-manager-edit .dropdown-toggle.seo-input-size .multi-select-close i,
+#page-user-manager-edit ::deep .multi-select .dropdown-toggle.seo-input-size .multi-select-close i {
+    font-size: 12px !important;
+    line-height: 1 !important;
+    color: #FFFFFF !important; /* Màu trắng */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important; /* Không có padding */
+    margin: 0 !important;
+}
+
+/* Team - /team */
+#page-team {
+    /* Specific styles for Team */
+}
+
+/* ============================================
+   CPD PAGES
+   ============================================ */
+
+/* CPD Management - /cpd */
+#page-cpd {
+    /* Specific styles for CpdManagement */
+}
+
+/* CPD Upload - /cpd-upload */
+#page-cpd-upload {
+    /* Specific styles for CpdUpload */
+}
+
+/* CPD Data View - /cpd-data */
+#page-cpd-data {
+    /* Specific styles for CpdDataView */
+}
+
+/* CPD Changes - /cpd-changes */
+#page-cpd-changes {
+    /* Specific styles for CpdChanges */
+}
+
+/* CPD Reports - /cpd-reports */
+#page-cpd-reports {
+    /* Specific styles for CpdReports */
+}
+
+/* CPD Checker Tool - /cpd-checker-tool */
+#page-cpd-checker-tool {
+    /* Specific styles for CpdCheckerTool */
+}
+
+/* CPD Checker Tool Rows - /cpd-checker-tool-rows: nút Làm mới (Refresh) tròn, xanh lá nhẹ, icon center middle */
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle),
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary {
+    background: linear-gradient(180deg, #34c759 0%, #2dab50 100%) !important;
+    background-color: #34c759 !important;
+    border: none !important;
+    border-radius: 100% !important;
+    color: #fff !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    text-align: center !important;
+    box-shadow: 0 1px 4px rgba(45, 171, 80, 0.35) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    position: relative !important;
+}
+/* Ẩn span trống bên cạnh icon (Bootstrap Blazor Button có span cho text) */
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle) > span,
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary > span {
+    display: none !important;
+}
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle):hover,
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary:hover {
+    background: linear-gradient(180deg, #2dab50 0%, #248b43 100%) !important;
+    background-color: #2dab50 !important;
+    border: none !important;
+    border-radius: 100% !important;
+    box-shadow: 0 2px 8px rgba(45, 171, 80, 0.45) !important;
+    transform: scale(1.05) !important;
+}
+/* Icon nằm đúng tâm nút (center middle): flex + absolute fallback cho FA icon */
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle) i,
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle) svg,
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary i,
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary svg {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+}
+/* Font Awesome icon (i) bên trong: căn glyph vào giữa */
+#page-cpd-checker-tool-rows .table-toolbar .table-column-right button.btn.btn-secondary:not(.dropdown-toggle) i::before,
+#page-cpd-checker-tool-rows .table-toolbar .float-end.btn-group.table-column-right > button.btn.btn-secondary i::before {
+    display: block !important;
+    text-align: center !important;
+    line-height: 1 !important;
+}
+/* CPD Checker Tool Rows - Filter (Trạng thái) dropdown menu: tăng chiều ngang để thấy đủ text */
+#page-cpd-checker-tool-rows .table-toolbar .dropdown-menu.is-fixed-toolbar {
+    min-width: 240px !important;
+}
+
+/* CPD Banners - /cpd-banners */
+#page-cpd-banners {
+    /* Specific styles for BannerUpload */
+}
+
+/* ============================================
+   SEO PAYMENT TICKET PAGES
+   ============================================ */
+
+/* SEO Payment Ticket - /seo-payment-ticket */
+#page-seo-payment-ticket {
+    /* Input styling - giống các trang khác */
+    input.form-control.seo-input-size,
+    input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Fallback: Nếu input nằm trong wrapper */
+    .bb-clearable-input input.form-control.seo-input-size,
+    .bb-clearable-input input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Đảm bảo wrapper bb-clearable-input cũng có height đúng và không có border */
+    ::deep .bb-clearable-input.seo-input-size,
+    ::deep .bb-clearable-input:has(input.seo-input-size),
+    ::deep .bb-clearable-input:has(.seo-input-size input),
+    ::deep .bb-clearable-input:has(input.form-control.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của form-group hoặc wrapper khác */
+    ::deep .form-group.seo-input-size,
+    ::deep .form-group:has(.seo-input-size),
+    ::deep .form-group:has(input.seo-input-size) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của dropdown-toggle - chỉ áp dụng cho route này */
+    /* NHƯNG giữ border cho select dropdown với is-clearable */
+    ::deep .dropdown-toggle.seo-input-size:not(.is-clearable),
+    ::deep .seo-input-size.dropdown-toggle:not(.is-clearable),
+    ::deep .seo-input-size .dropdown-toggle:not(.is-clearable),
+    ::deep .dropdown-toggle:has(.seo-input-size):not(.is-clearable) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Select dropdown với is-clearable seo-input-size - phải có border giống input */
+    ::deep .select.is-clearable.seo-input-size .dropdown-toggle,
+    ::deep .select.seo-input-size.is-clearable .dropdown-toggle,
+    ::deep .is-clearable.seo-input-size.select .dropdown-toggle,
+    ::deep .seo-input-size.is-clearable.select .dropdown-toggle,
+    ::deep .dropdown-toggle.is-clearable.seo-input-size {
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của input bên trong dropdown-toggle - chỉ áp dụng cho route này */
+    ::deep .dropdown-toggle.seo-input-size input,
+    ::deep .dropdown-toggle.seo-input-size .form-control,
+    ::deep .dropdown-toggle.seo-input-size .form-select,
+    ::deep .seo-input-size.dropdown-toggle input,
+    ::deep .seo-input-size.dropdown-toggle .form-control,
+    ::deep .seo-input-size.dropdown-toggle .form-select,
+    ::deep .seo-input-size .dropdown-toggle input,
+    ::deep .seo-input-size .dropdown-toggle .form-control,
+    ::deep .seo-input-size .dropdown-toggle .form-select {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        background: transparent !important;
+    }
+    
+    /* Xóa border của datetime-range-control - chỉ áp dụng cho route này */
+    ::deep .datetime-range-control,
+    ::deep .datetime-range-control .form-control,
+    ::deep .datetime-range-control .dropdown-toggle,
+    ::deep .seo-input-size.datetime-range,
+    ::deep .datetime-range.seo-input-size,
+    ::deep .datetime-range-control.seo-input-size {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của các element bên trong datetime-range */
+    ::deep .datetime-range-control input,
+    ::deep .datetime-range-control button,
+    ::deep .datetime-range-control .btn {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+    .row [class*="col-"] {
+        position: relative !important;
+    }
+    
+    /* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+    .row [class*="col-"] .seo-input-size,
+    .row [class*="col-"] .seo-input-size input,
+    .row [class*="col-"] .seo-input-size .form-control,
+    .row [class*="col-"] .seo-input-size .dropdown-toggle,
+    .row [class*="col-"] ::deep .seo-input-size.select,
+    .row [class*="col-"] ::deep .select.seo-input-size,
+    .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    .row [class*="col-"] ::deep .multi-select.seo-input-size {
+        margin-top: 0 !important;
+    }
+    
+    /* Floating label */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size) {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        height: auto !important;
+        transform: none !important;
+        transform-origin: 0 0 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Label background mask */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        border-radius: 2px !important;
+    }
+}
+
+/* SEO Payment Ticket Create - /seo-payment-ticket/create */
+#page-seo-payment-ticket-create {
+    /* Specific styles for SeoPaymentTicketCreateOrUpdate */
+}
+
+/* SEO Payment Ticket Edit - /seo-payment-ticket/edit/{Id} */
+#page-seo-payment-ticket-edit {
+    /* Specific styles for SeoPaymentTicketCreateOrUpdate */
+}
+
+/* SEO Payment Chart - /seo-payment-chart */
+#page-seo-payment-chart {
+    /* Input styling - giống các trang khác */
+    input.form-control.seo-input-size,
+    input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Fallback: Nếu input nằm trong wrapper */
+    .bb-clearable-input input.form-control.seo-input-size,
+    .bb-clearable-input input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Đảm bảo wrapper bb-clearable-input cũng có height đúng và không có border */
+    ::deep .bb-clearable-input.seo-input-size,
+    ::deep .bb-clearable-input:has(input.seo-input-size),
+    ::deep .bb-clearable-input:has(.seo-input-size input),
+    ::deep .bb-clearable-input:has(input.form-control.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của form-group hoặc wrapper khác */
+    ::deep .form-group.seo-input-size,
+    ::deep .form-group:has(.seo-input-size),
+    ::deep .form-group:has(input.seo-input-size) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+    .row [class*="col-"] {
+        position: relative !important;
+    }
+    
+    /* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+    .row [class*="col-"] .seo-input-size,
+    .row [class*="col-"] .seo-input-size input,
+    .row [class*="col-"] .seo-input-size .form-control,
+    .row [class*="col-"] .seo-input-size .dropdown-toggle,
+    .row [class*="col-"] ::deep .seo-input-size.select,
+    .row [class*="col-"] ::deep .select.seo-input-size,
+    .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    .row [class*="col-"] ::deep .multi-select.seo-input-size {
+        margin-top: 0 !important;
+    }
+    
+    /* Floating label */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size) {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        height: auto !important;
+        transform: none !important;
+        transform-origin: 0 0 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Label background mask */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        border-radius: 2px !important;
+    }
+}
+
+/* ============================================
+   OTHER PAGES
+   ============================================ */
+
+/* Evaluate SEO Performance - /evaluate-seo-performance */
+#page-evaluate-seo-performance {
+    /* Specific styles for EvaluateSeoPerformance */
+}
+
+/* SEO Daily Data - /seo-daily-data */
+#page-seo-daily-data {
+    /* Specific styles for SeoDailyDataPage */
+}
+
+/* SEO Daily Data Table Simple - /seo-daily-data-table-simple */
+#page-seo-daily-data-table-simple {
+    /* Specific styles for SeoDailyDataTableSimple */
+}
+
+/* Domain Checker - /check-redirect */
+#page-check-redirect {
+    /* Specific styles for DomainChecker */
+}
+
+/* Domain By PIC - /filter-domain-by-pic */
+#page-filter-domain-by-pic {
+    /* Specific styles for DomainByPic */
+}
+
+/* Users Keyword Selections - /users-keyword-selections */
+#page-users-keyword-selections {
+    /* Page title - theo Figma design */
+    .page-title {
+        font-family: 'Public Sans', sans-serif !important;
+        font-size: 24px !important;
+        font-weight: 600 !important; /* SemiBold */
+        line-height: 22px !important;
+        color: #000000 !important;
+        /* margin-bottom: 24px !important; */
+        margin-top: 0 !important;
+    }
+    /* Specific styles for UserKeywordSelections */
+    
+    /* BootstrapInput với seo-input-size - đảm bảo style đồng nhất */
+    /* VẤN ĐỀ: BootstrapInput thêm class seo-input-size vào input element trực tiếp */
+    /* Giải pháp: Target input element có class seo-input-size trực tiếp trên nó */
+    #page-users-keyword-selections input.form-control.seo-input-size,
+    #page-users-keyword-selections input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important; /* Đảm bảo margin-top bằng nhau */
+    }
+    
+    /* Fallback: Nếu input nằm trong wrapper */
+    #page-users-keyword-selections .bb-clearable-input input.form-control.seo-input-size,
+    #page-users-keyword-selections .bb-clearable-input input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Đảm bảo wrapper bb-clearable-input cũng có height đúng */
+    #page-users-keyword-selections ::deep .bb-clearable-input.seo-input-size,
+    #page-users-keyword-selections ::deep .bb-clearable-input:has(input.seo-input-size),
+    #page-users-keyword-selections ::deep .bb-clearable-input:has(.seo-input-size input),
+    #page-users-keyword-selections ::deep .bb-clearable-input:has(input.form-control.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+    
+    /* Search form container - theo Figma design */
+    #page-users-keyword-selections .search-form-container {
+        background: white !important;
+        box-shadow: 0px 12px 24px -4px rgba(145, 158, 171, 0.12) !important;
+        border-radius: 16px !important;
+        padding: 25px 26px !important;
+        margin-bottom: 24px !important;
+        min-height: 174px !important;
+    }
+    
+    /* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+    #page-users-keyword-selections .row [class*="col-"] {
+        position: relative !important; /* Cần cho floating label */
+    }
+    
+    /* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size,
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size input,
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size .form-control,
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size .dropdown-toggle,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .seo-input-size.select,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .select.seo-input-size,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .multi-select.seo-input-size {
+        margin-top: 0 !important;
+    }
+    
+    /* Đảm bảo wrapper container của Select và MultiSelect có cùng alignment */
+    #page-users-keyword-selections .row [class*="col-"] ::deep .seo-input-size.select,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .select.seo-input-size,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    #page-users-keyword-selections .row [class*="col-"] ::deep .multi-select.seo-input-size {
+        vertical-align: top !important;
+        display: block !important;
+    }
+    
+    /* Floating label - áp dụng cho Bootstrap grid */
+    /* Đảm bảo global CSS selector match với cấu trúc Bootstrap grid */
+    /* Select component: label có thể nằm trong wrapper */
+    #page-users-keyword-selections .row [class*="col-"] > .form-label:has(+ .seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] > .form-label:has(+ * .seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] .form-label:has(+ * .seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size.select .form-label,
+    #page-users-keyword-selections .row [class*="col-"] .select.seo-input-size .form-label,
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ * .seo-input-size) {
+        /* Áp dụng tất cả style từ global CSS */
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        height: auto !important;
+        transform: none !important;
+        transform-origin: 0 0 !important;
+        white-space: nowrap !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Label background mask để che border */
+    #page-users-keyword-selections .row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] .form-label:has(+ .seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] .form-label:has(+ * .seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] .seo-input-size.select .form-label::before,
+    #page-users-keyword-selections .row [class*="col-"] .select.seo-input-size .form-label::before,
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ * .seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        height: 12px !important;
+        width: 100% !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Toggle container - theo Figma design */
+    #page-users-keyword-selections .toggle-container {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        height: 54px !important; /* Đảm bảo height bằng với input */
+        margin-top: 0 !important; /* Đảm bảo margin-top bằng với input */
+        width: 100% !important; /* Đảm bảo width bằng với button search */
+        min-width: 100% !important;
+        max-width: 100% !important;
+        background-color: #EBF3FF !important;
+        border-radius: 10px !important;
+        padding: 8px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Toggle label spacer để căn với label của input */
+    #page-users-keyword-selections .toggle-label-spacer {
+        height: 12px !important;
+        width: 0 !important;
+    }
+    
+    /* Toggle label - theo Figma design */
+    #page-users-keyword-selections .toggle-label {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        line-height: 22px !important;
+        color: #212B36 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    #page-users-keyword-selections .toggle-label-small {
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 18px !important;
+        color: #637381 !important;
+    }
+    
+    /* Button search - theo Figma design */
+    #page-users-keyword-selections .btn-search {
+        width: 100% !important; /* Đảm bảo width bằng với toggle-container */
+        min-width: 100% !important;
+        max-width: 100% !important;
+        height: 54px !important;
+        background: #EBF3FF !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Col-1 với width cố định 150px */
+    #page-users-keyword-selections .row .col-1[style*="width: 150px"],
+    #page-users-keyword-selections .row > .col-1 {
+        width: 150px !important;
+        flex: 0 0 150px !important;
+        max-width: 150px !important;
+        min-width: 150px !important;
+    }
+    
+    /* Col-11 chiếm phần còn lại */
+    #page-users-keyword-selections .row .col-11 {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+    }
+    
+    /* Container cho toggle và button trong col-1 - căn về bên phải */
+    #page-users-keyword-selections .col-1 .d-flex.flex-column {
+        width: 100% !important;
+        align-items: flex-end !important; /* Căn về bên phải */
+    }
+    
+    /* Toggle container và button search có cùng width trong col-1 */
+    #page-users-keyword-selections .col-1 .toggle-container,
+    #page-users-keyword-selections .col-1 .btn-search,
+    #page-users-keyword-selections .col-1 .button-wrapper .btn-search {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Đảm bảo button-wrapper cũng có width 100% */
+    #page-users-keyword-selections .col-1 .button-wrapper {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Wrapper cho button để thẳng hàng với input Brand/ngành */
+    /* Tính toán: Hàng 1 có row g-3 (gap: 1rem), toggle có mb-3 (1rem), hàng 2 có mt-1 (0.25rem) */
+    /* Button wrapper cần có margin-top = mb-3 (1rem) + mt-1 (0.25rem) = 1.25rem để thẳng hàng */
+    #page-users-keyword-selections .col-1 .button-wrapper {
+        display: flex !important;
+        align-items: flex-end !important; /* Căn button xuống dưới để thẳng hàng với input */
+        height: 54px !important; /* Cùng height với input */
+        margin-top: .25rem !important; /* mb-3 (1rem) + mt-1 (0.25rem) = 1.25rem */
+        padding-top: 0 !important;
+    }
+    
+    /* Đảm bảo button trong wrapper có width 100% */
+    #page-users-keyword-selections .col-1 .button-wrapper .btn-search {
+        width: 100% !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Đảm bảo toggle container có margin-bottom đúng để tạo khoảng cách với button */
+    #page-users-keyword-selections .col-1 .toggle-container.mb-3 {
+        margin-bottom: 1rem !important; /* Bootstrap mb-3 = 1rem */
+    }
+    
+    /* Đảm bảo col-1 flex-column có gap đúng để thẳng hàng */
+    #page-users-keyword-selections .col-1 .d-flex.flex-column {
+        gap: 0 !important; /* Xóa gap để dùng margin-bottom thay thế */
+        align-items: flex-end !important; /* Căn về bên phải */
+    }
+    
+    /* Đảm bảo row g-3 trong col-11 có margin-top đúng */
+    #page-users-keyword-selections .col-11 .row.g-3[style*="margin-top"] {
+        margin-top: 0.25rem !important; /* Bootstrap mt-1 = 0.25rem */
+    }
+    
+    /* Toggle label - theo Figma design */
+    #page-users-keyword-selections .toggle-label {
+        text-align: center !important;
+        color: #1C252E !important;
+        font-size: 14px !important;
+        font-family: 'Public Sans', sans-serif !important;
+        font-weight: 400 !important;
+        line-height: 14px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    #page-users-keyword-selections .toggle-label-small {
+        font-size: 10px !important;
+        line-height: 14px !important;
+    }
+    
+    /* Button Tìm kiếm - theo Figma design */
+    #page-users-keyword-selections .btn-search {
+        height: 54px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        background: #007AFF !important;
+        border-radius: 8px !important;
+        color: white !important;
+        font-size: 15px !important;
+        font-family: 'Public Sans', sans-serif !important;
+        font-weight: 700 !important;
+        line-height: 26px !important;
+        border: none !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    #page-users-keyword-selections .btn-search:hover,
+    #page-users-keyword-selections .btn-search:focus {
+        background: #0066CC !important;
+    }
+    
+    /* Toggle switch - căn giữa label và switch theo chiều dọc */
+    /* Column chứa label và Switch - đảm bảo cùng height với input (54px) */
+    #page-users-keyword-selections .row .col-12.col-sm-3:has(label.form-label),
+    #page-users-keyword-selections .row .col-12.col-sm-2:has(label.form-label) {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important; /* Căn giữa nội dung theo chiều dọc */
+        align-items: flex-start !important;
+        gap: 8px !important; /* Gap giữa label và switch */
+        min-height: 54px !important; /* Cùng height với input */
+    }
+    
+    /* Label toggle - căn giữa với input */
+    #page-users-keyword-selections .row label.form-label {
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+        line-height: 22px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        display: block !important;
+        color: #000000 !important;
+    }
+    
+    /* Switch component - căn giữa theo chiều dọc với label */
+    #page-users-keyword-selections .row .switch {
+        display: flex !important;
+        align-items: center !important; /* Căn giữa switch-core trong switch */
+        justify-content: flex-start !important;
+        height: auto !important; /* Không cố định height để tự điều chỉnh */
+        min-height: auto !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Switch core - đảm bảo vertical alignment */
+    #page-users-keyword-selections .row .switch .switch-core {
+        vertical-align: middle !important;
+        margin: 0 !important;
+    }
+    
+    /* Select với seo-input-size - đảm bảo height 54px giống BootstrapInput */
+    #page-users-keyword-selections ::deep .seo-input-size.select,
+    #page-users-keyword-selections ::deep .select.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        position: relative !important; /* Cần cho floating label */
+        margin-top: 0 !important; /* Đảm bảo thẳng hàng với MultiSelect */
+    }
+    
+    #page-users-keyword-selections ::deep .seo-input-size.select .dropdown-toggle,
+    #page-users-keyword-selections ::deep .select.seo-input-size .dropdown-toggle {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 0px 16px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important; /* #919EAB với opacity 20% */
+        border-radius: 10px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Input bên trong dropdown-toggle của Select - đảm bảo không che border */
+    #page-users-keyword-selections ::deep .seo-input-size.select .dropdown-toggle input,
+    #page-users-keyword-selections ::deep .select.seo-input-size .dropdown-toggle input,
+    #page-users-keyword-selections ::deep .seo-input-size.select .dropdown-toggle .form-control,
+    #page-users-keyword-selections ::deep .select.seo-input-size .dropdown-toggle .form-control,
+    #page-users-keyword-selections ::deep .seo-input-size.select .dropdown-toggle > div,
+    #page-users-keyword-selections ::deep .select.seo-input-size .dropdown-toggle > div {
+        border: none !important; /* Xóa border của input bên trong */
+        background: transparent !important; /* Background trong suốt để không che border */
+        padding: 0 !important; /* Padding 0 vì dropdown-toggle đã có padding */
+        margin: 0 !important;
+        height: 100% !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Select label - BootstrapLabel component */
+    #page-users-keyword-selections .row [class*="col-"] > label.form-label:has(+ .seo-input-size.select),
+    #page-users-keyword-selections .row [class*="col-"] > label.form-label:has(+ .select.seo-input-size),
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .seo-input-size.select),
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .select.seo-input-size) {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        white-space: nowrap !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Select label background mask */
+    #page-users-keyword-selections .row [class*="col-"] > label.form-label:has(+ .seo-input-size.select)::before,
+    #page-users-keyword-selections .row [class*="col-"] > label.form-label:has(+ .select.seo-input-size)::before,
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .seo-input-size.select)::before,
+    #page-users-keyword-selections .row [class*="col-"] label.form-label:has(+ .select.seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        height: 12px !important;
+        width: 100% !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* MultiSelect với seo-input-size - đảm bảo height 54px giống BootstrapInput và Select */
+    #page-users-keyword-selections ::deep .seo-input-size.multi-select,
+    #page-users-keyword-selections ::deep .multi-select.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        position: relative !important; /* Cần cho floating label */
+        margin-top: 0 !important; /* Đảm bảo thẳng hàng với Select */
+    }
+    
+    /* Dropdown toggle cho MultiSelectGeneric và các dropdown khác (không phải Select) - đảm bảo chiều cao 54px */
+    #page-users-keyword-selections ::deep .dropdown-toggle.seo-input-size,
+    #page-users-keyword-selections ::deep .seo-input-size.dropdown-toggle,
+    #page-users-keyword-selections ::deep .seo-input-size.multi-select .dropdown-toggle {
+        padding: 16px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        /* overflow: hidden !important; */
+    }
+    
+    /* Select dropdown-toggle có padding riêng: 18px 0px 16px */
+    /* CSS này đã được định nghĩa ở trên (dòng 1118-1125), không cần duplicate */
+    
+    /* Đảm bảo tất cả component container với seo-input-size có margin-top bằng nhau */
+    ::deep .seo-input-size.select,
+    ::deep .seo-input-size.select.datetime-range,
+    ::deep .seo-input-size.multi-select,
+    ::deep .seo-input-size input.form-control,
+    ::deep input.seo-input-size.form-control,
+    ::deep .seo-input-size .form-control,
+    ::deep .seo-input-size.btn,
+    ::deep button.seo-input-size,
+    ::deep .btn.seo-input-size {
+        margin-top: 0 !important; /* Đảm bảo margin-top bằng nhau cho tất cả component */
+    }
+    
+    /* Đảm bảo form-group hoặc wrapper không có margin-top khác nhau */
+    ::deep .row [class*="col-"]:has(.seo-input-size) {
+        margin-top: 0 !important;
+    }
+    
+    /* Xóa border của datetime-range - chỉ áp dụng cho route này */
+    ::deep .datetime-range.seo-input-size,
+    ::deep .seo-input-size.datetime-range,
+    ::deep .select.datetime-range.seo-input-size,
+    ::deep .seo-input-size.select.datetime-range,
+    ::deep .datetime-range.form-control,
+    ::deep .datetime-range .form-control,
+    ::deep .datetime-range-control,
+    ::deep .datetime-range-control .form-control,
+    ::deep .datetime-range-control .dropdown-toggle,
+    ::deep .datetime-range-control .dropdown-toggle.seo-input-size,
+    ::deep .datetime-range-control .seo-input-size.dropdown-toggle,
+    ::deep .datetime-range .dropdown-toggle,
+    ::deep .datetime-range .dropdown-toggle.seo-input-size,
+    ::deep .datetime-range .seo-input-size.dropdown-toggle,
+    ::deep .datetime-range-control input,
+    ::deep .datetime-range-control button,
+    ::deep .datetime-range-control .btn {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Đảm bảo label và input có spacing đồng nhất */
+    ::deep .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    ::deep .row [class*="col-"] .form-label:has(+ * .seo-input-size) {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Table styling - theo Figma design - Bootstrap table thuần */
+    /* Table Header - Dark Blue Background #2d69b6 với white text */
+    #page-users-keyword-selections .table-users-keyword-selections thead th {
+        background-color: #2d69b6 !important; /* Figma: bg-[#2d69b6] */
+        color: #ffffff !important; /* Figma: text-white */
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 14px !important; /* Figma: subtitle2/size */
+        font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+        line-height: 22px !important; /* Figma: subtitle2/line-height */
+        padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+        text-align: center !important; /* Figma: text-center */
+        border: none !important; /* Không có border dọc */
+        border-bottom: none !important; /* Không có border dưới header */
+        letter-spacing: 0px !important; /* Figma: tracking-[0px] */
+        text-transform: none !important; /* Không uppercase */
+        vertical-align: middle !important;
+    }
+    
+    /* Table Body - Figma Design - Chỉ border ngang, không có border dọc */
+    #page-users-keyword-selections .table-users-keyword-selections tbody td {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 14px !important; /* Figma: subtitle2/size */
+        font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+        line-height: 22px !important; /* Figma: subtitle2/line-height */
+        padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+        border-left: none !important; /* Không có border dọc trái */
+        border-right: none !important; /* Không có border dọc phải */
+        border-top: none !important; /* Không có border ngang trên */
+        border-bottom: 1px solid #ebf3ff !important; /* Chỉ có border ngang dưới - Figma: bg-[#ebf3ff] */
+        vertical-align: middle !important;
+        text-align: center !important; /* Figma: text-center */
+        background-color: #ffffff !important; /* Figma: bg-white */
+        color: #000000 !important; /* Figma: text-black */
+    }
+    
+    /* Brand, Keyword và Người phụ trách columns - left align */
+    #page-users-keyword-selections .table-users-keyword-selections tbody td:first-child,
+    #page-users-keyword-selections .table-users-keyword-selections tbody td:nth-child(2),
+    #page-users-keyword-selections .table-users-keyword-selections tbody td:nth-child(4) {
+        text-align: left !important;
+    }
+    
+    /* Row border separator - Figma Design - Chỉ border ngang */
+    #page-users-keyword-selections .table-users-keyword-selections tbody tr {
+        position: relative !important;
+        border-left: none !important; /* Không có border dọc */
+        border-right: none !important; /* Không có border dọc */
+        border-top: none !important; /* Không có border ngang trên */
+        border-bottom: 1px solid #ebf3ff !important; /* Chỉ có border ngang dưới - Figma: bg-[#ebf3ff] */
+    }
+    
+    /* Badge styling cho "Người phụ trách" - Blue pill-shaped tags */
+    #page-users-keyword-selections .table-users-keyword-selections tbody td .badgePrimary {
+        background-color: #007AFF !important; /* Blue color cho badge */
+        color: #ffffff !important;
+        border: 1px solid #007AFF !important; /* Border với màu giống background */
+        border-radius: 20px !important; /* Pill shape */
+        padding: 4px 12px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        line-height: 20px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin-right: 4px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    /* Search volume text alignment - center align cho số */
+    #page-users-keyword-selections .table-users-keyword-selections tbody td .tooltip-selector,
+    #page-users-keyword-selections .table-users-keyword-selections tbody td .d-flex.justify-content-center {
+        text-align: center !important;
+    }
+    
+    /* Badge container alignment - left align cho cột Người phụ trách */
+    #page-users-keyword-selections .table-users-keyword-selections tbody td:nth-child(4) .d-flex.align-items-center.flex-wrap {
+        justify-content: flex-start !important;
+        border: 0.5px dashed #2D69B6;
+        border-radius: 20px !important;
+        padding: 5px 0px 1px 5px !important;
+    }
+    
+    /* Pagination container - 70/30 layout */
+    #page-users-keyword-selections .pagination-container {
+        width: 100% !important;
+    }
+    
+    #page-users-keyword-selections .pagination-left-spacer {
+        flex: 0 0 70% !important;
+        width: 70% !important;
+    }
+    
+    #page-users-keyword-selections .pagination-right-section {
+        flex: 0 0 30% !important;
+        width: 30% !important;
+        justify-content: flex-end !important;
+    }
+    
+    /* Pagination styling */
+    #page-users-keyword-selections .pagination-page-size {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+    }
+    
+    /* Target the input inside the select dropdown */
+    #page-users-keyword-selections .pagination-page-size input,
+    #page-users-keyword-selections .pagination-page-size .form-control,
+    #page-users-keyword-selections .pagination-page-size .form-select {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+    }
+    
+    #page-users-keyword-selections .pagination-nav-btn {
+        min-width: 32px !important;
+        height: 32px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 1px solid #d0d7de !important;
+        background-color: #ffffff !important;
+        color: #24292f !important;
+    }
+    
+    #page-users-keyword-selections .pagination-nav-btn:hover:not(.disabled) {
+        background-color: #f6f8fa !important;
+        border-color: #d0d7de !important;
+    }
+    
+    #page-users-keyword-selections .pagination-nav-btn.disabled,
+    #page-users-keyword-selections .pagination-nav-btn:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        background-color: #ffffff !important;
+        color: #8c959f !important;
+    }
+    
+    #page-users-keyword-selections .pagination-nav-btn i {
+        font-size: 12px !important;
+    }
+}
+
+/* Upload Top Domain Daily - /upload-top-domain-daily */
+#page-upload-top-domain-daily {
+    /* Specific styles for UploadTopDomainDaily */
+}
+
+/* Brand Code - /brand-code */
+#page-brand-code {
+    /* Specific styles for BrandCode */
+}
+
+/* SEO Cost - /seo-cost */
+#page-seo-cost {
+    /* Specific styles for SeoCost */
+}
+
+/* Currency - /currency */
+#page-currency {
+    /* Specific styles for Currency */
+}
+
+/* Cost Type Step - /cost-type-step */
+#page-cost-type-step {
+    /* Specific styles for CostTypeStepDashboard */
+}
+
+/* Telegram Bot - /telegram-bot */
+#page-telegram-bot {
+    /* Specific styles for ToolTelegram */
+}
+
+/* Facebook Group Manager - /facebook-group-manager */
+#page-facebook-group-manager {
+    /* Specific styles for FacebookGroup */
+}
+
+/* Profile Crawler Manager - /profile-crawler-manager */
+#page-profile-crawler-manager {
+    /* Specific styles for FacebookComment */
+}
+
+/* Support ASST - /support-asst */
+#page-support-asst {
+    /* Specific styles for SupportAsst */
+}
+
+/* Quy Trinh Doi Domain - /quy-trinh-doi-domain */
+#page-quy-trinh-doi-domain {
+    /* Specific styles for QuyTrinhDoiDomain */
+}
+
+/* AI SEO Chat - /ai-seo-chat */
+#page-ai-seo-chat {
+    /* Specific styles for AIChats */
+}
+
+/* AI Chat Agent - /agent */
+#page-agent {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Upload FIN Data - /upload-fin-data */
+#page-upload-fin-data {
+    /* Specific styles for LayoutPages */
+}
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================ */
+
+/* 
+   Cách sử dụng:
+   
+   1. Common styles: Áp dụng cho tất cả pages
+      .page-content { ... }
+   
+   2. Route-specific styles: Chỉ áp dụng cho route cụ thể
+      #page-report-seo-performance { ... }
+      #page-report-seo-performance .row.g-3 { ... }
+   
+   3. Nested selectors: Style các elements trong route cụ thể
+      #page-report-seo-performance .table-container { ... }
+      #page-report-seo-performance-by-pic .btn { ... }
+   
+   4. Responsive per route:
+      @media (max-width: 768px) {
+          #page-report-seo-performance .row.g-3 { ... }
+      }
+   
+   Ví dụ thực tế:
+   
+   #page-report-seo-performance {
+       padding: 2rem;
+   }
+   
+   #page-report-seo-performance .row.g-3 {
+       margin-bottom: 2rem;
+   }
+   
+   #page-report-seo-performance .btn-primary {
+       background-color: #1976d2;
+   }
+   
+   @media (max-width: 768px) {
+       #page-report-seo-performance {
+           padding: 1rem;
+       }
+   }
+*/
+
+/* ============================================
+   RESPONSIVE STYLES PER ROUTE
+   ============================================ */
+
+/* ============================================
+   TABLE COMPARE - So sánh nhân viên
+   Route: #page-report-seo-performance-by-pic
+   ============================================ */
+
+/* Table Compare Header */
+#page-report-seo-performance-by-pic .table-compare thead th {
+    background-color: #2d69b6 !important; /* Figma: bg-[#2d69b6] */
+    color: #ffffff !important; /* Figma: text-white */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    text-align: center !important; /* Figma: text-center */
+    border: none !important;
+    letter-spacing: 0px !important;
+    text-transform: none !important;
+}
+
+/* Table Compare Body - Base styles */
+#page-report-seo-performance-by-pic .table-compare tbody td:not(.compare-rank-name) {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 22px !important;
+    padding: 15px 10px !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f4f8ff !important; /* Divider between rows */
+    vertical-align: middle;
+    text-align: center !important;
+    background-color: #ffffff !important; /* Default white */
+    color: #000000 !important;
+}
+
+/* Compare Rank Name Column (rowspan) - Background #cae1ff - Same as pic-name */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-rank-name {
+    background-color: #cae1ff !important; /* Figma: bg-[#cae1ff] - Same as pic-name in tab "Hiệu suất SEO theo độ khó" */
+    width: 97px !important;
+    font-weight: 600 !important;
+    color: #000000 !important;
+    border-bottom: none !important;
+}
+
+/* Override any other background rules for compare-rank-name */
+#page-report-seo-performance-by-pic .table-compare tbody tr td.compare-rank-name,
+#page-report-seo-performance-by-pic .table-compare tbody tr:nth-child(odd) td.compare-rank-name,
+#page-report-seo-performance-by-pic .table-compare tbody tr:nth-child(even) td.compare-rank-name {
+    background-color: #cae1ff !important; /* Force #cae1ff for all compare-rank-name cells */
+}
+
+/* Compare Difficulty Column */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-difficulty {
+    /* background-color removed - will be set by group-based rules below */
+    width: 321px !important;
+    text-align: center !important;
+    color: #000000 !important;
+}
+
+/* Compare Base Value Column (first PIC) - Color #007aff */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-base-value {
+    background-color: #ffffff !important;
+    width: 79px !important;
+    color: #007aff !important; /* Figma: text-[#007aff] */
+    font-weight: 600 !important;
+}
+
+/* Compare Value Column (comparison columns) */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-value {
+    background-color: #ffffff !important;
+    width: 325px !important;
+    color: #000000 !important;
+}
+
+/* Compare Number */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-value .compare-number {
+    font-weight: 600 !important;
+    color: #000000 !important;
+}
+
+/* Compare Percent - Up (green) */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-value .compare-percent-up {
+    color: #00a76f !important; /* Figma: text-green-500 */
+    font-weight: 400 !important;
+    margin-left: 4px;
+}
+
+/* Compare Percent - Down (red) */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-value .compare-percent-down {
+    color: #f51d1d !important; /* Figma: text-red */
+    font-weight: 400 !important;
+    margin-left: 4px;
+}
+
+/* All rows in all groups - white background for compare-difficulty */
+/* Apply to ALL rows to ensure consistent color */
+#page-report-seo-performance-by-pic .table-compare tbody tr td.compare-difficulty {
+    background-color: #ffffff !important;
+}
+
+/* Base value and compare value columns - always white */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-base-value,
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-value {
+    background-color: #ffffff !important;
+}
+
+/* Border-radius for compare-rank-name cells (similar to pic-name) */
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-rank-name.compare-group-first:not(.compare-group-last) {
+    border-bottom-left-radius: 20px !important;
+}
+
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-rank-name.compare-group-last:not(.compare-group-first) {
+    border-top-left-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+}
+
+#page-report-seo-performance-by-pic .table-compare tbody td.compare-rank-name.compare-group-first.compare-group-last {
+    border-top-left-radius: 20px !important;
+    border-bottom-left-radius: 20px !important;
+}
+
+/* Divider between rows in rowspan group */
+#page-report-seo-performance-by-pic .table-compare tbody tr.compare-row:not(.compare-group-end) td.compare-rank-name {
+    border-bottom: 1px solid #f4f8ff !important;
+}
+
+#page-report-seo-performance-by-pic .table-compare tbody tr.compare-group-end td.compare-rank-name {
+    border-bottom: none !important;
+}
+
+/* ============================================
+   REPORT SEO PERFORMANCE BY PIC
+   Route: /report-seo-performance-by-pic
+   ============================================ */
+
+/* ============================================
+   REPORT SEO PERFORMANCE BY PIC
+   Route: /report-seo-performance-by-pic
+   ============================================ */
+
+/* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+#page-report-seo-performance-by-pic .row [class*="col-"] {
+    position: relative !important; /* Cần cho floating label */
+}
+
+/* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+#page-report-seo-performance-by-pic .row [class*="col-"] .seo-input-size,
+#page-report-seo-performance-by-pic .row [class*="col-"] .seo-input-size input,
+#page-report-seo-performance-by-pic .row [class*="col-"] .seo-input-size .form-control,
+#page-report-seo-performance-by-pic .row [class*="col-"] .seo-input-size .dropdown-toggle,
+#page-report-seo-performance-by-pic .row [class*="col-"] ::deep .seo-input-size.select,
+#page-report-seo-performance-by-pic .row [class*="col-"] ::deep .select.seo-input-size,
+#page-report-seo-performance-by-pic .row [class*="col-"] ::deep .seo-input-size.multi-select,
+#page-report-seo-performance-by-pic .row [class*="col-"] ::deep .multi-select.seo-input-size {
+    margin-top: 0 !important;
+}
+
+/* Xóa border của dropdown-toggle và datetime-range-control - chỉ áp dụng cho route này */
+/* Tăng specificity để override Bootstrap */
+#page-report-seo-performance-by-pic .datetime-range-control .dropdown-toggle,
+#page-report-seo-performance-by-pic .dropdown-toggle.datetime-range-control,
+#page-report-seo-performance-by-pic .datetime-range-control .dropdown-toggle.seo-input-size,
+#page-report-seo-performance-by-pic .dropdown-toggle.datetime-range-control.seo-input-size,
+#page-report-seo-performance-by-pic .datetime-range-control .seo-input-size.dropdown-toggle,
+#page-report-seo-performance-by-pic .seo-input-size.dropdown-toggle.datetime-range-control,
+#page-report-seo-performance-by-pic .datetime-range .dropdown-toggle,
+#page-report-seo-performance-by-pic .dropdown-toggle.datetime-range,
+#page-report-seo-performance-by-pic .datetime-range .dropdown-toggle.seo-input-size,
+#page-report-seo-performance-by-pic .dropdown-toggle.datetime-range.seo-input-size,
+#page-report-seo-performance-by-pic .datetime-range .seo-input-size.dropdown-toggle,
+#page-report-seo-performance-by-pic .seo-input-size.dropdown-toggle.datetime-range,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control .dropdown-toggle,
+#page-report-seo-performance-by-pic ::deep .dropdown-toggle.datetime-range-control,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control .dropdown-toggle.seo-input-size,
+#page-report-seo-performance-by-pic ::deep .dropdown-toggle.datetime-range-control.seo-input-size,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control .seo-input-size.dropdown-toggle,
+#page-report-seo-performance-by-pic ::deep .seo-input-size.dropdown-toggle.datetime-range-control,
+#page-report-seo-performance-by-pic ::deep .datetime-range .dropdown-toggle,
+#page-report-seo-performance-by-pic ::deep .dropdown-toggle.datetime-range,
+#page-report-seo-performance-by-pic ::deep .datetime-range .dropdown-toggle.seo-input-size,
+#page-report-seo-performance-by-pic ::deep .dropdown-toggle.datetime-range.seo-input-size,
+#page-report-seo-performance-by-pic ::deep .datetime-range .seo-input-size.dropdown-toggle,
+#page-report-seo-performance-by-pic ::deep .seo-input-size.dropdown-toggle.datetime-range,
+#page-report-seo-performance-by-pic .datetime-range-control,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control,
+#page-report-seo-performance-by-pic .datetime-range-control .form-control,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control .form-control,
+#page-report-seo-performance-by-pic .datetime-range-control input,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control input,
+#page-report-seo-performance-by-pic .datetime-range-control button,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control button,
+#page-report-seo-performance-by-pic .datetime-range-control .btn,
+#page-report-seo-performance-by-pic ::deep .datetime-range-control .btn {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Toggle container - theo Figma design */
+#page-report-seo-performance-by-pic .toggle-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 54px !important; /* Đảm bảo height bằng với input */
+    margin-top: 0 !important; /* Đảm bảo margin-top bằng với input */
+    width: 100% !important; /* Đảm bảo width bằng với button search */
+    min-width: 100% !important;
+    max-width: 100% !important;
+    background-color: #EBF3FF !important;
+    border-radius: 10px !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* Toggle label spacer để căn với label của input */
+#page-report-seo-performance-by-pic .toggle-label-spacer {
+    height: 12px !important;
+    width: 0 !important;
+}
+
+/* Toggle label - theo Figma design */
+#page-report-seo-performance-by-pic .toggle-label {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 22px !important;
+    color: #212B36 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+#page-report-seo-performance-by-pic .toggle-label-small {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 18px !important;
+    color: #637381 !important;
+}
+
+/* Button search - theo Figma design */
+#page-report-seo-performance-by-pic .btn-search {
+    width: 100% !important; /* Đảm bảo width bằng với toggle-container */
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 54px !important;
+    background: #007AFF !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-size: 15px !important;
+    font-family: 'Public Sans', sans-serif !important;
+    font-weight: 700 !important;
+    line-height: 26px !important;
+    border: none !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+#page-report-seo-performance-by-pic .btn-search:hover,
+#page-report-seo-performance-by-pic .btn-search:focus {
+    background: #0066CC !important;
+}
+
+/* Col-1 với width cố định 150px */
+#page-report-seo-performance-by-pic .row .col-1[style*="width: 150px"],
+#page-report-seo-performance-by-pic .row > .col-1 {
+    width: 150px !important;
+    flex: 0 0 150px !important;
+    max-width: 150px !important;
+    min-width: 150px !important;
+}
+
+/* Col-11 chiếm phần còn lại */
+#page-report-seo-performance-by-pic .row .col-11 {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+/* Container cho toggle và button trong col-1 - căn về bên phải */
+#page-report-seo-performance-by-pic .col-1 .d-flex.flex-column {
+    width: 100% !important;
+    align-items: flex-end !important; /* Căn về bên phải */
+}
+
+/* Toggle container và button search có cùng width trong col-1 */
+#page-report-seo-performance-by-pic .col-1 .toggle-container,
+#page-report-seo-performance-by-pic .col-1 .btn-search,
+#page-report-seo-performance-by-pic .col-1 .button-wrapper .btn-search {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Đảm bảo button-wrapper cũng có width 100% */
+#page-report-seo-performance-by-pic .col-1 .button-wrapper {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Wrapper cho button để thẳng hàng với input */
+#page-report-seo-performance-by-pic .col-1 .button-wrapper {
+    display: flex !important;
+    align-items: flex-end !important; /* Căn button xuống dưới để thẳng hàng với input */
+    height: 54px !important; /* Cùng height với input */
+    margin-top: 1.25rem !important; /* mb-3 (1rem) + mt-1 (0.25rem) = 1.25rem */
+    padding-top: 0 !important;
+}
+
+/* Đảm bảo button trong wrapper có width 100% */
+#page-report-seo-performance-by-pic .col-1 .button-wrapper .btn-search {
+    width: 100% !important;
+    margin-top: 0 !important;
+}
+
+/* Đảm bảo toggle container có margin-bottom đúng để tạo khoảng cách với button */
+#page-report-seo-performance-by-pic .col-1 .toggle-container.mb-3 {
+    margin-bottom: 1rem !important; /* Bootstrap mb-3 = 1rem */
+}
+
+/* Đảm bảo col-1 flex-column có gap đúng để thẳng hàng */
+#page-report-seo-performance-by-pic .col-1 .d-flex.flex-column {
+    gap: 0 !important; /* Xóa gap để dùng margin-bottom thay thế */
+    align-items: flex-end !important; /* Căn về bên phải */
+}
+
+/* Đảm bảo row g-3 trong col-11 có margin-top đúng */
+#page-report-seo-performance-by-pic .col-11 .row.g-3[style*="margin-top"] {
+    margin-top: 0.25rem !important; /* Bootstrap mt-1 = 0.25rem */
+}
+
+/* IC SEO Resource Management - /ic-seo-resource-management */
+#page-ic-seo-resource-management {
+    /* === Uniform 54px height for ALL form element wrappers === */
+    /* BootstrapInput wrapper (.form-floating) */
+    ::deep .row.g-3 .form-floating.seo-input-size,
+    ::deep .row.g-3 .form-floating:has(.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+
+    /* Select wrapper */
+    ::deep .row.g-3 .select.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+
+    /* SelectGeneric wrapper */
+    ::deep .row.g-3 .select-generic.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+
+    ::deep .row.g-3 .select-generic.seo-input-size .dropdown-toggle {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+
+    /* DateTimeRange wrapper */
+    ::deep .row.g-3 .select.datetime-range.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+    }
+
+    /* DateTimePicker wrapper */
+    ::deep .row.g-3 .select.datetime-picker.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        position: relative;
+    }
+
+    /* Select inner .form-select — enforce same height */
+    ::deep .row.g-3 .select.seo-input-size .form-select {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 16px 14px !important;
+    }
+
+    /* Button — same 54px height, icon+text inline */
+    ::deep .row.g-3 .btn.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+        border-radius: 10px !important;
+    }
+
+    /* === Input element styling === */
+    input.form-control.seo-input-size,
+    input.seo-input-size.form-control,
+    input.dropdown-toggle.datetime-picker-input.seo-input-size,
+    ::deep .select.datetime-picker.seo-input-size > input.dropdown-toggle {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+
+    /* BootstrapInput inner .form-control inside .form-floating */
+    ::deep .row.g-3 .form-floating.seo-input-size .form-control,
+    ::deep .row.g-3 .form-floating:has(.seo-input-size) .form-control {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 6px 14px !important;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+    }
+
+    /* Fallback: Nếu input nằm trong wrapper */
+    .bb-clearable-input input.form-control.seo-input-size,
+    .bb-clearable-input input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+
+    /* Đảm bảo wrapper bb-clearable-input cũng có height đúng và không có border */
+    ::deep .bb-clearable-input.seo-input-size,
+    ::deep .bb-clearable-input:has(input.seo-input-size),
+    ::deep .bb-clearable-input:has(.seo-input-size input),
+    ::deep .bb-clearable-input:has(input.form-control.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Xóa border của form-group hoặc wrapper khác */
+    ::deep .form-group.seo-input-size,
+    ::deep .form-group:has(.seo-input-size),
+    ::deep .form-group:has(input.seo-input-size) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Xóa border của dropdown-toggle - chỉ áp dụng cho route này */
+    /* NHƯNG giữ border cho select dropdown với is-clearable */
+    ::deep .dropdown-toggle.seo-input-size:not(.is-clearable),
+    ::deep .seo-input-size.dropdown-toggle:not(.is-clearable),
+    ::deep .seo-input-size .dropdown-toggle:not(.is-clearable),
+    ::deep .dropdown-toggle:has(.seo-input-size):not(.is-clearable) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Select dropdown với is-clearable seo-input-size - phải có border giống input */
+    ::deep .select.is-clearable.seo-input-size .dropdown-toggle,
+    ::deep .select.seo-input-size.is-clearable .dropdown-toggle,
+    ::deep .is-clearable.seo-input-size.select .dropdown-toggle,
+    ::deep .seo-input-size.is-clearable.select .dropdown-toggle,
+    ::deep .dropdown-toggle.is-clearable.seo-input-size {
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Xóa border của input bên trong dropdown-toggle */
+    ::deep .dropdown-toggle.seo-input-size input,
+    ::deep .dropdown-toggle.seo-input-size .form-control,
+    ::deep .dropdown-toggle.seo-input-size .form-select,
+    ::deep .seo-input-size.dropdown-toggle input,
+    ::deep .seo-input-size.dropdown-toggle .form-control,
+    ::deep .seo-input-size.dropdown-toggle .form-select,
+    ::deep .seo-input-size .dropdown-toggle input,
+    ::deep .seo-input-size .dropdown-toggle .form-control,
+    ::deep .seo-input-size .dropdown-toggle .form-select {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        background: transparent !important;
+    }
+
+    /* Xóa border của datetime-range-control */
+    ::deep .datetime-range-control,
+    ::deep .datetime-range-control .form-control,
+    ::deep .datetime-range-control .dropdown-toggle,
+    ::deep .seo-input-size.datetime-range,
+    ::deep .datetime-range.seo-input-size,
+    ::deep .datetime-range-control.seo-input-size {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* Xóa border của các element bên trong datetime-range */
+    ::deep .datetime-range-control input,
+    ::deep .datetime-range-control button,
+    ::deep .datetime-range-control .btn {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* DateTimePicker - calendar icon inline-right */
+    ::deep .select.datetime-picker.seo-input-size > .datetime-picker-bar {
+        position: absolute !important;
+        right: 12px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        pointer-events: none;
+        z-index: 2;
+        color: #637381;
+        font-size: 16px;
+    }
+
+    /* === Ensure align-items-end works: columns must NOT grow taller === */
+    ::deep .row.g-3.align-items-end > [class*="col-"] {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    /* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+    .row [class*="col-"] {
+        position: relative !important;
+    }
+
+    /* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+    .row [class*="col-"] .seo-input-size,
+    .row [class*="col-"] .seo-input-size input,
+    .row [class*="col-"] .seo-input-size .form-control,
+    .row [class*="col-"] .seo-input-size .dropdown-toggle,
+    .row [class*="col-"] ::deep .seo-input-size.select,
+    .row [class*="col-"] ::deep .select.seo-input-size,
+    .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    .row [class*="col-"] ::deep .multi-select.seo-input-size {
+        margin-top: 0 !important;
+    }
+
+    /* Floating label */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size) {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        height: auto !important;
+        transform: none !important;
+        transform-origin: 0 0 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Label background mask */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        border-radius: 2px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile styles for all pages */
+    .page-content {
+        padding: 1rem;
+    }
+    
+    /* Mobile specific for report-seo-performance */
+    #page-report-seo-performance .row.g-3 > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+    
+    /* Mobile specific for report-seo-performance-by-pic */
+    #page-report-seo-performance-by-pic .row.g-3 > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet styles */
+    .page-content {
+        padding: 1.5rem;
+    }
+}
+
+/* ============================================
+   SEO DAILY DATA
+   Route: /seo-daily-data
+   ============================================ */
+
+#page-seo-daily-data {
+    /* Input styling - giống các trang khác */
+    input.form-control.seo-input-size,
+    input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Fallback: Nếu input nằm trong wrapper */
+    .bb-clearable-input input.form-control.seo-input-size,
+    .bb-clearable-input input.seo-input-size.form-control {
+        padding: 18px 14px 16px 14px !important;
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Đảm bảo wrapper bb-clearable-input cũng có height đúng và không có border */
+    ::deep .bb-clearable-input.seo-input-size,
+    ::deep .bb-clearable-input:has(input.seo-input-size),
+    ::deep .bb-clearable-input:has(.seo-input-size input),
+    ::deep .bb-clearable-input:has(input.form-control.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Xóa border của form-group hoặc wrapper khác */
+    ::deep .form-group.seo-input-size,
+    ::deep .form-group:has(.seo-input-size),
+    ::deep .form-group:has(input.seo-input-size) {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Dropdown-toggle styling - giống input */
+    ::deep .dropdown-toggle.seo-input-size,
+    ::deep .seo-input-size.dropdown-toggle,
+    ::deep .seo-input-size .dropdown-toggle,
+    ::deep .dropdown-toggle:has(.seo-input-size) {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 16px 14px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        overflow: hidden !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* Xóa border của input bên trong dropdown-toggle */
+    ::deep .dropdown-toggle.seo-input-size input,
+    ::deep .dropdown-toggle.seo-input-size .form-control,
+    ::deep .dropdown-toggle.seo-input-size .form-select,
+    ::deep .seo-input-size.dropdown-toggle input,
+    ::deep .seo-input-size.dropdown-toggle .form-control,
+    ::deep .seo-input-size.dropdown-toggle .form-select,
+    ::deep .seo-input-size .dropdown-toggle input,
+    ::deep .seo-input-size .dropdown-toggle .form-control,
+    ::deep .seo-input-size .dropdown-toggle .form-select {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 100% !important;
+    }
+    
+    /* DateTimePicker styling */
+    ::deep .datetime-picker.seo-input-size,
+    ::deep .seo-input-size.datetime-picker,
+    ::deep .datetime-picker .form-control.seo-input-size,
+    ::deep .seo-input-size.datetime-picker .form-control {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 16px 14px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* DateTimePicker input styling - cụ thể cho datetime-picker-input */
+    ::deep .datetime-picker-input,
+    ::deep input.datetime-picker-input,
+    ::deep .datetime-picker-input.form-control,
+    ::deep .dropdown-toggle.datetime-picker-input,
+    ::deep .datetime-picker .datetime-picker-input,
+    ::deep .seo-input-size .datetime-picker-input,
+    ::deep .datetime-picker.seo-input-size .datetime-picker-input {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 16px 14px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        border: 0.5px solid rgba(145, 158, 171, 0.2) !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    /* Button styling - giống input */
+    .btn.seo-input-size,
+    button.seo-input-size {
+        height: 54px !important;
+        min-height: 54px !important;
+        max-height: 54px !important;
+        padding: 18px 14px 16px 14px !important;
+        box-sizing: border-box !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        margin-top: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    /* Bootstrap grid - đảm bảo các col có position relative cho floating label */
+    .row [class*="col-"] {
+        position: relative !important;
+    }
+    
+    /* Đảm bảo tất cả input trong Bootstrap grid có margin-top bằng nhau */
+    .row [class*="col-"] .seo-input-size,
+    .row [class*="col-"] .seo-input-size input,
+    .row [class*="col-"] .seo-input-size .form-control,
+    .row [class*="col-"] .seo-input-size .dropdown-toggle,
+    .row [class*="col-"] ::deep .seo-input-size.select,
+    .row [class*="col-"] ::deep .select.seo-input-size,
+    .row [class*="col-"] ::deep .seo-input-size.multi-select,
+    .row [class*="col-"] ::deep .multi-select.seo-input-size,
+    .row [class*="col-"] ::deep .seo-input-size.datetime-picker,
+    .row [class*="col-"] ::deep .datetime-picker.seo-input-size {
+        margin-top: 0 !important;
+    }
+    
+    /* Floating label */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ .seo-input-size),
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size),
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size) {
+        font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        line-height: 12px !important;
+        color: #637381 !important;
+        position: absolute !important;
+        top: -6px !important;
+        left: 16px !important;
+        margin: 0 !important;
+        padding: 0 2px 0 5px !important;
+        background-color: #ffffff !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+        display: block !important;
+        height: auto !important;
+        transform: none !important;
+        transform-origin: 0 0 !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Label background mask */
+    .row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] .form-label:has(+ * .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ .seo-input-size)::before,
+    .row [class*="col-"] label.form-label:has(+ * .seo-input-size)::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background-color: #ffffff !important;
+        z-index: -1 !important;
+        border-radius: 2px !important;
+    }
+}
+

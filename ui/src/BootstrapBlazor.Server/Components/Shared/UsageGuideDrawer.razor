@@ -1,0 +1,24 @@
+@* Right-side how-to drawer, same surface as the guide on the domain-ownership page. The page
+   owns the button and the steps; this only owns the scrim, the frame and the step styling. *@
+@if (Open)
+{
+    <div class="guide-scrim" @onclick="OnClose"></div>
+    <section class="guide-drawer" role="dialog" aria-modal="true" aria-label="@Title">
+        <header class="guide-drawer-head">
+            <h2><i class="fa-solid fa-circle-question me-2"></i>@Title</h2>
+            <button type="button" class="guide-icon-btn" aria-label="Đóng" @onclick="OnClose">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+        <div class="guide-drawer-body">
+            @ChildContent
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public string Title { get; set; } = "Hướng dẫn sử dụng";
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,80 @@
+@namespace BootstrapBlazor.Server.Components.Shared
+@using BootstrapBlazor.Server.Data.SeoRequests
+
+<SelectGeneric TValue="string"
+               Items="@SelectItems"
+               Value="@Value"
+               ValueChanged="@ValueChanged"
+               IsDisabled="@IsDisabled"
+               IsClearable="@IsClearable"
+               ShowSearch="@ShowSearch"
+               ShowLabel="@ShowLabel"
+               DisplayText="@DisplayText"
+               PlaceHolder="@PlaceHolder"
+               Class="@($"colored-pill-select {Class}")">
+    <ItemTemplate>
+        @RenderPill(LookupOption(context.Value))
+    </ItemTemplate>
+    <DisplayTemplate>
+        @if (context != null)
+        {
+            @RenderPill(LookupOption(context.Value))
+        }
+        else if (!string.IsNullOrEmpty(PlaceHolder))
+        {
+            <span class="colored-pill colored-pill-placeholder">@PlaceHolder</span>
+        }
+    </DisplayTemplate>
+</SelectGeneric>
+
+@code {
+    [Parameter] public List<ColoredSelectOption> Items { get; set; } = new();
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public bool IsClearable { get; set; }
+    [Parameter] public bool ShowSearch { get; set; }
+    [Parameter] public bool ShowLabel { get; set; }
+    [Parameter] public string? DisplayText { get; set; }
+    [Parameter] public string? PlaceHolder { get; set; }
+    [Parameter] public string? Class { get; set; }
+
+    private List<SelectedItem<string>> SelectItems { get; set; } = new();
+    private Dictionary<string, ColoredSelectOption> _lookup = new();
+
+    protected override void OnParametersSet()
+    {
+        _lookup = Items
+            .GroupBy(x => x.Value)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+        SelectItems = Items
+            .Select(x => new SelectedItem<string>(x.Value, x.Text))
+            .ToList();
+    }
+
+    private ColoredSelectOption LookupOption(string? value)
+    {
+        if (!string.IsNullOrEmpty(value) && _lookup.TryGetValue(value, out var option))
+            return option;
+
+        return new ColoredSelectOption
+        {
+            Value = value ?? string.Empty,
+            Text = value ?? PlaceHolder ?? "-",
+            BgColor = "transparent",
+            TextColor = SeoColoredOptionHelper.ColorNeutral
+        };
+    }
+
+    private RenderFragment RenderPill(ColoredSelectOption option) => builder =>
+    {
+        var bg = string.IsNullOrWhiteSpace(option.BgColor) ? "transparent" : option.BgColor;
+        var fg = string.IsNullOrWhiteSpace(option.TextColor) ? SeoColoredOptionHelper.ColorNeutral : option.TextColor;
+        builder.OpenElement(0, "span");
+        builder.AddAttribute(1, "class", "colored-pill");
+        builder.AddAttribute(2, "style", $"color:{fg};background:{bg};border-radius:4px;padding:2px 8px;");
+        builder.AddContent(3, option.Text);
+        builder.CloseElement();
+    };
+}

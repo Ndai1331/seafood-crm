@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+   
+
+    <ItemGroup>
+      <ProjectReference Include="..\Contract\Contract.csproj" />
+      <ProjectReference Include="..\Core\Core.csproj" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\SqlServ4r\SqlServ4r.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="14.0.0" />
+      <PackageReference Include="EPPlus" Version="8.0.3" />
+      <PackageReference Include="Fido2" Version="4.0.1" />
+      <!-- Encrypts the stored SSO client secret (SsoProviderCredentialService). -->
+      <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="MyFiles\" />
+    </ItemGroup>
+
+</Project>

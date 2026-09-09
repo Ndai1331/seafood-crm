@@ -1,0 +1,47 @@
+@page "/unauthorized"
+@layout PageLayout
+@using BootstrapBlazor.Server.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using BootstrapBlazor.Server.Identity
+@using AuthService = BootstrapBlazor.Server.Services.IUrlAuthorizationService
+
+<PageTitle>Không có quyền truy cập</PageTitle>
+
+<div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="fa-solid fa-ban text-danger" style="font-size: 5rem;"></i>
+        </div>
+        <h1 class="display-4 mb-3">Không có quyền truy cập</h1>
+        <p class="lead mb-4">Bạn không có quyền truy cập vào trang này.</p>
+        <p class="text-muted mb-4">Vui lòng liên hệ quản trị viên nếu bạn cần quyền truy cập.</p>
+        <button class="btn btn-primary" @onclick="GoToDefaultPage">
+            <i class="fa-solid fa-home me-2"></i>Về trang chủ
+        </button>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager? NavigationManager { get; set; }
+    
+    [Inject]
+    private AuthService? AuthorizationService { get; set; }
+    
+    [Inject]
+    private AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    
+    private async Task GoToDefaultPage()
+    {
+        if (AuthorizationService != null)
+        {
+            var defaultPage = await AuthorizationService.GetDefaultPageAsync();
+            NavigationManager?.NavigateTo(string.IsNullOrEmpty(defaultPage) ? "/" : $"/{defaultPage}");
+        }
+        else
+        {
+            NavigationManager?.NavigateTo("/");
+        }
+    }
+}
+

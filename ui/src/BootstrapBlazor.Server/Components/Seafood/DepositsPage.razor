@@ -1,0 +1,47 @@
+@page "/finance/deposits"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Deposit</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.AmountUsd" placeholder="Số tiền USD" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Note" placeholder="Ghi chú" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Nhận deposit</Button></div>
+    </div>
+    <div class="row g-2 mt-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_depositId" placeholder="Deposit Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_contractId" placeholder="HĐ Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_alloc" placeholder="Allocate USD" /></div>
+        <div class="col-md-2"><Button Color="Color.Secondary" OnClick="AllocateAsync">Allocate vào HĐ</Button></div>
+    </div>
+</div>
+<Table TItem="CustomerDepositDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<CustomerDepositDto> _rows = new();
+    private CustomerDepositDto _form = new();
+    private int _depositId;
+    private int _contractId;
+    private decimal _alloc;
+
+    protected override async Task OnInitializedAsync() => _rows = await Api.DepositsAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SaveDepositAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu deposit"); return; }
+        await Toast.Success("Đã nhận deposit");
+        _form = new();
+        _rows = await Api.DepositsAsync() ?? new();
+    }
+
+    private async Task AllocateAsync()
+    {
+        await Api.AllocateDepositAsync(_depositId, _contractId, _alloc);
+        await Toast.Success("Đã allocate");
+        _rows = await Api.DepositsAsync() ?? new();
+    }
+}

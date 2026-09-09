@@ -1,0 +1,31 @@
+@page "/master-data/catalog"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Danh mục chung</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.Category" placeholder="Category (0=loài...)" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Description" placeholder="Mô tả" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu danh mục</Button></div>
+    </div>
+</div>
+<Table TItem="CatalogLookupDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
+
+@code {
+    private List<CatalogLookupDto> _rows = new();
+    private CatalogLookupDto _form = new() { IsActive = true };
+    protected override async Task OnInitializedAsync() => _rows = await Api.CatalogAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SaveCatalogAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu danh mục"); return; }
+        await Toast.Success("Đã lưu danh mục");
+        _form = new() { IsActive = true };
+        _rows = await Api.CatalogAsync() ?? new();
+    }
+}

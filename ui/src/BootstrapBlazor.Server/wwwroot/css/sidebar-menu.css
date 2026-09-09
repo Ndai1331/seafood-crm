@@ -1,0 +1,1399 @@
+/* Sidebar Base Styles */
+#sidebar {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    border-right: 1px solid rgba(145, 158, 171, 0.12);
+    box-shadow: none;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s ease, min-width 0.3s ease, max-width 0.3s ease;
+}
+
+/* Sidebar Menu Custom Styling */
+.sidebar-content {
+    background-color: #ffffff;
+    padding: 0px;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    padding-left: 0rem;
+    padding-right: 0rem;
+    padding-bottom: 0px;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+    width: 100%;
+}
+
+/* Sidebar Header - Fixed Header Area */
+.sidebar-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    padding: 10px 16px;
+    margin: 0;
+    width: 100%;
+    z-index: 99;
+    box-sizing: border-box;
+}
+
+.sidebar-header .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    height: 37px;
+    width: 115px;
+    box-sizing: border-box;
+}
+
+.sidebar-header .logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.sidebar-header .brand-name {
+    font-size: 16px;
+    font-weight: 900;
+    color: #1d7bf5;
+    letter-spacing: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: normal;
+    text-align: left;
+    white-space: nowrap;
+}
+
+/* Sidebar Scrollable Area */
+.sidebar-scrollable {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Brand Logo */
+.sidebar-content .brand-logo {
+    margin-bottom: 1rem;
+    position: sticky;
+    top: 0;
+    left: 0;
+    background-color: var(--bb-main-bg, #ffffff);
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+    z-index: 99;
+}
+
+.sidebar-content .brand-logo h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--bb-primary-color, #007bff);
+    margin: 0;
+}
+
+/* Section Headers */
+.sidebar-content .nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1rem 1.25rem 0.5rem;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Section Header for BÁO CÁO and QUẢN LÝ */
+.nav-section-header {
+    padding: 8px 12px 16px 12px;
+    margin: 0;
+    margin-top: 0;
+    margin-left: 3px;
+    margin-right: 0;
+    list-style: none;
+}
+
+.nav-section-header:first-child {
+    margin-top: 0;
+}
+
+.nav-section-header .section-header-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #919eab;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding-left: 0;
+    line-height: 18px;
+}
+
+/* Section Header cho menu groups */
+.nav-section {
+    padding: 0.5rem 0;
+}
+
+.nav-section:first-child {
+    padding-top: 0;
+}
+
+/* Hide section headers when sidebar is collapsed */
+#sidebar.collapsed .nav-section-header {
+    display: none !important;
+}
+
+/* Menu Items */
+.sidebar-content .nav-link {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    min-height: 36px;
+    padding: 8px 12px;
+    color: #637381;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 0;
+    margin: 0;
+    transition: all 0.2s ease;
+    position: relative;
+    font-size: 12px;
+    line-height: 26px;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+    border-left: none !important; /* Đảm bảo menu cha không có line dọc */
+}
+
+/* Đảm bảo menu cha (không phải trong collapse) không có line dọc */
+.sidebar-content .nav-item:not(:has(.collapse)) .nav-link,
+.sidebar-content .nav-item > .nav-link:not([class*="collapse"]) {
+    border-left: none !important;
+}
+
+/* Che line dọc ở menu cha bằng màu nền - khớp chính xác với màu nền của menu cha */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 12px; /* Che từ left edge đến vị trí line (12px) */
+    background-color: #FFFFFF; /* Màu mặc định khi đóng - cùng màu với sidebar */
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Đảm bảo menu cha có background-color */
+/* Mặc định khi đóng: cùng màu với sidebar (#FFFFFF) */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"] {
+    background-color: #FFFFFF !important; /* Màu nền mặc định khi đóng - cùng màu với sidebar */
+}
+
+/* CHỈ khi menu cha expanded mới có màu đậm - và ::before cũng phải cùng màu */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"],
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed) {
+    background-color: #E6E9EC; /* Màu đậm khi expanded */
+}
+
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::before,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::before {
+    background-color: #E6E9EC !important; /* Cùng màu với menu cha khi expanded */
+}
+
+/* Khi menu cha expanded và active, ưu tiên màu active - và ::before cũng phải cùng màu */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active {
+    background-color: #ebf3ff; /* Màu nền khi active và expanded */
+}
+
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active::before,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active::before {
+    background-color: #ebf3ff !important; /* Cùng màu với menu cha khi active và expanded */
+}
+
+
+/* Đảm bảo đoạn line ngắn nối với menu con vẫn hiển thị (z-index cao hơn) */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::after {
+    z-index: 11; /* Cao hơn ::before để vẫn hiển thị */
+}
+
+.sidebar-content .nav-link:hover {
+    background-color: transparent;
+    color: #637381;
+}
+
+.sidebar-content .nav-link.active {
+    color: #1d7bf5;
+    font-weight: 500;
+    font-style: normal;
+    padding: 8px 12px;
+    background-color: #ebf3ff !important;
+}
+
+/* QUAN TRỌNG: Override cho menu cha active nhưng chưa expanded - phải có màu sidebar (#FFFFFF) */
+/* Đặt sau rule .nav-link.active và có specificity cao hơn để override */
+/* Chỉ áp dụng cho menu cha (có data-bs-toggle="collapse") và chưa expanded */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"]),
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"],
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed {
+    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng - override rule .nav-link.active */
+}
+
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"])::before,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"]::before,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed::before {
+    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+}
+
+
+/* Active state with pink background like design */
+.sidebar-content .collapse .nav-link.active {
+    background-color: var(--bb-sidebar-active-bg, #ff7875) !important;
+    color: var(--bb-sidebar-active-color, #007bff) !important;
+}
+
+/* Khi parent menu được expand, hiển thị background-color ở parent */
+/* CHỈ khi expanded mới có màu đậm */
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] {
+    background-color: #E6E9EC !important; /* Màu đậm khi expanded */
+    color: #1C252E;
+    border-left: none;
+    font-weight: 600;
+}
+
+/* Khi menu cha đóng lại (không expanded), cùng màu với sidebar */
+/* Đặt sau tất cả các rule khác để override */
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="false"],
+.sidebar-content .nav-link[data-bs-toggle="collapse"].collapsed,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="false"],
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].collapsed {
+    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng */
+}
+
+/* Đảm bảo phần che line dọc cũng có màu #FFFFFF khi menu cha đóng */
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="false"]::before,
+.sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].collapsed::before {
+    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+}
+
+/* Menu cha active khi expanded */
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active {
+    font-style: italic;
+}
+
+/* Giữ nguyên màu khi hover vào menu cha đã expanded */
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover {
+    background-color: #E6E9EC;
+    color: #1C252E; /* Giữ nguyên màu text khi hover */
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover i {
+    color: #1C252E; /* Giữ nguyên màu icon khi hover */
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover svg {
+    color: #1C252E; /* Giữ nguyên màu SVG khi hover */
+    fill: #1C252E;
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover svg path {
+    fill: #1C252E !important; /* Giữ nguyên màu fill khi hover */
+}
+
+/* Chỉ child items trong collapse mới có border-left, và chỉ khi active mới có background */
+.sidebar-content .collapse .nav-link {
+    background-color: transparent !important;
+}
+
+/* Child items có background khi hover */
+.sidebar-content .collapse .nav-link:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.sidebar-content .collapse .nav-link.active {
+    background-color: rgba(145, 158, 171, 0.06) !important;
+    border-left: none;
+    color: #1d7bf5 !important;
+    font-style: normal;
+    padding-left: 22px !important; /* Đồng nhất với padding-left của nav-link */
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 26px;
+}
+
+.sidebar-content .collapse .nav-link.active i {
+    color: #1d7bf5 !important;
+}
+
+/* Đảm bảo item cuối cùng không có background khi không active */
+.sidebar-content .collapse .nav-item:last-child .nav-link:not(.active) {
+    background-color: transparent !important;
+}
+
+/* Icons in Menu Items - Adjusted to align text with section header */
+/* Ensure all icons have consistent width so all texts align */
+.sidebar-content .nav-link i {
+    margin-right: 0;
+    margin-left: 0;
+    font-size: 18px;
+    width: 18px;
+    min-width: 18px;
+    max-width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    text-align: center;
+    color: #637381;
+    opacity: 1;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* For nav-link with icon directly (not in span.d-flex) */
+.sidebar-content .nav-link > i:first-child {
+    margin-left: 0;
+}
+
+/* Icons in Active Menu Items */
+.sidebar-content .nav-link.active i {
+    color: #1d7bf5 !important;
+}
+
+/* Icon trong span.d-flex - đảm bảo tất cả icons có cùng width và spacing để text thẳng hàng */
+.sidebar-content .nav-link > span.d-flex > i {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Đảm bảo khi sidebar expanded, icon có margin-right đúng */
+.sidebar-content .nav-link:not(.collapsed) i {
+    margin-right: 0;
+}
+
+/* Reset icon styles khi sidebar expanded */
+#sidebar:not(.collapsed) .nav-link i {
+    margin-right: 0 !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Icon trong span.d-flex khi expanded - override Bootstrap me-2 */
+#sidebar:not(.collapsed) .nav-link > span.d-flex > i.me-2 {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Đảm bảo text trong span.d-flex không có margin-left để text thẳng hàng */
+#sidebar:not(.collapsed) .nav-link > span.d-flex > span {
+    margin-left: 0 !important; /* Removed to align all texts */
+}
+
+/* Icon trong submenu khi expanded */
+#sidebar:not(.collapsed) .collapse .nav-link i {
+    margin-right: 6px !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+}
+
+.sidebar-content .nav-link.active i {
+    color: #1d7bf5;
+    opacity: 1;
+}
+
+.sidebar-content .nav-link span {
+    flex: 1;
+    min-width: 0;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: 26px;
+}
+
+/* Đảm bảo text trong span.d-flex không lấn icon */
+.sidebar-content .nav-link > span.d-flex {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.sidebar-content .nav-link > span.d-flex > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-left: 0; /* Removed margin-left to align all text */
+}
+
+/* Align menu item text with section header text and ensure all menu item texts align */
+.sidebar-content .nav-link > span.d-flex {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 1;
+    gap: 10px;
+}
+
+/* Ensure all text starts at the same position after icon */
+.sidebar-content .nav-link > span.d-flex > span {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Override any Bootstrap classes that might add spacing */
+.sidebar-content .nav-link > span.d-flex > i.me-2 {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+.sidebar-content .nav-link:hover i {
+    opacity: 1;
+    color: #637381;
+}
+
+/* Submenu Items */
+.sidebar-content .nav-link[href*="cpd"] i.fas.fa-circle {
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+/* Submenu items styling */
+/* Tree view style cho submenu items */
+.sidebar-content .nav-item {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.sidebar-content .nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    width: 100%;
+}
+
+.sidebar-content .collapse {
+    position: relative;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+/* Đường kẻ dọc của collapse - bắt đầu từ menu con đầu tiên và kéo dài xuống */
+/* Vị trí: đặt trước icon để không chồng lấn */
+.sidebar-content .collapse::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Vị trí đường dọc - trước icon và text */
+    top: 0; /* Bắt đầu từ top của collapse (menu con đầu tiên) */
+    bottom: 0; /* Kéo dài đến bottom của collapse */
+    width: 1px;
+    background-color: #E6E9EC;
+    z-index: 0;
+}
+
+/* Đoạn line ngắn từ menu cha xuống menu con đầu tiên - chỉ hiển thị khi collapse được mở */
+.sidebar-content .nav-item .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after,
+.sidebar-content .nav-item .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: 0;
+    width: 1px;
+    height: 8px; /* Độ dài đoạn line nối từ menu cha xuống menu con đầu tiên */
+    background-color: #E6E9EC;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Điều chỉnh để đường line dừng ở bottom của menu con cuối cùng */
+.sidebar-content .collapse .nav-item:last-child {
+    position: relative;
+}
+
+/* Ẩn phần đường line vượt quá bottom của menu con cuối cùng (từ giữa bottom trở xuống) */
+.sidebar-content .collapse .nav-item:last-child::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: 0;
+    width: 1px;
+    height: 50%; /* Che phần đường line từ giữa bottom của menu con cuối cùng trở xuống */
+    background-color: #ffffff; /* Màu nền sidebar để che đường line */
+    z-index: 2;
+    pointer-events: none;
+}
+
+.sidebar-content .collapse .nav-link {
+    padding-left: 22px !important; /* Line (12px) + gap (8px) = 20px, thêm 2px để icon không chồng */
+    font-size: 12px;
+    line-height: 26px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-right: 12px;
+    position: relative;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+    gap: 6px;
+}
+
+/* Đường kẻ ngang từ đường dọc đến text của mỗi child item */
+.sidebar-content .collapse .nav-item {
+    position: relative;
+}
+
+.sidebar-content .collapse .nav-link::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Bắt đầu từ đường dọc */
+    top: 50%;
+    width: 8px; /* Độ dài đường ngang - từ line (12px) đến icon (20px) */
+    height: 1px;
+    background-color: #E6E9EC;
+    z-index: 1;
+    transform: translateY(-50%);
+}
+
+
+.sidebar-content .collapse .nav-link i {
+    font-size: 18px;
+    width: 18px;
+    min-width: 18px;
+    max-width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+/* Expandable Menu Items (Parent items with dropdown) */
+.sidebar-content .nav-link[data-bs-toggle="collapse"] {
+    cursor: pointer;
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"] svg {
+    color: #637381;
+    fill: #637381;
+    transition: transform 0.2s ease;
+    margin-left: auto;
+}
+
+.sidebar-content .nav-link:hover svg {
+    color: #637381;
+    fill: #637381;
+}
+
+.sidebar-content .nav-link:hover svg path {
+    fill: #637381 !important;
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] svg,
+.sidebar-content .nav-link.active svg {
+    transform: rotate(90deg);
+    color: #1C252E;
+    fill: #1C252E;
+}
+
+.sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] svg path,
+.sidebar-content .nav-link.active svg path {
+    fill: #1C252E !important;
+}
+
+/* Đảm bảo tất cả SVG toggle có fill color đúng */
+.sidebar-content .nav-link[data-bs-toggle="collapse"] svg path {
+    fill: currentColor;
+}
+
+/* Collapse container styling */
+.sidebar-content .collapse {
+    background-color: transparent;
+}
+
+.sidebar-content .collapse.show {
+    background-color: transparent;
+}
+
+/* Scrollbar Styling */
+.sidebar-content::-webkit-scrollbar,
+.sidebar-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track,
+.sidebar-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb,
+.sidebar-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover,
+.sidebar-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar Collapsed State */
+#sidebar.collapsed {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    background-color: #ffffff;
+    overflow: visible;
+}
+
+#sidebar.collapsed .sidebar-header {
+    padding: 0.75rem 0.25rem 0.25rem 0.25rem;
+    text-align: center;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    height: 52px;
+}
+
+/* Hiển thị logo khi collapsed - cho phép text xuống dòng */
+#sidebar.collapsed .sidebar-header .logo-container {
+    position: relative;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 32px;
+    height: 32px;
+    max-width: 32px;
+    overflow: visible;
+    align-items: center;
+    justify-content: center;
+}
+
+#sidebar.collapsed .sidebar-header .logo-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1rem !important;
+}
+
+#sidebar.collapsed .sidebar-header .brand-name {
+    width: 32px !important;
+    height: 32px !important;
+    overflow: hidden !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    white-space: nowrap !important;
+}
+
+#sidebar.collapsed .sidebar-header .brand-name::before {
+    content: 'T9';
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(29, 123, 245, 0.18);
+    border-radius: 9px;
+    background: #f4f8ff;
+    color: #1d7bf5;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(29, 123, 245, 0.08);
+}
+
+#sidebar.collapsed .sidebar-scrollable {
+    width: 100%;
+    height: calc(100% - 52px);
+    overflow: visible;
+}
+
+#sidebar.collapsed .sidebar-content {
+    overflow: visible;
+}
+
+#sidebar.collapsed .nav-link {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0px 0px !important; /* Không có padding để icon có đủ không gian */
+    flex-direction: column !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    text-align: center !important;
+    width: calc(100% - 8px) !important;
+    display: flex !important;
+    color: #495057 !important;
+    margin: 0.18rem 4px !important;
+    border-radius: 7px !important;
+}
+
+#sidebar.collapsed .nav-link:hover {
+    background-color: transparent !important;
+    color: #637381 !important;
+}
+
+/* Chỉ ẩn span chứa text, không ẩn span chứa icon */
+/* Sử dụng cách tiếp cận khác vì :has() có thể không được hỗ trợ */
+#sidebar.collapsed .nav-link > span {
+    display: none !important;
+}
+
+/* Đảm bảo span chứa icon luôn hiển thị nhưng ẩn text bên trong */
+#sidebar.collapsed .nav-link > span.d-flex {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+/* Ẩn text bên trong span.d-flex khi collapsed */
+#sidebar.collapsed .nav-link > span.d-flex > span {
+    display: none !important;
+}
+
+/* Chỉ hiển thị icon trong span.d-flex khi collapsed */
+#sidebar.collapsed .nav-link > span.d-flex > i {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Đảm bảo icon luôn hiển thị, ngay cả khi nằm trong span */
+#sidebar.collapsed .nav-link span i,
+#sidebar.collapsed .nav-link > i {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Icon của menu cha - luôn hiển thị khi collapsed - Phải là square (hình vuông) - width = height */
+/* Icon phải khớp với nav-link height 40px - icon = 40px x 40px square */
+#sidebar.collapsed .nav-link i,
+#sidebar.collapsed .nav-link span i,
+#sidebar.collapsed .nav-item .nav-link i,
+#sidebar.collapsed .nav-item .nav-link span i {
+    margin: 0 auto !important;
+    font-size: 22px !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    line-height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #637381 !important;
+    opacity: 1 !important;
+    font-weight: 400 !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    padding: 0 !important;
+    text-align: center !important;
+}
+
+/* Override FontAwesome classes khi collapsed - Phải là square - width = height = 40px */
+#sidebar.collapsed .nav-link i.fa-fw {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    line-height: 30px !important;
+    text-align: center;
+}
+
+#sidebar.collapsed .nav-link i.me-2 {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* Đảm bảo ::before của icon hiển thị đúng - Phải là square - width = height = 40px */
+#sidebar.collapsed .nav-link i::before,
+#sidebar.collapsed .nav-link span i::before,
+#sidebar.collapsed .nav-item .nav-link i::before,
+#sidebar.collapsed .nav-item .nav-link span i::before {
+    display: block !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+    line-height: 30px;
+    font-size: 22px;
+    font-weight: 900;
+    box-sizing: border-box;
+    visibility: visible;
+    opacity: 1;
+    text-align: center;
+    margin: 0 auto;
+}
+
+#sidebar.collapsed .nav-link:hover i,
+#sidebar.collapsed .nav-link:hover span i {
+    color: #637381 !important;
+    opacity: 1 !important;
+}
+
+#sidebar.collapsed .nav-link.active i,
+#sidebar.collapsed .nav-link.active span i {
+    color: #1d7bf5 !important;
+    opacity: 1 !important;
+}
+
+#sidebar.collapsed .nav-link.active {
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    font-style: normal;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    background-color: #ebf3ff !important;
+}
+
+#sidebar.collapsed .nav-link.active i {
+    color: #1d7bf5 !important;
+    opacity: 1;
+}
+
+/* Submenu items khi collapsed - ẩn mặc định, hiển thị khi hover */
+/* CHỈ áp dụng khi sidebar collapsed VÀ collapse không có class .show (Bootstrap) */
+#sidebar.collapsed .nav-item .collapse:not(.show) {
+    display: none !important;
+    position: absolute !important;
+    left: calc(100% + 8px) !important; /* Bên phải sidebar với khoảng cách 8px */
+    top: 0 !important;
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    min-width: 200px !important;
+    padding: 8px 0 !important;
+    z-index: 9999 !important; /* Tăng z-index cao hơn sidebar (1000) và các elements khác */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateX(-10px) !important;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+}
+
+/* Đảm bảo khi sidebar expanded, collapse hoạt động bình thường với Bootstrap */
+#sidebar:not(.collapsed) .nav-item .collapse {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    min-width: auto !important;
+    padding: 0 !important;
+    z-index: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    margin: 0 !important;
+}
+
+/* Hiển thị submenu khi nav-item có class submenu-hover */
+#sidebar.collapsed .nav-item.submenu-hover .collapse {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Hiển thị submenu khi hover vào nav-item có collapse - với specificity cao nhất */
+#sidebar.collapsed .nav-item:hover .collapse,
+#sidebar.collapsed .nav-item:hover > .collapse,
+#sidebar.collapsed .nav-item:hover div.collapse {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important; /* Đảm bảo z-index cao khi hiển thị */
+}
+
+/* Đảm bảo collapse hiển thị khi hover vào nav-link */
+#sidebar.collapsed .nav-item .nav-link:hover ~ .collapse,
+#sidebar.collapsed .nav-item .nav-link[data-bs-toggle="collapse"]:hover ~ .collapse {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Đảm bảo khi hover vào collapse, nó vẫn hiển thị */
+#sidebar.collapsed .nav-item .collapse:hover {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Khi collapsed, NGĂN CHẶN .collapse.show hiển thị trong sidebar */
+/* CHỈ cho phép hiển thị khi hover (qua submenu-hover class hoặc hover state) */
+#sidebar.collapsed .nav-item .collapse.show {
+    /* Vẫn giữ position absolute và các style popup */
+    position: absolute !important;
+    left: calc(100% + 8px) !important;
+    top: 0 !important;
+    background-color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    min-width: 200px !important;
+    padding: 8px 0 !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    /* NHƯNG mặc định vẫn ẩn, chỉ hiển thị khi hover */
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateX(-10px) !important;
+    pointer-events: none !important;
+}
+
+/* Style cho submenu items khi collapsed và hiển thị dạng popup */
+#sidebar.collapsed .collapse {
+    position: relative;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+#sidebar.collapsed .collapse .nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: #637381 !important;
+}
+
+#sidebar.collapsed .collapse .nav-link.active {
+    background-color: rgba(25, 118, 210, 0.08) !important;
+    color: #1d7bf5 !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    padding-left: 22px !important; /* Đồng nhất với padding-left */
+    border-left: none !important;
+    font-size: 12px !important;
+    line-height: 26px !important;
+}
+
+/* Đường kẻ dọc từ parent item xuống submenu khi collapsed - bắt đầu từ menu con đầu tiên */
+#sidebar.collapsed .collapse::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Vị trí đường dọc trong popup - trước icon */
+    top: 0; /* Bắt đầu từ top của collapse (menu con đầu tiên) */
+    bottom: 0; /* Kéo dài đến bottom của collapse */
+    width: 1px;
+    background-color: #E6E9EC;
+    z-index: 0;
+}
+
+/* Che line dọc ở menu cha khi collapsed bằng màu nền - khớp chính xác với màu nền của menu cha */
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 12px; /* Che từ left edge đến vị trí line (12px) */
+    background-color: #FFFFFF; /* Màu mặc định khi đóng - cùng màu với sidebar */
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Đảm bảo menu cha có background-color khi collapsed */
+/* Mặc định khi đóng: cùng màu với sidebar (#FFFFFF) */
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"] {
+    background-color: #FFFFFF !important; /* Màu nền mặc định khi đóng - cùng màu với sidebar */
+}
+
+/* CHỈ khi menu cha expanded trong collapsed sidebar mới có màu đậm - và ::before cũng phải cùng màu */
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"],
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed) {
+    background-color: #E6E9EC; /* Màu đậm khi expanded */
+}
+
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::before,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::before {
+    background-color: #E6E9EC !important; /* Cùng màu với menu cha khi expanded */
+}
+
+/* Khi menu cha expanded và active trong collapsed sidebar, ưu tiên màu active - và ::before cũng phải cùng màu */
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active {
+    background-color: #ebf3ff; /* Màu nền khi active và expanded */
+}
+
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active::before,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active::before {
+    background-color: #ebf3ff !important; /* Cùng màu với menu cha khi active và expanded */
+}
+
+/* Đảm bảo menu cha active nhưng chưa expanded vẫn có màu sidebar (#FFFFFF) */
+/* Override rule .nav-link.active cho menu cha chưa expanded trong collapsed sidebar với specificity cao hơn */
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"],
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"]) {
+    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng */
+}
+
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"]::before,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed::before,
+#sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"])::before {
+    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+}
+
+/* Đoạn line ngắn từ menu cha xuống menu con đầu tiên khi collapsed - chỉ hiển thị khi collapse được mở */
+#sidebar.collapsed .nav-item .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::after,
+#sidebar.collapsed .nav-item .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: 0;
+    width: 1px;
+    height: 8px; /* Độ dài đoạn line nối từ menu cha xuống menu con đầu tiên */
+    background-color: #E6E9EC;
+    z-index: 11; /* Cao hơn ::before để vẫn hiển thị */
+    pointer-events: none;
+}
+
+/* Ẩn phần đường line vượt quá bottom của menu con cuối cùng khi collapsed */
+#sidebar.collapsed .collapse .nav-item:last-child::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    bottom: 0;
+    width: 1px;
+    height: 50%; /* Che phần đường line từ giữa bottom của menu con cuối cùng trở xuống */
+    background-color: #ffffff; /* Màu nền popup để che đường line */
+    z-index: 2;
+    pointer-events: none;
+}
+#sidebar.collapsed .collapse::after {
+    display: none; /* Không cần đường dọc thứ 2 */
+}
+#sidebar.collapsed .collapse .nav-link {
+    padding: 8px 12px !important;
+    padding-left: 22px !important; /* Đồng nhất với expanded state */
+    color: #637381 !important;
+    font-size: 12px !important;
+    line-height: 26px !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border-radius: 0 !important;
+    min-height: 36px !important;
+    flex-direction: row !important;
+    text-align: left !important;
+    width: 100% !important;
+    position: relative;
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+}
+
+/* Đường kẻ ngang cho mỗi child item khi collapsed */
+#sidebar.collapsed .collapse .nav-item {
+    position: relative;
+}
+
+#sidebar.collapsed .collapse .nav-link::before {
+    content: '';
+    position: absolute;
+    left: 12px; /* Bắt đầu từ đường dọc */
+    top: 50%;
+    width: 8px; /* Độ dài đường ngang - từ line đến icon */
+    height: 1px;
+    background-color: #E6E9EC;
+    z-index: 1;
+    transform: translateY(-50%);
+}
+
+/* Đường kẻ ngang cho mỗi child item khi collapsed */
+#sidebar.collapsed .collapse .nav-item {
+    position: relative;
+}
+
+/* Icon trong submenu popup */
+#sidebar.collapsed .collapse .nav-link i {
+    font-size: 18px !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    height: 18px !important;
+    margin-right: 6px !important;
+    margin-left: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* Text trong submenu popup */
+#sidebar.collapsed .collapse .nav-link span {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+
+/* Đảm bảo nav-item có position relative để popup position đúng */
+#sidebar.collapsed .nav-item {
+    position: relative;
+}
+
+/* Điều chỉnh vị trí popup để căn chỉnh với icon */
+#sidebar.collapsed .nav-item .collapse {
+    top: 0;
+    margin-top: 0;
+}
+
+/* Đảm bảo ul trong collapse có style đúng */
+#sidebar.collapsed .collapse ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Arrow icon trong menu cha khi collapsed - ẩn */
+#sidebar.collapsed .nav-link svg {
+    display: none !important;
+}
+
+#sidebar.collapsed .nav-item:hover .collapse.show,
+#sidebar.collapsed .nav-item.submenu-hover .collapse.show,
+#sidebar.collapsed .nav-item .collapse.show:hover {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+    pointer-events: auto !important;
+    z-index: 9999 !important;
+}
+
+/* Main Content Base Styles */
+#main-content {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+    min-height: 100vh;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    background-color: var(--bb-main-bg, #ffffff);
+    padding: 0;
+    padding-bottom: 50px;
+    border-left: 1px solid rgba(145, 158, 171, 0.12);
+}
+
+/* Main Content when Sidebar Collapsed */
+#main-content.sidebar-collapsed {
+    margin-left: 64px;
+    width: calc(100% - 64px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* Toggle button position when sidebar collapsed - Đưa về đúng ranh giới và căn giữa với logo */
+#main-content.sidebar-collapsed #sidebar-toggle-desktop {
+    left: 51px !important;
+    top: 17px !important;
+}
+
+/* Mobile Toggle Button */
+#sidebar-toggle-mobile {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#sidebar-toggle-mobile i {
+    font-size: 18px;
+    color: #6c757d;
+}
+
+#sidebar-toggle-mobile:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+/* Mobile Offcanvas Sidebar */
+#sidebar-offcanvas {
+    width: 280px !important;
+    max-width: 85vw !important;
+}
+
+#sidebar-offcanvas .offcanvas-header {
+    border-bottom: 1px solid rgba(145, 158, 171, 0.12);
+    padding: 16px;
+}
+
+#sidebar-offcanvas .offcanvas-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #1d7bf5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#sidebar-offcanvas .offcanvas-body {
+    padding: 0;
+    overflow-y: auto;
+}
+
+/* Mobile Sidebar Content */
+#sidebar-mobile {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar-mobile .sidebar-header {
+    position: relative;
+    padding: 16px;
+    border-bottom: 1px solid rgba(145, 158, 171, 0.12);
+    display: none; /* Ẩn logo trong sidebar-header vì đã có logo trong offcanvas-header */
+}
+
+#sidebar-mobile .sidebar-scrollable {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Hide desktop sidebar on mobile */
+@media (max-width: 991.98px) {
+    #sidebar {
+        display: none !important;
+    }
+    
+    #main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    #sidebar-toggle-desktop {
+        display: none !important;
+    }
+}
+
+/* Show desktop sidebar on large screens */
+@media (min-width: 992px) {
+    #sidebar-offcanvas {
+        display: none !important;
+    }
+    
+    #sidebar-toggle-mobile {
+        display: none !important;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    #sidebar {
+        width: 220px;
+        min-width: 220px;
+        max-width: 220px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    #sidebar.collapsed {
+        transform: translateX(0);
+    }
+    
+    .sidebar-content,
+    .sidebar-scrollable {
+        width: 100%;
+        height: auto;
+        padding: 0px;
+    }
+    
+    #main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    #main-content.sidebar-collapsed {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    /* Toggle button trên mobile */
+    #sidebar-toggle-desktop {
+        left: 13px !important;
+        z-index: 1002;
+    }
+    
+    #main-content.sidebar-collapsed #sidebar-toggle-desktop {
+        left: 290px !important;
+    }
+}

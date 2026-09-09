@@ -1,0 +1,197 @@
+@page "/menu-arrangement"
+@namespace BootstrapBlazor.Server.Components.Task9
+@layout PageLayout
+@inherits BootstrapComponentBase
+
+@using BootstrapBlazor.Components
+@using BootstrapBlazor.Server.Services
+
+<PageTitle>Sắp xếp menu</PageTitle>
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-1"><i class="fa-solid fa-sitemap me-2"></i>Sắp xếp menu</h4>
+            <span class="text-muted">Kéo-thả hoặc dùng nút ▲▼◀▶ để đổi thứ tự module/page, chuyển page sang module khác, hoặc thêm module mới. Nút <i class="fa-solid fa-pen"></i> đổi tên hiển thị, nút <i class="fa-solid fa-trash"></i> xoá khỏi menu (chỉ ẩn sidebar, khôi phục lại được — không xoá trang, URL vẫn vào được nếu có quyền). Lưu để áp dụng (F5 để xem).</span>
+        </div>
+        <div>
+            <Button Color="Color.Secondary" Icon="fa-solid fa-rotate" OnClick="ReloadAsync" IsDisabled="@IsBusy">Tải lại</Button>
+            <Button Color="Color.Primary" Icon="fa-solid fa-floppy-disk" OnClick="SaveAsync" IsDisabled="@(!IsDirty || IsBusy)">Lưu</Button>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Trang mặc định khi đăng nhập theo vai trò</strong>
+            <Button Color="Color.Primary" Icon="fa-solid fa-floppy-disk" OnClick="SaveRoleDefaultsAsync" IsDisabled="@IsBusy">Lưu</Button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Vai trò</th><th>Trang mặc định</th></tr></thead>
+                    <tbody>
+                        @foreach (var role in RoleDefaults)
+                        {
+                            <tr>
+                                <td>@role.RoleName</td>
+                                <td>
+                                    <Select TValue="string" @bind-Value="role.DefaultPageUrl">
+                                        <Options>
+                                            <SelectOption Text="Theo mặc định hệ thống" Value="" />
+                                            @foreach (var page in DefaultPageOptions)
+                                            {
+                                                <SelectOption Text="@(page.Text)" Value="@(page.Url)" />
+                                            }
+                                        </Options>
+                                    </Select>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-arrangement-add-module mb-3">
+        <input class="form-control form-control-sm" style="max-width:220px" placeholder="Tên module mới"
+               @bind="NewModuleName" @bind:event="oninput" />
+        <input class="form-control form-control-sm" style="max-width:220px" placeholder="Icon (vd: fa-solid fa-folder)"
+               @bind="NewModuleIcon" @bind:event="oninput" />
+        <i class="@NewModuleIcon menu-arrangement-icon-preview" title="Xem trước icon"></i>
+        <Button Color="Color.Secondary" Icon="fa-solid fa-plus" OnClick="AddModule">Thêm module</Button>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="text-center py-5"><Spinner /></div>
+    }
+    else
+    {
+        <div class="menu-arrangement-columns">
+            @for (var moduleIndex = 0; moduleIndex < Modules.Count; moduleIndex++)
+            {
+                var module = Modules[moduleIndex];
+                var mIndex = moduleIndex;
+                <div class="menu-arrangement-column"
+                     draggable="true"
+                     @ondragstart="() => OnModuleDragStart(module.Text)"
+                     @ondragover:preventDefault
+                     @ondrop="() => OnDropOnModule(module)">
+                    <div class="menu-arrangement-column-header">
+                        <i class="@module.Icon"></i>
+                        <span class="fw-bold">@module.Text</span>
+                        <div class="ms-auto btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" title="Đưa module lên"
+                                    disabled="@(mIndex == 0)" @onclick="() => MoveModule(mIndex, -1)">
+                                <i class="fa-solid fa-angle-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" title="Đưa module xuống"
+                                    disabled="@(mIndex == Modules.Count - 1)" @onclick="() => MoveModule(mIndex, 1)">
+                                <i class="fa-solid fa-angle-down"></i>
+                            </button>
+                            @if (module.Items.Count == 0 && IsCustomModule(module))
+                            {
+                                <button type="button" class="btn btn-outline-danger" title="Xóa module rỗng"
+                                        @onclick="() => RemoveEmptyModule(module)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                    <div class="menu-arrangement-column-body">
+                        @for (var pageIndex = 0; pageIndex < module.Items.Count; pageIndex++)
+                        {
+                            var pg = module.Items[pageIndex];
+                            var pIndex = pageIndex;
+                            <div class="menu-arrangement-card @(pg.Enabled ? "" : "menu-arrangement-card-disabled")" draggable="@(!pg.IsHiddenByDefault && RenamingUrl != pg.Url)"
+                                 @ondragstart="() => OnPageDragStart(module.Text, pg.Url)">
+                                @if (RenamingUrl == pg.Url)
+                                {
+                                    <i class="@pg.Icon menu-arrangement-card-icon"></i>
+                                    <input class="form-control form-control-sm menu-arrangement-rename-input"
+                                           placeholder="Tên hiển thị trên menu" maxlength="256"
+                                           @ref="RenameInput"
+                                           @bind="RenameDraft" @bind:event="oninput"
+                                           @onkeydown="e => OnRenameKeyDown(e, pg)" />
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-success" title="Lưu tên mới"
+                                                @onclick="() => CommitRename(pg)">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Về tên gốc trong code: @pg.DefaultText"
+                                                disabled="@(pg.Text == pg.DefaultText)" @onclick="() => ResetRename(pg)">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Huỷ"
+                                                @onclick="CancelRename">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                <i class="@pg.Icon menu-arrangement-card-icon"></i>
+                                <span class="menu-arrangement-card-text" title="@(pg.Text == pg.DefaultText ? pg.Text : $"{pg.Text} (tên gốc: {pg.DefaultText})")">@pg.Text</span>
+                                @if (pg.Text != pg.DefaultText)
+                                {
+                                    <span class="badge text-bg-info" title="Đã đổi tên — tên gốc trong code: @pg.DefaultText">Đã đổi tên</span>
+                                }
+                                @if (!pg.Enabled)
+                                {
+                                    <span class="badge text-bg-warning" title="Không hiện trên sidebar — bấm khôi phục để hiện lại">Đã ẩn</span>
+                                }
+                                @if (pg.IsHiddenByDefault)
+                                {
+                                    <span class="badge text-bg-secondary ms-auto" title="Trang ẩn mặc định — không đổi module/thứ tự được, chỉ xoá khỏi menu / khôi phục">Ẩn mặc định</span>
+                                }
+                                else
+                                {
+                                    <div class="btn-group btn-group-sm ms-auto">
+                                        <button type="button" class="btn btn-outline-secondary" title="Chuyển sang module trước"
+                                                disabled="@(mIndex == 0)" @onclick="() => MovePageToModule(module, pg, -1)">
+                                            <i class="fa-solid fa-angle-left"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Đưa lên"
+                                                disabled="@(pIndex == 0)" @onclick="() => MovePage(module, pIndex, -1)">
+                                            <i class="fa-solid fa-angle-up"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Đưa xuống"
+                                                disabled="@(pIndex == module.Items.Count - 1)" @onclick="() => MovePage(module, pIndex, 1)">
+                                            <i class="fa-solid fa-angle-down"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Chuyển sang module sau"
+                                                disabled="@(mIndex == Modules.Count - 1)" @onclick="() => MovePageToModule(module, pg, 1)">
+                                            <i class="fa-solid fa-angle-right"></i>
+                                        </button>
+                                    </div>
+                                }
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary" title="Đổi tên hiển thị trên menu"
+                                            @onclick="() => StartRename(pg)">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    @if (pg.Enabled)
+                                    {
+                                        <button type="button" class="btn btn-outline-danger" title="Xoá khỏi menu — chỉ ẩn trên sidebar, khôi phục lại được; trang vẫn vào được bằng URL nếu có quyền"
+                                                @onclick="() => ToggleEnabled(pg)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-outline-success" title="Khôi phục lên menu"
+                                                @onclick="() => ToggleEnabled(pg)">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                    }
+                                </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

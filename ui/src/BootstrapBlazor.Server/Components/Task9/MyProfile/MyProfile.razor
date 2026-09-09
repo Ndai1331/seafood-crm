@@ -1,0 +1,395 @@
+@page "/my-profile"
+@using BootstrapBlazor.Components
+@using BootstrapBlazor.Server.Data
+@using BootstrapBlazor.Server.Services
+@layout PageLayout
+
+<div id="page-my-profile">
+<DemoBlock Title="" Name="MyProfile">
+    @if (IsLoadingData)
+    {
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải thông tin cá nhân...</p>
+        </div>
+    }
+    else if (Model != null)
+    {
+        <!-- Profile Header Card -->
+        <div class="profile-header-card mb-4">
+            <div class="d-flex align-items-center gap-3 gap-sm-4">
+                <div class="profile-avatar">
+                    @if (!string.IsNullOrEmpty(AvatarUrl))
+                    {
+                        <img src="@AvatarUrl" alt="@FullName" class="avatar-img"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="avatar-initials" style="display: none;">@Initials</div>
+                    }
+                    else
+                    {
+                        <div class="avatar-initials">@Initials</div>
+                    }
+                </div>
+                <div class="profile-info flex-grow-1">
+                    <h2 class="profile-name mb-1">@FullName</h2>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="profile-badge badge-code">
+                            <i class="fa-solid fa-id-badge me-1"></i>@UserCode
+                        </span>
+                        @if (!string.IsNullOrEmpty(DisplayRole))
+                        {
+                            <span class="profile-badge badge-role">
+                                <i class="fa-solid fa-shield-halved me-1"></i>@DisplayRole
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(DisplayPosition))
+                        {
+                            <span class="profile-badge badge-position">
+                                <i class="fa-solid fa-briefcase me-1"></i>@DisplayPosition
+                            </span>
+                        }
+                        @if (!string.IsNullOrEmpty(DisplayTeam))
+                        {
+                            <span class="profile-badge badge-team">
+                                <i class="fa-solid fa-users me-1"></i>@DisplayTeam
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <ValidateForm Model="@Model" OnValidSubmit="@OnValidSubmit">
+
+            <!-- Section: Thông tin cá nhân -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <div>
+                        <h3 class="form-card-title">Thông tin cá nhân</h3>
+                        <p class="form-card-subtitle">Cập nhật họ tên, liên hệ và thông tin cơ bản</p>
+                    </div>
+                </div>
+                <div class="form-card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <BootstrapInput @bind-Value="@Model.FirstName"
+                                DisplayText="Họ"
+                                ShowLabel="true"
+                                placeholder="Nhập họ" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <BootstrapInput @bind-Value="@Model.LastName"
+                                DisplayText="Tên"
+                                ShowLabel="true"
+                                placeholder="Nhập tên" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <BootstrapInput @bind-Value="@Model.Email"
+                                DisplayText="Email"
+                                ShowLabel="true"
+                                placeholder="Nhập email" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <BootstrapInput @bind-Value="@Model.PhoneNumber"
+                                DisplayText="Số điện thoại"
+                                ShowLabel="true"
+                                placeholder="Nhập số điện thoại" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <Select @bind-Value="@Model.Gender"
+                                DisplayText="Giới tính"
+                                ShowLabel="true" Class="seo-input-size" Size="Size.Large">
+                                <Options>
+                                    <SelectOption Value="1" Text="Nam" />
+                                    <SelectOption Value="0" Text="Nữ" />
+                                    <SelectOption Value="2" Text="Không xác định" />
+                                </Options>
+                            </Select>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <DateTimePicker @bind-Value="@Model.DOB"
+                                DisplayText="Ngày sinh"
+                                ShowLabel="true"
+                                DateFormat="dd/MM/yyyy" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+
+                        <div class="col-12">
+                            <BootstrapInput @bind-Value="@Model.Address"
+                                DisplayText="Địa chỉ"
+                                ShowLabel="true"
+                                placeholder="Nhập địa chỉ" Class="seo-input-size" Size="Size.Large" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Đổi mật khẩu -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon icon-password">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="form-card-title">Bảo mật</h3>
+                        <p class="form-card-subtitle">Thay đổi mật khẩu đăng nhập</p>
+                    </div>
+                    <div class="password-toggle">
+                        <Switch @bind-Value="@Model.IsSetPassword"
+                            DisplayText=""
+                            ShowLabel="false"
+                            OnColor="Color.Success"
+                            OffColor="Color.Secondary" />
+                    </div>
+                </div>
+                @if (Model.IsSetPassword)
+                {
+                    <div class="form-card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <BootstrapInput @bind-Value="@Model.Password"
+                                    DisplayText="Mật khẩu mới"
+                                    ShowLabel="true"
+                                    Type="text"
+                                    placeholder="Nhập mật khẩu mới" Class="seo-input-size" Size="Size.Large" />
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <BootstrapInput @bind-Value="@Model.PasswordConfirm"
+                                    DisplayText="Xác nhận mật khẩu"
+                                    ShowLabel="true"
+                                    Type="text"
+                                    placeholder="Nhập lại mật khẩu" Class="seo-input-size" Size="Size.Large" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (TotpStatusLoaded)
+            {
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <div class="form-card-icon icon-totp">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="form-card-title">Google Authenticator</h3>
+                            <p class="form-card-subtitle">Bật hoặc tắt xác thực hai bước cho tài khoản này</p>
+                        </div>
+                        <span class="totp-status @(TotpEnabled ? "enabled" : "disabled")">
+                            @(TotpEnabled ? "Đang bật" : "Đang tắt")
+                        </span>
+                    </div>
+                    <div class="form-card-body">
+                        @if (!TotpFeatureEnabled)
+                        {
+                            <div class="text-muted">Google Authenticator đang tắt ở cấu hình hệ thống.</div>
+                        }
+                        else if (IsLoadingTotp)
+                        {
+                            <div class="text-muted">Đang tải trạng thái Authenticator...</div>
+                        }
+                        else if (!TotpEnabled)
+                        {
+                            @if (TotpSetup == null)
+                            {
+                                <Button ButtonType="ButtonType.Button"
+                                    Color="Color.Primary"
+                                    Icon="fa-solid fa-qrcode"
+                                    OnClick="@OnStartTotpSetup"
+                                    IsDisabled="@IsTotpBusy">
+                                    Tạo mã QR
+                                </Button>
+                            }
+                            else
+                            {
+                                <div class="totp-setup">
+                                    <QRCode Content="@TotpSetup.ProvisioningUri" Width="180"></QRCode>
+                                    <div class="totp-setup-fields">
+                                        <div class="small text-muted mb-2">Secret: <code>@TotpSetup.Base32Secret</code></div>
+                                        <BootstrapInput @bind-Value="@TotpConfirmCode"
+                                            DisplayText="Mã xác nhận"
+                                            ShowLabel="true"
+                                            placeholder="Nhập mã 6 số" Class="seo-input-size" />
+                                        <Button ButtonType="ButtonType.Button"
+                                            Class="mt-2"
+                                            Color="Color.Success"
+                                            Icon="fa-solid fa-check"
+                                            OnClick="@OnConfirmTotpSetup"
+                                            IsDisabled="@IsTotpBusy">
+                                            Bật Authenticator
+                                        </Button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="totp-actions">
+                                <div class="text-muted mb-3">Recovery codes còn lại: <b>@RemainingRecoveryCodes</b></div>
+                                <BootstrapInput @bind-Value="@TotpActionCode"
+                                    DisplayText="Mã Authenticator"
+                                    ShowLabel="true"
+                                    placeholder="Nhập mã 6 số để thao tác" Class="seo-input-size" />
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <Button ButtonType="ButtonType.Button"
+                                        Color="Color.Warning"
+                                        Icon="fa-solid fa-rotate"
+                                        OnClick="@OnRegenerateRecoveryCodes"
+                                        IsDisabled="@IsTotpBusy">
+                                        Tạo lại recovery codes
+                                    </Button>
+                                    <Button ButtonType="ButtonType.Button"
+                                        Color="Color.Danger"
+                                        Icon="fa-solid fa-ban"
+                                        OnClick="@OnDisableTotp"
+                                        IsDisabled="@IsTotpBusy">
+                                        Tắt Authenticator
+                                    </Button>
+                                </div>
+                            </div>
+                        }
+
+                        @if (RecoveryCodes.Any())
+                        {
+                            <div class="totp-recovery-codes mt-3">
+                                <div class="fw-semibold mb-2">Recovery codes chỉ hiển thị một lần</div>
+                                <div class="totp-code-grid">
+                                    @foreach (var recoveryCodeItem in RecoveryCodes)
+                                    {
+                                        <code>@recoveryCodeItem</code>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* The security-key card lives in its own component: the profile page is a page, and
+               key management is a job of its own. *@
+            <YubikeySection OnKeysCounted="OnYubikeyKeysCounted" />
+
+            @* Backup keys: the WebAuthn ceremony, deliberately back on this page as the spare
+               rather than the main door. A browser passkey is a second key that costs nothing —
+               and once passwords are off, another key is the only thing that survives losing the
+               first one; the authenticator cannot help there because it sits behind a password. *@
+            @if (SecurityKeyFeatureEnabled)
+            {
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <div class="form-card-icon icon-totp">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="form-card-title">Khoá dự phòng (passkey)</h3>
+                            <p class="form-card-subtitle">
+                                Touch ID, Windows Hello hoặc passkey trên điện thoại — khoá thứ hai
+                                không cần mua thêm thiết bị
+                            </p>
+                        </div>
+                        <span class="totp-status @(SecurityKeys.Count > 0 ? "enabled" : "disabled")">
+                            @(SecurityKeys.Count > 0 ? $"{SecurityKeys.Count} passkey" : "Chưa có")
+                        </span>
+                    </div>
+
+                    <div class="form-card-body">
+                        @if (IsLoadingSecurityKeys)
+                        {
+                            <div class="text-muted">Đang tải danh sách passkey...</div>
+                        }
+                        else
+                        {
+                            @foreach (var key in SecurityKeys)
+                            {
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-fingerprint text-muted"></i>
+                                    <div class="flex-grow-1">
+                                        <div>@key.DeviceName</div>
+                                        <div class="small text-muted">
+                                            Đăng ký @key.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                            @(key.LastUsedAt.HasValue
+                                                ? $" · Dùng gần nhất {key.LastUsedAt.Value.ToLocalTime():dd/MM/yyyy HH:mm}"
+                                                : "")
+                                        </div>
+                                    </div>
+                                    <Button ButtonType="ButtonType.Button" Color="Color.Danger"
+                                            Icon="fa-solid fa-trash" IsDisabled="@IsSecurityKeyBusy"
+                                            OnClick="@(() => OnDeleteSecurityKey(key))">
+                                        Gỡ
+                                    </Button>
+                                </div>
+                            }
+
+                            @* Native id on purpose: the ceremony must start inside the user's own
+                               click, so JS binds to this exact button and Blazor never sits in the
+                               middle of the gesture. *@
+                            <div style="max-width: 380px;">
+                                <button type="button" id="webauthn-register-key" class="btn btn-primary"
+                                        disabled="@IsSecurityKeyBusy">
+                                    <i class="fa-solid fa-plus me-1"></i>
+                                    @(SecurityKeys.Count == 0 ? "Đăng ký passkey" : "Thêm passkey khác")
+                                </button>
+                            </div>
+
+                            @if (SecondFactorCountReady && SecondFactorCount == 1)
+                            {
+                                <div class="alert alert-warning py-2 mt-3 mb-0">
+                                    Bạn đang có đúng <strong>một</strong> cách xác thực. Mất nó là phải
+                                    nhờ quản trị viên gỡ khoá mới vào lại được — thêm một passkey hoặc
+                                    bật Authenticator để tự cứu mình.
+                                </div>
+                            }
+                            else if (SecondFactorCountReady && SecondFactorCount > 1)
+                            {
+                                <div class="small text-muted mt-3 mb-0">
+                                    Tài khoản có @SecondFactorCount cách xác thực
+                                    (@Math.Max(YubikeyKeyCount, 0) YubiKey, @SecurityKeys.Count passkey@(TotpEnabled ? ", Authenticator" : "")).
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            <!-- Actions -->
+            <div class="form-actions">
+                <Button ButtonType="ButtonType.Submit" Class="seo-input-size btn-save" Size="Size.Large"
+                    Color="Color.Primary"
+                    Icon="fa-solid fa-save"
+                    IsDisabled="@IsLoading">
+                    @if (IsLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Lưu thay đổi
+                </Button>
+                <Button Class="seo-input-size btn-reload" Size="Size.Large"
+                    Color="Color.Secondary"
+                    Icon="fa-solid fa-rotate-left"
+                    OnClick="@OnReload"
+                    IsDisabled="@IsLoading">
+                    Tải lại
+                </Button>
+            </div>
+        </ValidateForm>
+    }
+    else
+    {
+        <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            Không tìm thấy thông tin người dùng.
+        </div>
+    }
+</DemoBlock>
+</div>

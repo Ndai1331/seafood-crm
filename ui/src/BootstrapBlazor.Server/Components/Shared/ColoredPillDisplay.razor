@@ -1,0 +1,11 @@
+@namespace BootstrapBlazor.Server.Components.Shared
+
+<span class="colored-pill-display" style="color:@TextColor;">
+    @Text
+</span>
+
+@code {
+    [Parameter] public string Text { get; set; } = "-";
+    [Parameter] public string BgColor { get; set; } = "transparent";
+    [Parameter] public string TextColor { get; set; } = "#212529";
+}

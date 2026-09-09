@@ -1,0 +1,30 @@
+@page "/master-data/payment-terms"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Điều khoản thanh toán</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã (TT20_80)" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.RatiosJson" placeholder='Tỷ lệ JSON, vd [0.2,0.8]' /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu điều khoản</Button></div>
+    </div>
+</div>
+<Table TItem="PaymentTermDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<PaymentTermDto> _rows = new();
+    private PaymentTermDto _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
+    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentTermsAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SavePaymentTermAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu điều khoản"); return; }
+        await Toast.Success("Đã lưu điều khoản");
+        _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
+        _rows = await Api.PaymentTermsAsync() ?? new();
+    }
+}

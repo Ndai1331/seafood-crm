@@ -1,0 +1,435 @@
+@page "/sso-settings"
+@layout PageLayout
+@namespace BootstrapBlazor.Server.Components.Task9
+@using BootstrapBlazor.Components
+@using Microsoft.AspNetCore.Components.Forms
+
+@* The route stays /sso-settings even though workspace-email sign-in is gone. Changing it would
+   mean changing the menu and the URL whitelist in step, and a mismatch there sends users to the
+   Unauthorized screen — a trap this repo has fallen into before. The label is what people read. *@
+
+<PageTitle>Cài đặt đăng nhập</PageTitle>
+
+@if (IsAdmin)
+{
+    <div class="row g-3 mt-1">
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-start gap-2">
+                <i class="fa-solid fa-info-circle mt-1"></i>
+                <div>
+                    <strong>Cài đặt đăng nhập:</strong> quyết định màn đăng nhập cho phép vào bằng
+                    cách nào. Mọi công tắc ở đây có hiệu lực sau tối đa 30 giây.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <h6 class="fw-semibold mb-3">
+                <i class="fa-solid fa-fingerprint me-2"></i>Phương thức đăng nhập
+            </h6>
+
+            @if (WebAuthnStatus == null && WebAuthnLoadError != null)
+            {
+                <div class="alert alert-warning py-2 mb-0">
+                    Không đọc được cài đặt đăng nhập: @WebAuthnLoadError
+                    <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="LoadWebAuthnSettingsAsync">
+                        Thử lại
+                    </button>
+                </div>
+            }
+            else if (WebAuthnStatus == null)
+            {
+                <div class="text-muted">Đang tải cài đặt đăng nhập...</div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3" style="max-width: 680px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <Switch @bind-Value="WebAuthnEnabled" OnText="Bật" OffText="Tắt" />
+                        <span>Bật tính năng khoá bảo mật (user tự đăng ký ở trang Hồ sơ)</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <Switch @bind-Value="WebAuthnEnforced" OnText="Bật" OffText="Tắt"
+                                IsDisabled="@(!WebAuthnEnabled)" />
+                        <span>Bắt buộc mọi user phải có khoá mới đăng nhập được</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <Switch @bind-Value="AllowPasswordLogin" OnText="Bật" OffText="Tắt"
+                                IsDisabled="@(!WebAuthnEnabled)" />
+                        <span>Cho phép đăng nhập bằng mật khẩu</span>
+                    </div>
+
+                    <div class="alert alert-secondary py-2 mb-0">
+                        <div>
+                            Đã đăng ký khoá: <strong>@WebAuthnStatus.UsersWithKey/@WebAuthnStatus.ActiveUsers</strong>
+                            user đang hoạt động.
+                        </div>
+                        <div>
+                            Super admin đã có khoá:
+                            <strong>@WebAuthnStatus.SuperAdminsWithKey/@WebAuthnStatus.ActiveSuperAdmins</strong>
+                            — cần ít nhất 1 để bật bắt buộc.
+                        </div>
+                        <div>
+                            Không còn đường vào nếu tắt mật khẩu:
+                            <strong>@WebAuthnStatus.UsersLockedOut</strong> user — chưa có khoá và chưa
+                            được cấp phép dùng mật khẩu.
+                        </div>
+                        <div class="small text-muted mt-1">
+                            User chưa có khoá không cần làm gì trước: khi bật bắt buộc, họ đăng nhập
+                            bằng mật khẩu rồi đăng ký khoá ngay tại màn hình đăng nhập.
+                        </div>
+                        @if (!WebAuthnStatus.CallerHasKey)
+                        {
+                            <div class="text-danger mt-1">
+                                Tài khoản của bạn chưa có khoá nào.
+                            </div>
+                        }
+                    </div>
+
+                    @* Both boxes mirror the API's own refusal. The API is what actually enforces
+                       this — these only explain it before the round trip. *@
+                    @if (WebAuthnEnforced && !string.IsNullOrEmpty(WebAuthnStatus.EnforcementBlockedReason))
+                    {
+                        <div class="alert alert-danger py-2 d-flex align-items-start gap-2 mb-0">
+                            <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+                            <span>@WebAuthnStatus.EnforcementBlockedReason</span>
+                        </div>
+                    }
+                    else if (WebAuthnEnforced && !WebAuthnStatus.IsEnforced)
+                    {
+                        <div class="alert alert-warning py-2 d-flex align-items-start gap-2 mb-0">
+                            <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+                            <span>
+                                Bật mục này: user chưa có khoá, sau khi nhập đúng mật khẩu, sẽ phải
+                                chạm khoá để đăng ký ngay tại màn đăng nhập rồi mới vào được.
+                                Tắt lại được bất cứ lúc nào tại đây.
+                            </span>
+                        </div>
+                    }
+
+                    @if (!AllowPasswordLogin && !string.IsNullOrEmpty(WebAuthnStatus.PasswordDisableBlockedReason))
+                    {
+                        <div class="alert alert-danger py-2 d-flex align-items-start gap-2 mb-0">
+                            <i class="fa-solid fa-ban mt-1"></i>
+                            <span>@WebAuthnStatus.PasswordDisableBlockedReason</span>
+                        </div>
+                    }
+                    else if (!AllowPasswordLogin && WebAuthnStatus.AllowPasswordLogin)
+                    {
+                        <div class="alert alert-danger py-2 d-flex align-items-start gap-2 mb-0">
+                            <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+                            <span>
+                                <strong>Đọc kỹ trước khi lưu.</strong> Tắt mật khẩu là chỉ còn khoá bảo
+                                mật mở được hệ thống. Ai làm mất khoá mà không có khoá dự phòng sẽ không
+                                còn đường nào tự vào lại — kể cả quản trị viên. Mở lại được tại đây, hoặc
+                                bằng SQL nếu không ai đăng nhập được nữa.
+                            </span>
+                        </div>
+                    }
+
+                    @* Who can actually get in, name by name. The counts above answer "how many";
+                       this answers "who", and it is where the one person who still needs a
+                       password gets handed one. Most of the accounts on this system exist so a
+                       domain can be assigned to a PIC and will never hold a key — which is why
+                       the number of keyless accounts is a number here, not a wall. *@
+                    <hr class="my-1" />
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="fw-semibold">Ai đăng nhập được</span>
+                            <Button Color="Color.Light" Size="Size.ExtraSmall" Icon="fa-solid fa-rotate"
+                                    Text="Tải lại" OnClick="LoadUserAccessAsync"
+                                    IsDisabled="@IsLoadingUserAccess" />
+                        </div>
+                        <div class="small text-muted mb-2">
+                            Bật <strong>Mật khẩu</strong> cho ai cần đăng nhập bằng mật khẩu dù công tắc
+                            chung đã tắt — họ vào một lần rồi đăng ký khoá ngay tại màn đăng nhập. Tắt
+                            lại sau khi họ đã có khoá.
+                        </div>
+
+                        @if (IsLoadingUserAccess && UserAccess.Count == 0)
+                        {
+                            <div class="small text-muted">Đang tải danh sách...</div>
+                        }
+                        else if (UserAccess.Count == 0)
+                        {
+                            <div class="small text-muted">Không đọc được danh sách user.</div>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button"
+                                            class="btn @(AccessFilter == "all" ? "btn-primary" : "btn-outline-secondary")"
+                                            @onclick="@(() => AccessFilter = "all")">
+                                        Tất cả (@UserAccess.Count)
+                                    </button>
+                                    <button type="button"
+                                            class="btn @(AccessFilter == "withkey" ? "btn-primary" : "btn-outline-secondary")"
+                                            @onclick="@(() => AccessFilter = "withkey")">
+                                        Đã có khoá (@WithKeyCount)
+                                    </button>
+                                    <button type="button"
+                                            class="btn @(AccessFilter == "password" ? "btn-primary" : "btn-outline-secondary")"
+                                            @onclick="@(() => AccessFilter = "password")">
+                                        Được cấp mật khẩu (@PasswordGrantedCount)
+                                    </button>
+                                    <button type="button"
+                                            class="btn @(AccessFilter == "locked" ? "btn-primary" : "btn-outline-secondary")"
+                                            @onclick="@(() => AccessFilter = "locked")">
+                                        Không vào được (@LockedOutCount)
+                                    </button>
+                                </div>
+                                <input type="search" class="form-control form-control-sm" style="max-width: 220px;"
+                                       placeholder="Tìm tài khoản hoặc tên" autocomplete="off"
+                                       @bind="UserSearch" @bind:event="oninput" />
+                            </div>
+
+                            <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                                <table class="table table-sm align-middle mb-1">
+                                    <thead class="position-sticky top-0 bg-white">
+                                        <tr class="small text-muted">
+                                            <th>Tài khoản</th>
+                                            <th class="text-center">Khoá</th>
+                                            <th class="text-center">Mật khẩu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var row in VisibleUsers)
+                                        {
+                                            <tr class="small">
+                                                <td>
+                                                    <div class="fw-semibold">@row.UserName</div>
+                                                    <div class="text-muted">
+                                                        @(string.IsNullOrWhiteSpace(row.FullName) ? "—" : row.FullName)
+                                                        @if (row.IsSuperAdmin)
+                                                        {
+                                                            <span class="badge bg-secondary ms-1">super admin</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    @if (row.KeyCount > 0)
+                                                    {
+                                                        <span class="text-success">@row.KeyCount khoá</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">chưa có</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    @* Same reason as the ownership table: OnValueChanged
+                                                       needs no ValueExpression, and the key makes the
+                                                       switch snap back when the server refuses. *@
+                                                    <Switch @key="@($"{row.UserId}:{row.PasswordLoginAllowed}")"
+                                                            Value="@row.PasswordLoginAllowed"
+                                                            OnValueChanged="v => TogglePasswordLoginAsync(row, v)"
+                                                            OnColor="Color.Success" OffColor="Color.Secondary"
+                                                            ShowInnerText="false" Height="20" Width="40"
+                                                            IsDisabled="@(TogglingUserId != null)" />
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if (VisibleUsers.Count == 0)
+                                        {
+                                            <tr>
+                                                <td colspan="3" class="small text-muted text-center py-2">
+                                                    Không có user nào khớp.
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    @* Yubico API credentials. They used to live only in an environment variable
+                       on the host; when that host directory was deleted the next deploy came up
+                       with no credentials and no way to fix it without SSH. Editable here, stored
+                       in the database, and the secret never travels back to this page. *@
+                    <hr class="my-1" />
+                    <div>
+                        <div class="fw-semibold mb-1">Khoá API Yubico</div>
+                        <div class="small text-muted mb-2">
+                            Lấy ở <code>upgrade.yubico.com/getapikey</code>. Không có cặp này thì mọi
+                            cú chạm khoá đều báo "cấu hình xác thực khoá chưa đúng".
+                        </div>
+
+                        <div class="d-flex flex-column gap-2" style="max-width: 420px;">
+                            <div>
+                                <label class="form-label mb-1 small">Client ID</label>
+                                <input type="text" class="form-control" placeholder="vd: 121729"
+                                       autocomplete="off" @bind="YubicoClientId" />
+                            </div>
+                            <div>
+                                <label class="form-label mb-1 small">
+                                    Secret Key
+                                    @if (WebAuthnStatus.HasYubicoSecret)
+                                    {
+                                        <span class="text-success ms-1">· đã lưu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger ms-1">· chưa có</span>
+                                    }
+                                </label>
+                                <input type="password" class="form-control" autocomplete="new-password"
+                                       placeholder="@(WebAuthnStatus.HasYubicoSecret
+                                           ? "Để trống nếu không đổi"
+                                           : "Dán secret key vào đây")"
+                                       @bind="YubicoSecretKey" />
+                                <div class="form-text">
+                                    Máy chủ không bao giờ gửi secret đã lưu về màn hình này. Để trống
+                                    khi lưu là giữ nguyên cái đang có.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <Button Color="Color.Primary" Icon="fa-solid fa-save" Text="Lưu cài đặt đăng nhập"
+                                OnClick="SaveWebAuthnSettingsAsync" IsDisabled="@IsSavingWebAuthn" />
+                    </div>
+
+                    @* The record that stops a bad credential from costing everybody their key.
+                       A wrong client id or secret makes every touch fail, the secret cannot be
+                       read back off this page, and without knowing what worked before the only
+                       remedy was wiping all 121 registrations. *@
+                    <hr class="my-1" />
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="fw-semibold">Lịch sử thay đổi</span>
+                            <Button Color="Color.Light" Size="Size.ExtraSmall"
+                                    Icon="@(HistoryOpen ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down")"
+                                    Text="@(HistoryOpen ? "Thu gọn" : "Xem")"
+                                    OnClick="ToggleHistoryAsync" />
+                        </div>
+
+                        @if (HistoryOpen)
+                        {
+                            @if (IsLoadingHistory)
+                            {
+                                <div class="small text-muted">Đang tải...</div>
+                            }
+                            else if (History.Count == 0)
+                            {
+                                <div class="small text-muted">
+                                    Chưa có lần lưu nào được ghi lại. Lần bấm Lưu tiếp theo sẽ vào đây.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-1">
+                                        <thead>
+                                            <tr class="small text-muted">
+                                                <th>Thời điểm</th>
+                                                <th>Người sửa</th>
+                                                <th>Đổi gì</th>
+                                                <th>Client ID</th>
+                                                <th>Secret</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in History)
+                                            {
+                                                <tr class="small">
+                                                    <td class="text-nowrap">@item.ChangedAt.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                                                    <td>@(item.ChangedBy ?? "—")</td>
+                                                    <td>@item.ChangedFields</td>
+                                                    <td><code>@(item.YubicoClientId ?? "—")</code></td>
+                                                    <td>
+                                                        @if (item.HasYubicoSecret)
+                                                        {
+                                                            <span class="text-success">có</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-danger">trống</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-end">
+                                                        @* Restoring changes what the whole company authenticates
+                                                           against, so it sits behind the same role as the wipe. *@
+                                                        @if (IsSuperAdmin && item.HasYubicoSecret)
+                                                        {
+                                                            <Button Color="Color.Warning" Size="Size.ExtraSmall"
+                                                                    Icon="fa-solid fa-rotate-left" Text="Khôi phục cặp khoá"
+                                                                    OnClick="@(() => RestoreYubicoAsync(item.Id))"
+                                                                    IsDisabled="@IsRestoringYubico" />
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="form-text">
+                                    Secret không bao giờ hiện ra màn hình. "Khôi phục cặp khoá" chép Client ID
+                                    và Secret của mốc đó về cấu hình đang chạy — dùng khi vừa lưu nhầm và mọi
+                                    cú chạm khoá bắt đầu báo lỗi. Các công tắc phía trên giữ nguyên.
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    @* Wiping every key is the only way out of a half-provisioned estate: keys
+                       registered before enrollment collected a PIN pass the password door but are
+                       turned away at the passwordless one, and no per-row edit fixes that. Super
+                       admins only, and behind a typed confirmation — one stray click here costs
+                       everybody their key. *@
+                    @if (IsSuperAdmin)
+                    {
+                        <hr class="my-1" />
+                        <div class="border border-danger-subtle rounded p-3">
+                            <div class="fw-semibold text-danger mb-1">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i>Vùng nguy hiểm
+                            </div>
+                            <div class="small text-muted mb-2">
+                                Xoá <strong>@ResettableKeyCount khoá</strong> đang đăng ký. Những người đó
+                                sẽ đăng ký lại từ đầu ở màn đăng nhập — lần này đi qua đủ cả PIN và ứng
+                                dụng Authenticator. Dùng khi dữ liệu khoá cũ được tạo bằng luồng thiếu bước.
+                                <br />
+                                <strong>Khoá của super admin (@WebAuthnStatus.SuperAdminsWithKey) được giữ
+                                nguyên</strong> — đó là đường quay lại nếu có gì sai. Muốn làm lại khoá của
+                                họ thì gỡ từng người ở trang Quản lý người dùng. Ứng dụng Authenticator đã
+                                bật cũng giữ nguyên, không mất recovery code.
+                            </div>
+
+                            @if (!ResetConfirmOpen)
+                            {
+                                <Button Color="Color.Danger" Icon="fa-solid fa-trash-can"
+                                        Text="Xoá toàn bộ khoá đã đăng ký"
+                                        OnClick="@(() => ResetConfirmOpen = true)"
+                                        IsDisabled="@(IsResettingKeys || ResettableKeyCount == 0)" />
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column gap-2" style="max-width: 420px;">
+                                    <div class="small">
+                                        Không hoàn tác được. Gõ <code>XOA</code> để xác nhận:
+                                    </div>
+                                    <input type="text" class="form-control" autocomplete="off"
+                                           placeholder="Gõ XOA" @bind="ResetConfirmText"
+                                           @bind:event="oninput" />
+                                    <div class="d-flex gap-2">
+                                        <Button Color="Color.Danger" Icon="fa-solid fa-trash-can"
+                                                Text="Xoá ngay" OnClick="ResetAllKeysAsync"
+                                                IsDisabled="@(IsResettingKeys || ResetConfirmText.Trim() != "XOA")" />
+                                        <Button Color="Color.Secondary" Text="Huỷ"
+                                                OnClick="@(() => { ResetConfirmOpen = false; ResetConfirmText = string.Empty; })"
+                                                IsDisabled="@IsResettingKeys" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}

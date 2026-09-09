@@ -1,0 +1,115 @@
+:root {
+  --sf-navy: #0b3d4a;
+  --sf-teal: #1a7a7a;
+  --sf-teal-soft: #e6f4f4;
+  --sf-sand: #f4f7f7;
+  --sf-ink: #1c2a32;
+  --sf-muted: #5b6b73;
+  --sf-card: #ffffff;
+  --sf-border: #d4e4e6;
+  --sf-accent: #0e7490;
+}
+
+html, body {
+  color: var(--sf-ink);
+  font-family: "Inter", "Be Vietnam Pro", system-ui, sans-serif;
+  background: var(--sf-sand);
+}
+
+.brand-name,
+.sidebar-header .brand-name {
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #e8f6f6 !important;
+}
+
+#sidebar {
+  background: linear-gradient(180deg, #0b3d4a 0%, #0f5260 100%) !important;
+}
+
+#sidebar .nav-link {
+  color: rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.kpi-card {
+  background: var(--sf-card);
+  border: 1px solid var(--sf-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 24px rgba(11, 61, 74, 0.08);
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--sf-muted);
+  margin-bottom: 6px;
+}
+
+.kpi-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--sf-navy);
+}
+
+.sf-panel {
+  background: var(--sf-card);
+  border: 1px solid var(--sf-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.sf-bar-track {
+  height: 10px;
+  background: var(--sf-teal-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sf-bar-fill {
+  height: 100%;
+  background: var(--sf-teal);
+  border-radius: 999px;
+}
+
+.sso-login-page .brand-panel {
+  background: radial-gradient(1200px 600px at 20% 10%, #1a7a7a 0%, #0b3d4a 55%, #072830 100%) !important;
+}
+
+.sso-login-page .brand-mark {
+  background: #1a7a7a !important;
+}
+
+.table {
+  --bs-table-striped-bg: var(--sf-teal-soft);
+}
+
+.btn-primary {
+  background-color: var(--sf-teal);
+  border-color: var(--sf-teal);
+}
+
+.btn-primary:hover {
+  background-color: var(--sf-navy);
+  border-color: var(--sf-navy);
+}
+
+.alert-warning {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar .nav-link,
+  .kpi-card {
+    transition: none;
+  }
+}

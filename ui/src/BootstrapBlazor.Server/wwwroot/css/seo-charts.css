@@ -1,0 +1,88 @@
+/* SEO Charts - Improved Styling */
+
+/* Chart Container */
+.seo-chart-container,
+.chart-container {
+    position: relative;
+    height: 600px;
+    width: 100%;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Chart Canvas */
+.seo-chart-container canvas,
+.chart-container canvas {
+    max-width: 100% !important;
+    height: 100% !important;
+}
+
+/* Chart Legend - Improved Styling */
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.chart-legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+/* Pastel Colors for Charts - Matching Design */
+.chart-color-1 { background-color: #4A90E2; } /* Blue */
+.chart-color-2 { background-color: #50C878; } /* Teal */
+.chart-color-3 { background-color: #FF6B9D; } /* Pink */
+.chart-color-4 { background-color: #FFA500; } /* Orange */
+.chart-color-5 { background-color: #FFD700; } /* Yellow */
+.chart-color-6 { background-color: #FF6B6B; } /* Red */
+.chart-color-7 { background-color: #FFB6C1; } /* Light Pink */
+.chart-color-8 { background-color: #9370DB; } /* Purple */
+.chart-color-9 { background-color: #32CD32; } /* Green */
+.chart-color-10 { background-color: #708090; } /* Dark Gray */
+
+/* Chart Tooltip */
+.chartjs-tooltip {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    color: #ffffff;
+}
+
+/* Responsive Charts */
+@media (max-width: 768px) {
+    .seo-chart-container,
+    .chart-container {
+        height: 400px;
+        padding: 0.5rem;
+    }
+    
+    .chart-legend {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .chart-legend-item {
+        margin: 0.25rem 0;
+    }
+}
+

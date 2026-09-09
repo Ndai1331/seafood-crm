@@ -1,0 +1,253 @@
+/* SEO Tables - Unified Styling */
+
+/* Base Table Styles */
+.seo-table,
+.table-domain,
+.table-freeze {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+}
+
+/* Table Headers - Figma Design: Dark Blue Background #2d69b6 */
+.seo-table thead th,
+.table-domain thead th,
+.table-freeze thead th {
+    background-color: #2d69b6 !important; /* Figma: bg-[#2d69b6] */
+    color: #ffffff !important; /* Figma: text-white */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    text-align: center !important; /* Figma: text-center */
+    border: none !important;
+    letter-spacing: 0px !important; /* Figma: tracking-[0px] */
+    text-transform: none !important; /* Không uppercase */
+}
+
+/* Table Body - Figma Design */
+.seo-table tbody td,
+.table-domain tbody td,
+.table-freeze tbody td {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important; /* Figma: subtitle2/size */
+    font-weight: 600 !important; /* Figma: subtitle2/weight - SemiBold */
+    line-height: 22px !important; /* Figma: subtitle2/line-height */
+    padding: 15px 10px !important; /* Figma: py-[15px] px-[10px] */
+    border-bottom: 1px solid #ebf3ff !important; /* Figma: bg-[#ebf3ff] cho border */
+    vertical-align: middle;
+    text-align: center !important; /* Figma: text-center */
+    background-color: #ffffff !important; /* Figma: bg-white - mặc định tất cả cột là trắng */
+    color: #000000 !important; /* Figma: text-black */
+}
+
+/* Đảm bảo các cột không phải pic-name có background trắng */
+.table-domain tbody td:not(.pic-name) {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Volume column - Blue text #1d7bf5 */
+.table-domain tbody td.volume {
+    color: #1d7bf5 !important; /* Figma: text-[#1d7bf5] */
+}
+
+/* Số lần lên top column - Green text #00a76f */
+.table-domain tbody td.domains {
+    color: #00a76f !important; /* Figma: text-[#00a76f] */
+}
+
+/* Keyword column - Black text */
+.table-domain tbody td.keyword {
+    color: #000000 !important; /* Figma: text-black */
+}
+
+/* Grouped Rows - Light Blue Background */
+.seo-table tbody tr.grouped-row,
+.table-domain tbody tr.grouped-row,
+.table-freeze tbody tr.grouped-row,
+.seo-table tbody tr[class*="top-"],
+.table-domain tbody tr[class*="top-"],
+.table-freeze tbody tr[class*="top-"] {
+    background-color: var(--bb-table-grouped-row-bg, #e6f0ff) !important;
+    font-weight: 600;
+}
+
+/* Alternating Row Colors - Figma Design: All rows white with #ebf3ff border */
+/* Tất cả rows có background trắng, chỉ cột pic-name có background #ebf3ff */
+.seo-table tbody tr:nth-child(even):not(.grouped-row),
+.table-domain tbody tr:nth-child(even):not(.grouped-row),
+.table-freeze tbody tr:nth-child(even):not(.grouped-row) {
+    background-color: transparent !important; /* Transparent để td tự quyết định background */
+}
+
+.seo-table tbody tr:nth-child(odd):not(.grouped-row),
+.table-domain tbody tr:nth-child(odd):not(.grouped-row),
+.table-freeze tbody tr:nth-child(odd):not(.grouped-row) {
+    background-color: transparent !important; /* Transparent để td tự quyết định background */
+}
+
+/* Đảm bảo tất cả td trong row có background trắng, trừ pic-name */
+.table-domain tbody tr td {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Override cho pic-name - background #ebf3ff */
+.table-domain tbody tr td.pic-name {
+    background-color: #ebf3ff !important; /* Figma: bg-[#ebf3ff] */
+}
+
+/* Row border separator - Figma Design */
+.table-domain tbody tr {
+    position: relative;
+    border-bottom: 1px solid #ebf3ff !important; /* Figma: bg-[#ebf3ff] cho border */
+}
+
+/* NGƯỜI PHỤ TRÁCH column - Figma Design: Background #ebf3ff với border-radius bên trái */
+.table-domain tbody td.pic-name {
+    background-color: #ebf3ff !important; /* Figma: bg-[#ebf3ff] */
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 22px !important;
+    color: #000000 !important;
+    text-align: center !important;
+    padding: 10px !important; /* Figma: p-[10px] */
+    vertical-align: middle;
+    width: 163px !important; /* Figma: w-[163px] */
+}
+
+/* Xử lý border-radius cho pic-name với rowspan */
+/* Row đầu tiên của group - border-radius dưới bên trái */
+.table-domain tbody tr:first-child td.pic-name {
+    border-radius: 0 0 0 20px !important; /* rounded-bl-[20px] - bottom-left */
+}
+
+/* Row cuối cùng của group - border-radius trên và dưới bên trái */
+.table-domain tbody tr:last-child td.pic-name {
+    border-radius: 20px 0 0 20px !important; /* rounded-bl-[20px] rounded-tl-[20px] - top-left và bottom-left */
+}
+
+/* Row duy nhất - cả trên và dưới bên trái */
+.table-domain tbody tr:only-child td.pic-name {
+    border-radius: 20px 0 0 20px !important; /* rounded-bl-[20px] rounded-tl-[20px] */
+}
+
+/* Row giữa (không phải đầu tiên, không phải cuối cùng) - không có border-radius */
+.table-domain tbody tr:not(:first-child):not(:last-child) td.pic-name {
+    border-radius: 0 !important;
+}
+
+/* Đảm bảo các cột không phải pic-name luôn có background trắng */
+.table-domain tbody td.keyword,
+.table-domain tbody td.volume,
+.table-domain tbody td.domains,
+.table-domain tbody td:not(.pic-name) {
+    background-color: #ffffff !important; /* Figma: bg-white */
+}
+
+/* Hover Effects */
+.seo-table tbody tr:hover,
+.table-domain tbody tr:hover,
+.table-freeze tbody tr:hover {
+    background-color: var(--bb-table-hover-bg, #f0f4f8) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Sticky Headers for Freeze Tables */
+.table-freeze thead th.sticky,
+.table-freeze thead th.sticky2 {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bb-table-header-bg, #0d6efd) !important;
+}
+
+/* Table Borders */
+.seo-table,
+.table-domain,
+.table-freeze {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+}
+
+/* Responsive Tables */
+@media (max-width: 768px) {
+    .seo-table,
+    .table-domain,
+    .table-freeze {
+        font-size: 0.75rem;
+    }
+    
+    .seo-table thead th,
+    .table-domain thead th,
+    .table-freeze thead th,
+    .seo-table tbody td,
+    .table-domain tbody td,
+    .table-freeze tbody td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* SEO Request list — the table must stay inside its container.
+   These live here rather than in SeoRequestList.razor.css because the table, its cells and the
+   expanded block are rendered by BootstrapBlazor and by SeoRequestInfoSections: scoped component
+   CSS carries a different id and never reaches them. Everything is kept under the page id so it
+   cannot leak into other screens. */
+#page-seo-request-list .seo-request-table table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+#page-seo-request-list .seo-request-table .table-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* One long URL in Domain used to stretch the table to 1917px and push VND and Trạng thái out of
+   the viewport entirely — worse than a scrollbar, because nothing hinted they existed. */
+#page-seo-request-list .seo-request-table tbody td a {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+#page-seo-request-list .seo-request-table .seo-request-action-buttons {
+    flex-wrap: nowrap;
+}
+
+/* The expanded block spans the row, so it must be pinned to the table width. Without max-width:0
+   a single unbreakable Google Sheets URL inside it stretched the cell to 3809px and dragged the
+   whole table off screen. */
+#page-seo-request-list .seo-request-table tr.is-detail > td {
+    max-width: 0;
+}
+
+#page-seo-request-list .seo-request-table .sris--compact {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Long links and pasted notes wrap instead of pushing the layout wider. */
+#page-seo-request-list .seo-request-table .sris--compact a,
+#page-seo-request-list .seo-request-table .sris--compact strong,
+#page-seo-request-list .seo-request-table .sris--compact p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+}

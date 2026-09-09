@@ -1,0 +1,136 @@
+@page "/user-manager"
+@using BootstrapBlazor.Components
+@using BootstrapBlazor.Server.Data
+@using BootstrapBlazor.Server.Services
+@layout PageLayout
+
+<DemoBlock Title="Quản lý người dùng" Name="UserList">
+    <div class="user-list-surface">
+        <Table TItem="UserWithNavigationPropertiesDto"
+               PageItemsSource="@PageItemsSource"
+               AutoGenerateColumns="false"
+               IsPagination="true"
+               IsStriped="false"
+               IsBordered="false"
+               IsMultipleSelect="false"
+               ShowColumnList="false"
+               ShowToolbar="true"
+               ShowDefaultButtons="false"
+               ShowExtendButtons="false"
+               ShowLoading="true"
+               ShowSearch="true"
+               ShowCardView="false"
+               ShowAdvancedSearch="false"
+               OnQueryAsync="@OnQueryAsync"
+               @ref="TableRef">
+            <TableToolbarTemplate>
+                <TableToolbarButton TItem="UserWithNavigationPropertiesDto"
+                    Color="Color.Success"
+                    Icon="fa-solid fa-user-plus"
+                    Text="Tạo mới"
+                    OnClick="@OnCreateClick"/>
+            </TableToolbarTemplate>
+            <TableColumns>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="string" @bind-Field="@context.User.UserCode" Text="Mã NV" Width="110" Fixed="true">
+                    <Template Context="value">
+                        <span class="code-chip">@value.Value</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="string" @bind-Field="@context.User.FirstName" Text="Nhân viên" Width="240">
+                    <Template Context="value">
+                        <div class="identity-cell">
+                            <span class="avatar-initials">@GetInitials(value.Row.User)</span>
+                            <span class="identity-text">
+                                <span class="identity-name">@($"{value.Row.User.LastName} {value.Value}".Trim())</span>
+                                <span class="identity-username">@@@value.Row.User.UserName</span>
+                            </span>
+                        </div>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="string" @bind-Field="@context.User.Email" Text="Email" Width="210" TextWrap="true">
+                    <Template Context="value">
+                        <span class="cell-muted">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="string" @bind-Field="@context.User.PhoneNumber" Text="Điện thoại" Width="130">
+                    <Template Context="value">
+                        <span class="cell-num">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="Gender" @bind-Field="@context.User.Gender" Text="Giới tính" Width="100">
+                    <Template Context="value">
+                        <span class="cell-muted">@GetGenderText(value.Value)</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="UserType" @bind-Field="@context.User.UserType" Text="Loại NV" Width="110">
+                    <Template Context="value">
+                        <span class="cell-muted">@GetUserTypeText(value.Value)</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="int" @bind-Field="@context.Index" Text="Chức vụ" Width="130">
+                    <Template Context="value">
+                        <span class="cell-muted">@(value.Row.Position?.Name ?? "—")</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="int" @bind-Field="@context.Index" Text="Team" Width="130">
+                    <Template Context="value">
+                        <span class="cell-muted">@(value.Row.Team?.Name ?? "—")</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="int" @bind-Field="@context.Count" Text="Vai trò" Width="200">
+                    <Template Context="value">
+                        <div class="role-chips">
+                            @{
+                                var roleNames = value.Row.Roles?
+                                    .Where(r => r != null && !string.IsNullOrEmpty(r.Name))
+                                    .Select(r => r.Name!)
+                                    .ToList() ?? new List<string>();
+                            }
+                            @if (roleNames.Count == 0)
+                            {
+                                <span class="cell-muted">—</span>
+                            }
+                            else
+                            {
+                                @foreach (var role in roleNames)
+                                {
+                                    <span class="@GetRoleChipClass(role)">@role</span>
+                                }
+                            }
+                        </div>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="bool" @bind-Field="@context.User.IsActive" Text="Trạng thái" Width="120" Fixed="true" Align="Alignment.Center">
+                    <Template Context="value">
+                        @if (value.Value)
+                        {
+                            <span class="status-badge status-active"><span class="status-dot"></span>Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-locked"><span class="status-dot"></span>Đã khóa</span>
+                        }
+                    </Template>
+                </TableColumn>
+
+                <TableColumn TItem="UserWithNavigationPropertiesDto" TType="int" @bind-Field="@context.User.Id" Text="Hành động" Width="112" Fixed="true" Align="Alignment.Center">
+                    <Template Context="value">
+                        <div class="action-cell">
+                            <Button Color="Color.None" Class="btn-action btn-action-edit"
+                                    Icon="fa-solid fa-pen-to-square"
+                                    title="Sửa thông tin" aria-label="Sửa thông tin"
+                                    OnClick="() => OnEditClick(value.Value)" />
+                            @if (IsSuperAdmin && CanImpersonate(value.Row))
+                            {
+                                <Button Color="Color.None" Class="btn-action btn-action-view"
+                                        Icon="fa-solid fa-user-secret"
+                                        title="Đăng nhập hộ" aria-label="Đăng nhập hộ"
+                                        OnClick="() => OnImpersonateClick(value.Row)" />
+                            }
+                        </div>
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</DemoBlock>

@@ -1,0 +1,41 @@
+@page "/production"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Đưa vào sản xuất</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.LotNumber" placeholder="Lot number" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.RawMaterialKg" placeholder="NL kg" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_certs" placeholder="Chứng từ (EUCC,COA,MSC)" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.SkuId" placeholder="SKU Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RecoveredKg" placeholder="TP thu hồi kg" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RawUsedKg" placeholder="NL dùng kg" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_output.ExportMarket" placeholder="Thị trường" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu lô SX</Button></div>
+    </div>
+    <p class="text-muted mt-2 mb-0">Yield = thành phẩm thu hồi / nguyên liệu. Gắn chứng từ lô để matching xuất khẩu.</p>
+</div>
+<Table TItem="ProductionLotDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<ProductionLotDto> _rows = new();
+    private ProductionLotDto _form = new();
+    private ProductionOutputDto _output = new();
+    private string _certs = "COA";
+
+    protected override async Task OnInitializedAsync() => _rows = await Api.ProductionAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        _form.CertificateCodes = _certs.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        _form.Outputs = new List<ProductionOutputDto> { _output };
+        var saved = await Api.SaveProductionAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu được lô sản xuất"); return; }
+        await Toast.Success($"Đã lưu lô {saved.LotNumber}, yield {saved.RecoveryRatio:P1}");
+        _form = new();
+        _output = new();
+        _rows = await Api.ProductionAsync() ?? new();
+    }
+}

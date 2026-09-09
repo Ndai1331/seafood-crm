@@ -1,0 +1,1243 @@
+/* SEO Dashboard Global Styles */
+
+/* Reset and Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+/* Switch với label alignment */
+/* Đảm bảo label và switch align đẹp với nhau */
+.col-12 .form-label:has(+ .switch),
+.col-sm-1 .form-label:has(+ .switch),
+.col-sm-2 .form-label:has(+ .switch),
+.col-sm-3 .form-label:has(+ .switch),
+.col-sm-4 .form-label:has(+ .switch),
+.col-sm-6 .form-label:has(+ .switch),
+.col-sm-12 .form-label:has(+ .switch) {
+    display: block;
+    margin-bottom: 0 !important; /* Không có margin-bottom để switch có thể center với label */
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #000000;
+}
+
+/* Switch component styling - cải thiện alignment */
+.switch {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    min-width: 40px !important;
+    width: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    line-height: 22px !important;
+}
+
+.switch .switch-core {
+    flex-shrink: 0;
+    margin: 0 !important;
+    vertical-align: middle !important;
+    display: inline-block !important;
+}
+
+/* Switch trong col có label - align với input 54px và center với label */
+.col-12 .form-label:has(+ .switch) + .switch,
+.col-sm-1 .form-label:has(+ .switch) + .switch,
+.col-sm-2 .form-label:has(+ .switch) + .switch,
+.col-sm-3 .form-label:has(+ .switch) + .switch,
+.col-sm-4 .form-label:has(+ .switch) + .switch,
+.col-sm-6 .form-label:has(+ .switch) + .switch,
+.col-sm-12 .form-label:has(+ .switch) + .switch {
+    height: 54px !important; /* Cùng chiều cao với input */
+    min-height: 54px !important;
+    display: flex !important;
+    align-items: center !important; /* Align-middle với input */
+    justify-content: center !important; /* Center switch trong container */
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Căn giữa switch so với label - thêm padding-left để center */
+.col-12 .form-label:has(+ .switch) + .switch,
+.col-sm-1 .form-label:has(+ .switch) + .switch,
+.col-sm-2 .form-label:has(+ .switch) + .switch,
+.col-sm-3 .form-label:has(+ .switch) + .switch,
+.col-sm-4 .form-label:has(+ .switch) + .switch,
+.col-sm-6 .form-label:has(+ .switch) + .switch,
+.col-sm-12 .form-label:has(+ .switch) + .switch {
+    padding-left: 14px !important; /* Padding-left để căn giữa với label (giống padding của input) */
+}
+
+/* Ẩn label từ Switch component nếu đã có label riêng */
+.col-12 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-1 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-2 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-3 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-4 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-6 .form-label:has(+ .switch) + .switch .form-label,
+.col-sm-12 .form-label:has(+ .switch) + .switch .form-label {
+    display: none !important;
+}
+
+/* Container chứa label và switch - đảm bảo alignment */
+.col-12:has(.form-label:has(+ .switch)),
+.col-sm-1:has(.form-label:has(+ .switch)),
+.col-sm-2:has(.form-label:has(+ .switch)),
+.col-sm-3:has(.form-label:has(+ .switch)),
+.col-sm-4:has(.form-label:has(+ .switch)),
+.col-sm-6:has(.form-label:has(+ .switch)),
+.col-sm-12:has(.form-label:has(+ .switch)) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center để switch align-middle với label */
+    align-items: flex-start;
+    gap: 0;
+    position: relative; /* Để có thể điều chỉnh vị trí */
+    min-height: 54px; /* Đảm bảo container có chiều cao tối thiểu bằng input */
+}
+
+/* ============================================
+   SEO Input Size Class - Thay thế py-3 của Bootstrap
+   ============================================ */
+/* Class này được dùng để đảm bảo input có size đúng theo Figma design */
+/* Không dùng padding-top/bottom vì đã được xử lý trong CSS global */
+/* Chỉ dùng cho input components: Select, SelectGeneric, DateTimeRange, MultiSelectGeneric */
+
+
+/* Đảm bảo các component với seo-input-size không bị ảnh hưởng bởi Bootstrap py-3 */
+/* Component container không có padding để label floating đúng */
+::deep .seo-input-size.select,
+::deep .seo-input-size.select.datetime-range,
+::deep .seo-input-size.multi-select {
+    /* Override bất kỳ padding nào từ Bootstrap */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    /* Đảm bảo component có height đúng theo Figma */
+    min-height: 54px;
+    height: 54px;
+}
+
+/* Đảm bảo input bên trong có padding đủ để text không bị đè lên label */
+::deep .seo-input-size.select .form-select {
+    /* Padding đã được xử lý trong CSS global, nhưng đảm bảo override mọi thứ */
+    padding: 18px 14px 16px 14px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+}
+
+/* DateTimeRange với seo-input-size */
+::deep .seo-input-size.select.datetime-range .datetime-range-input {
+    padding: 26px 0 6px 0 !important;
+    min-height: 22px !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* MultiSelectGeneric với seo-input-size */
+::deep .seo-input-size.multi-select .dropdown-toggle {
+    padding: 18px 14px 16px 14px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+/* Button với seo-input-size - đảm bảo height 54px giống các input */
+/* Override tất cả các class Bootstrap button (btn-lg, btn-block, etc.) */
+::deep .seo-input-size.btn,
+::deep button.seo-input-size,
+::deep .btn.seo-input-size,
+::deep .btn.seo-input-size.btn-lg,
+::deep .btn.seo-input-size.btn-block,
+::deep .btn.btn-lg.seo-input-size,
+::deep .btn.btn-block.seo-input-size,
+::deep .btn.btn-primary.btn-lg.btn-block.seo-input-size {
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    /* Override padding của btn-lg */
+    padding: 0 16px !important; /* Padding horizontal cho button */
+    /* Đảm bảo button có display flex để căn giữa nội dung */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    /* Font styling giống với input */
+    font-size: 15px !important; /* Giống với input font-size */
+    font-weight: 700 !important; /* Button thường có font-weight lớn hơn */
+    line-height: 22px !important; /* Giống với input line-height */
+    /* Override border-radius nếu cần */
+    border-radius: 8px !important; /* Giống với input border-radius */
+}
+
+/* Đảm bảo multi-select-items trong seo-input-size không vượt quá và có padding */
+::deep .seo-input-size.multi-select .dropdown-toggle .multi-select-items {
+    max-height: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    /* Padding để tránh items đè lên label floating và border */
+    padding-top: 10px !important; /* Đủ để tránh label */
+    padding-bottom: 0 !important;
+    padding-left: 2px !important; /* Padding nhẹ bên trái để không chồng lấn border */
+    padding-right: 2px !important; /* Padding nhẹ bên phải để không chồng lấn border */
+    box-sizing: border-box !important;
+}
+
+body {
+    /* background-color: #ffffff !important; */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--bb-sidebar-text-color);
+    background-color: var(--bb-main-bg);
+    margin: 0;
+    padding: 0;
+}
+
+/* Global Layout Override */
+.blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+.blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+/* Card Styles */
+.seo-card {
+    background: var(--bb-content-bg);
+    border: 1px solid var(--bb-sidebar-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.seo-card-header {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bb-sidebar-text-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bb-sidebar-border);
+}
+
+/* Form Controls - Material Design Style */
+.seo-form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.seo-form-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 1rem;
+    color: var(--bb-sidebar-text-color);
+    pointer-events: none;
+    transition: 0.2s ease all;
+    transform-origin: left top;
+    padding: 0.75rem 0;
+    margin: 0;
+}
+
+.seo-form-control {
+    width: 100%;
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    border: none;
+    border-bottom: 2px solid var(--bb-sidebar-border);
+    background: transparent;
+    transition: 0.2s ease all;
+    border-radius: 0;
+}
+
+.seo-form-control:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom: 2px solid var(--bb-primary-color);
+}
+
+/* Floating label animation */
+.seo-form-control:focus ~ .seo-form-label,
+.seo-form-control:not(:placeholder-shown) ~ .seo-form-label {
+    transform: translateY(-1.5rem) scale(0.85);
+    color: var(--bb-primary-color);
+}
+
+/* Line animation */
+.seo-form-group::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--bb-primary-color);
+    transition: 0.2s ease all;
+}
+
+.seo-form-control:focus ~ .seo-form-group::after {
+    width: 100%;
+}
+
+/* Select styles */
+.seo-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0 center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 1.5rem;
+}
+
+/* Helper text and validation */
+.seo-form-helper {
+    position: absolute;
+    bottom: -1.25rem;
+    left: 0;
+    font-size: 0.75rem;
+    color: var(--bb-secondary-color);
+    transition: 0.2s ease all;
+}
+
+.seo-form-control.is-invalid {
+    border-bottom-color: var(--bb-danger-color);
+}
+
+.seo-form-control.is-invalid ~ .seo-form-label {
+    color: var(--bb-danger-color);
+}
+
+.seo-form-control.is-invalid ~ .seo-form-helper {
+    color: var(--bb-danger-color);
+}
+
+/* Disabled state */
+.seo-form-control:disabled {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-bottom-style: dotted;
+    cursor: not-allowed;
+}
+
+.seo-form-control:disabled ~ .seo-form-label {
+    color: var(--bb-secondary-color);
+}
+
+/* Button Styles */
+.seo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.seo-btn-primary {
+    color: white;
+    background-color: var(--bb-primary-color);
+    border-color: var(--bb-primary-color);
+}
+
+.seo-btn-primary:hover {
+    background-color: var(--bb-layout-button-hover-bg);
+    border-color: var(--bb-layout-button-hover-bg);
+}
+
+.seo-btn-secondary {
+    color: var(--bb-sidebar-text-color);
+    background-color: transparent;
+    border-color: var(--bb-sidebar-border);
+}
+
+.seo-btn-secondary:hover {
+    background-color: var(--bb-sidebar-hover-bg);
+}
+
+/* Table Styles */
+.seo-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.seo-table th,
+.seo-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--bb-sidebar-border);
+}
+
+.seo-table th {
+    font-weight: 600;
+    color: var(--bb-sidebar-text-color);
+    background-color: var(--bb-sidebar-hover-bg);
+}
+
+.seo-table tbody tr:hover {
+    background-color: var(--bb-sidebar-hover-bg);
+}
+
+/* Chart Container */
+.seo-chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+/* Responsive Grid */
+.seo-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.seo-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.seo-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.seo-grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+    /* Filter sections stack vertically */
+    .row.g-3 > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+    
+    /* Buttons full width on mobile */
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Tables horizontal scroll */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Sidebar improvements already handled in sidebar-menu.css */
+    
+    /* Header adjustments */
+    #main-content .navbar .container-fluid {
+        padding: 0 1rem;
+    }
+    
+    /* Page title smaller on mobile */
+    #main-content .navbar h1 {
+        font-size: 1.125rem;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet optimizations */
+    #sidebar {
+        width: 240px;
+    }
+    
+    #main-content {
+        margin-left: 240px;
+        width: calc(100% - 240px);
+    }
+}
+
+/* Utility Classes */
+.seo-text-center { text-align: center; }
+.seo-text-right { text-align: right; }
+.seo-text-muted { color: var(--bb-secondary-color); }
+.seo-text-primary { color: var(--bb-primary-color); }
+.seo-text-success { color: var(--bb-success-color); }
+.seo-text-warning { color: var(--bb-warning-color); }
+.seo-text-danger { color: var(--bb-danger-color); }
+
+.seo-mb-0 { margin-bottom: 0; }
+.seo-mb-1 { margin-bottom: 0.5rem; }
+.seo-mb-2 { margin-bottom: 1rem; }
+.seo-mb-3 { margin-bottom: 1.5rem; }
+.seo-mb-4 { margin-bottom: 2rem; }
+
+.seo-mt-0 { margin-top: 0; }
+.seo-mt-1 { margin-top: 0.5rem; }
+.seo-mt-2 { margin-top: 1rem; }
+.seo-mt-3 { margin-top: 1.5rem; }
+.seo-mt-4 { margin-top: 2rem; }
+
+/* Override Bootstrap Blazor specific styles */
+::deep .layout {
+    --bb-layout-headerbar-background: var(--bb-header-bg);
+    --bb-layout-logo-bg: var(--bb-primary-color);
+}
+
+::deep .sidebar {
+    background-color: var(--bb-sidebar-bg);
+    border-right: 1px solid var(--bb-sidebar-border);
+}
+
+::deep .main {
+    background-color: var(--bb-main-bg);
+    padding: var(--bb-main-padding);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .seo-grid-2,
+    .seo-grid-3,
+    .seo-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .seo-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .seo-chart-container {
+        height: 250px;
+    }
+}
+
+#sidebar-toggle-desktop {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #dbe4ee;
+    border-radius: 100%;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    position: fixed;
+    left: 207px;
+    top: 16px;
+    z-index: 1001;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+/* Toggle button khi sidebar collapsed - handled in sidebar-menu.css */
+
+/* Style cho sidebar khi thu gọn */
+/* Hiệu ứng chuyển đổi chung */
+#sidebar, #main-content {
+    transition: all 0.3s ease;
+}
+
+/* Style cho sidebar khi thu gọn */
+.sidebar-collapsed .sidebar-content {
+    padding: 0;
+}
+
+.sidebar-collapsed .nav-link {
+    padding: 0.75rem 0;
+    text-align: center;
+    justify-content: center;
+}
+
+.sidebar-collapsed .nav-link span {
+    display: none !important;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar-collapsed .nav-link i {
+    margin: 0 !important;
+    font-size: 2rem !important;
+    display: block !important;
+    justify-content: center;
+    width: 2rem !important;
+    height: 2rem !important;
+    line-height: 2rem !important;
+    text-align: center !important;
+}
+
+.sidebar-collapsed .brand-logo {
+    padding: 0.5rem 0;
+    text-align: center;
+    justify-content: center;
+}
+
+.sidebar-collapsed .brand-logo span {
+    display: none !important;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar-collapsed .nav-item {
+    padding: 0;
+}
+
+#sidebar-toggle-desktop:hover {
+    background: #ffffff;
+    border-color: #b6c7dc;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+    transform: translateY(-1px);
+}
+
+#sidebar-toggle-desktop i {
+    font-size: 11px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar and Main Content transitions are handled in sidebar-menu.css */
+
+.col-lg-1 .nav-link span,
+.col-lg-1 .brand-logo h4 {
+    display: none !important;
+}
+
+.col-lg-1 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.col-lg-1 .nav-link {
+    justify-content: center !important;
+    padding: 0.5rem !important;
+}
+
+.col-lg-1 .nav-link i {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+}
+
+#sidebar-toggle-desktop:hover i {
+    color: #1d7bf5;
+}
+
+#main-content .navbar{
+    background-color: var(--bb-main-bg, #ffffff) !important;
+    display: flex !important;
+    align-items: center !important;
+    min-height: 60px !important;
+    height: 60px !important;
+}
+
+#main-content .navbar .container-fluid {
+    padding: 0px;
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+}
+
+/* Đảm bảo avatar và username được căn giữa */
+#main-content .navbar .d-flex.align-items-center {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+}
+
+#main-content .navbar .dropdown button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#main-content .navbar span.me-3 {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+    line-height: 1 !important;
+}
+
+/* ============================================
+   Global Figma Design Input Styling
+   Based on Figma design: Walktour/Demo/3
+   Áp dụng cho tất cả SelectGeneric và Select components
+   ============================================ */
+
+/* Main Input Field (form-select) - Figma Design Specs */
+/* Áp dụng cho cả Select và SelectGeneric */
+::deep .select .form-select,
+::deep .select.datetime-range .form-control,
+::deep .seo-input-size.select .form-select {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #1c252e; /* text/primary */
+    
+    /* Figma Design Specs */
+    /* Figma: border border-[var(--components/textfield/outline,rgba(145,158,171,0.2))] */
+    border: 1px solid rgba(145, 158, 171, 0.2); /* components/textfield/outline */
+    /* Figma: rounded-[var(--textfield/outlined-radius,8px)] */
+    border-radius: 8px; /* textfield/outlined-radius */
+    /* Figma: px-[var(--textfield/outlined-px,14px)] - padding horizontal 14px */
+    /* Padding vertical được tính toán để label đè lên border */
+    padding: 18px 14px 16px 14px !important; /* Top padding lớn hơn để có chỗ cho floating label */
+    /* Figma: bg-[var(--background/paper,#ffffff)] */
+    background-color: #ffffff; /* background/paper */
+    /* Figma: h-[54px] */
+    height: 54px !important; /* textfield/outlined-md-height */
+    min-height: 54px !important;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* DateTimeRange specific styling */
+::deep .select.datetime-range {
+    border: 1px solid rgba(145, 158, 171, 0.2);
+    border-radius: 8px;
+    background-color: #ffffff;
+    height: 54px !important; /* Cố định height 54px giống các input khác */
+    min-height: 54px !important;
+    max-height: 54px !important; /* Đảm bảo không vượt quá */
+    padding: 0;
+    overflow: hidden; /* Ẩn phần vượt quá */
+    box-sizing: border-box;
+}
+
+::deep .select.datetime-range .datetime-range-control {
+    height: 100% !important; /* 100% của container 54px */
+    max-height: 54px !important; /* Đảm bảo không vượt quá */
+    /* Padding horizontal 14px theo Figma */
+    padding: 0 14px;
+    /* Đảm bảo có đủ space cho label ở trên */
+    display: flex;
+    align-items: center !important; /* Căn giữa các elements theo chiều dọc */
+    /* Đảm bảo control không bị overflow */
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Đảm bảo div position-relative cũng căn giữa */
+::deep .select.datetime-range .datetime-range-control .position-relative {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/* Icon trong DateTimeRange */
+::deep .select.datetime-range .datetime-range-control .range-bar {
+    display: flex;
+    align-items: center;
+    margin-right: 8px; /* Khoảng cách giữa icon và input */
+}
+
+::deep .select.datetime-range .datetime-range-input {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #1c252e;
+    /* Căn giữa text theo chiều dọc bằng line-height và padding */
+    /* Với container height 54px và line-height 22px, cần padding để căn giữa */
+    /* (54px - 22px) / 2 = 16px padding mỗi bên */
+    padding: 16px 0 !important; /* Padding để căn giữa text theo chiều dọc */
+    height: auto !important;
+    max-height: 54px !important;
+    /* Đảm bảo input không bị overflow */
+    box-sizing: border-box;
+    /* Đảm bảo text không bị cắt */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* Căn giữa text theo chiều ngang */
+    text-align: center;
+    /* Đảm bảo input align với các elements khác */
+    vertical-align: middle;
+}
+
+/* Range separator cũng cần căn giữa */
+::deep .select.datetime-range .range-separator {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    line-height: 22px;
+}
+
+::deep .select.datetime-range .range-separator {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    color: #1c252e;
+    padding: 0 8px;
+}
+
+::deep .select.datetime-range .range-bar {
+    color: #637381;
+    font-size: 16px;
+}
+
+::deep .select .form-select:hover:not(:disabled),
+::deep .select.datetime-range:hover:not(.disabled) {
+    border-color: rgba(145, 158, 171, 0.4);
+}
+
+::deep .select .form-select:focus,
+::deep .select.datetime-range:focus {
+    border-color: rgba(145, 158, 171, 0.6);
+    outline: none;
+    box-shadow: none;
+}
+
+::deep .select .form-select:disabled,
+::deep .select.datetime-range.disabled {
+    border-color: rgba(145, 158, 171, 0.2);
+    color: rgba(28, 37, 46, 0.38);
+    background-color: #f5f7fa;
+    cursor: not-allowed;
+}
+
+/* MultiSelectGeneric styling */
+::deep .multi-select .dropdown-toggle {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #1c252e;
+    border: 1px solid rgba(145, 158, 171, 0.2);
+    border-radius: 8px;
+    padding: 18px 14px 16px 14px; /* Giữ padding như các input khác */
+    background-color: #ffffff;
+    height: 54px !important; /* Cố định height 54px */
+    min-height: 54px !important;
+    max-height: 54px !important; /* Đảm bảo không vượt quá */
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    overflow: hidden; /* Ẩn phần vượt quá */
+    display: flex;
+    align-items: center; /* Căn giữa các elements theo chiều dọc */
+}
+
+/* Đảm bảo multi-select-items không vượt quá height và có padding để không đè lên label và border */
+::deep .multi-select .dropdown-toggle .multi-select-items {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px; /* Khoảng cách giữa các items */
+    max-height: 100%; /* Không vượt quá height của toggle */
+    overflow: hidden;
+    flex: 1;
+    min-width: 0; /* Cho phép flex item shrink */
+    /* Padding để tránh items đè lên label floating ở trên và border ở hai bên */
+    /* Label ở top: -5px với height 12px, nên label chiếm từ -5px đến 7px */
+    /* Dropdown-toggle có padding-top: 18px, nhưng items cần thêm padding-top để tránh label */
+    /* Vì label đè lên border, items cần có padding-top để không đè lên label text */
+    padding-top: 10px !important; /* Đủ để tránh label (label ở -5px đến 7px, items bắt đầu từ 10px) */
+    padding-bottom: 0; /* Không cần padding-bottom vì đã có padding của toggle */
+    padding-left: 2px !important; /* Padding nhẹ bên trái để không chồng lấn border */
+    padding-right: 2px !important; /* Padding nhẹ bên phải để không chồng lấn border */
+    box-sizing: border-box;
+}
+
+/* Multi-select-item styling */
+::deep .multi-select .dropdown-toggle .multi-select-item-group,
+::deep .multi-select .dropdown-toggle .multi-select-item {
+    display: inline-flex;
+    align-items: center;
+    height: auto;
+    max-height: 22px; /* Không vượt quá line-height */
+    line-height: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Placeholder khi không có data */
+::deep .multi-select .dropdown-toggle .multi-select-ph {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    line-height: 22px;
+    color: rgba(28, 37, 46, 0.5); /* Placeholder color */
+}
+
+::deep .multi-select .dropdown-toggle:hover:not(:disabled) {
+    border-color: rgba(145, 158, 171, 0.4);
+}
+
+::deep .multi-select .dropdown-toggle:focus {
+    border-color: rgba(145, 158, 171, 0.6);
+    outline: none;
+    box-shadow: none;
+}
+
+::deep .multi-select .dropdown-toggle:disabled {
+    border-color: rgba(145, 158, 171, 0.2);
+    color: rgba(28, 37, 46, 0.38);
+    background-color: #f5f7fa;
+    cursor: not-allowed;
+}
+
+/* Dropdown Menu Container - Material UI Elevation */
+/* Áp dụng cho cả Select, SelectGeneric và MultiSelectGeneric */
+::deep .select .dropdown-menu,
+::deep .multi-select .dropdown-menu,
+::deep .popover-dropdown .dropdown-menu {
+    border-radius: 4px;
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+                0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+                0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    border: none;
+    padding: 8px 0;
+    margin-top: 8px;
+    max-height: 304px;
+    overflow-y: auto;
+}
+
+/* Dropdown Items - Figma Design Style */
+/* Áp dụng cho cả Select, SelectGeneric và MultiSelectGeneric */
+::deep .select .dropdown-item,
+::deep .multi-select .dropdown-item,
+::deep .popover-dropdown .dropdown-item {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px; /* components/input/value/size */
+    font-weight: 400; /* components/input/value/weight */
+    line-height: 22px; /* components/input/value/line-height */
+    color: #1c252e; /* text/primary */
+    
+    min-height: 48px;
+    padding: 8px 16px;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+}
+
+::deep .select .dropdown-item:hover:not(.disabled):not(.active),
+::deep .multi-select .dropdown-item:hover:not(.disabled):not(.active),
+::deep .popover-dropdown .dropdown-item:hover:not(.disabled):not(.active) {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+::deep .select .dropdown-item.active,
+::deep .multi-select .dropdown-item.active,
+::deep .popover-dropdown .dropdown-item.active {
+    background-color: rgba(25, 118, 210, 0.08); /* Material UI Primary with opacity */
+    color: #1976d2;
+}
+
+::deep .select .dropdown-item.disabled,
+::deep .multi-select .dropdown-item.disabled,
+::deep .popover-dropdown .dropdown-item.disabled {
+    color: rgba(0, 0, 0, 0.38);
+    cursor: not-allowed;
+    background-color: transparent;
+}
+
+/* Custom Item Template Styling - Material UI Card Style */
+.dropdown-item-demo {
+    border-radius: 4px;
+    padding: 8px 0;
+    margin: 0;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.select-custom-header {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.select-custom-header .name {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px; /* components/input/value/size */
+    font-weight: 400; /* components/input/value/weight */
+    line-height: 22px; /* components/input/value/line-height */
+    color: #1c252e; /* text/primary */
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+/* Dropdown Search Input (if ShowSearch is enabled) - Figma Design */
+::deep .select .dropdown-menu-search .search-text {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #1c252e;
+    border: none;
+    border-bottom: 1px solid rgba(145, 158, 171, 0.2);
+    border-radius: 0;
+    padding: 8px 16px;
+    margin: 0 8px;
+    background-color: transparent;
+    transition: border-bottom-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::deep .select .dropdown-menu-search .search-text:focus {
+    border-bottom: 1px solid rgba(145, 158, 171, 0.6);
+    outline: none;
+    box-shadow: none;
+}
+
+/* Select Arrow Icon - Figma Design */
+/* Áp dụng cho cả Select và SelectGeneric */
+::deep .select .form-select-append,
+::deep .multi-select .form-select-append {
+    color: #1d7bf5; /* Arrow icon color from Figma */
+    right: 10px; /* textfield/select-arrow-mr */
+}
+
+::deep .select .form-select-append i,
+::deep .multi-select .form-select-append i {
+    font-size: 20px; /* textfield/select-arrow-icon */
+    width: 20px;
+    height: 20px;
+}
+
+/* Label Styling - Figma Design Floating Label (đè lên border) */
+/* BootstrapLabel được render TRƯỚC component (Select, DateTimeRange, SelectGeneric) */
+/* Cấu trúc DOM: <div class="col-*"><label class="form-label">...</label><div class="select">...</div></div> */
+
+/* Make column container relative for absolute positioning of label */
+.row [class*="col-"],
+.row .col-12,
+.row .col-sm-2,
+.row .col-sm-3,
+.row .col-sm-4,
+.row .col-sm-6,
+.row .col-sm-8,
+.row .col-sm-12,
+.row .col-3,
+.row .col-9 {
+    position: relative !important;
+}
+
+/* Đặc biệt cho DateTimeRange: đảm bảo label floating đúng */
+.row .col-12 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-2 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-3 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-4 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-6 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-8 > .form-label:has(+ .select.datetime-range),
+.row .col-sm-12 > .form-label:has(+ .select.datetime-range) {
+    /* Label cho DateTimeRange cần floating đè lên border */
+    position: absolute !important;
+    top: -5px !important; /* Đè lên border trên của input */
+    left: 16px !important; /* 14px padding-left của input + 2px = 16px */
+    margin: 0 !important;
+    padding: 0 2px 0 5px !important; /* padding-left: 5px để tạo khoảng cách từ border trái */
+    background-color: transparent !important;
+    z-index: 10 !important; /* Đảm bảo label ở trên border */
+    pointer-events: none;
+    display: block;
+    transform: none !important;
+    white-space: nowrap;
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 12px !important;
+    color: #637381 !important;
+}
+
+/* Label background mask cho DateTimeRange - che border phía sau label text */
+.row .col-12 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-2 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-3 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-4 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-6 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-8 > .form-label:has(+ .select.datetime-range)::before,
+.row .col-sm-12 > .form-label:has(+ .select.datetime-range)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 5px; /* top-[5px] - nằm ở giữa border */
+    height: 2px; /* h-[2px] */
+    background-color: #ffffff; /* background/paper */
+    z-index: -1; /* Nằm phía sau label text nhưng phía trước border */
+}
+
+/* Make select/datetime-range container relative too */
+/* Đảm bảo .select không có margin-top để label position đúng */
+::deep .select,
+::deep .select.datetime-range,
+::deep .multi-select {
+    position: relative;
+    margin-top: 0 !important; /* Đảm bảo không có margin-top để label position đúng */
+}
+
+/* Override padding-top của .seo-input-size để label position đúng */
+/* Khi override padding-top về 0, label sẽ luôn ở top: -6px để đè lên border */
+::deep .select.seo-input-size,
+::deep .select.datetime-range.seo-input-size,
+::deep .multi-select.seo-input-size {
+    padding-top: 0 !important; /* Override padding-top để label position đúng với top: -6px */
+    padding-bottom: 0 !important; /* Không cần padding-bottom vì đã xử lý trong CSS global */
+}
+
+/* ============================================
+   Floating Label cho seo-input-size - GLOBAL CLASS
+   ============================================ */
+/* seo-input-size là global class - áp dụng cho tất cả routes */
+/* Label được render bởi BootstrapLabel TRƯỚC component có class seo-input-size */
+/* Floating label đè lên border của input - theo Figma design chính xác */
+
+/* Global: Label floating cho seo-input-size - không cần route ID */
+/* seo-input-size là global class - áp dụng cho tất cả routes */
+[class*="col-"] > .form-label:has(+ .seo-input-size),
+[class*="col-"] > .form-label:has(+ * .seo-input-size),
+.row [class*="col-"] > .form-label:has(+ .seo-input-size),
+.row [class*="col-"] > .form-label:has(+ * .seo-input-size) {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px !important; /* components/input/label/size */
+    font-weight: 600 !important; /* components/input/label/weight - SemiBold */
+    line-height: 12px !important; /* components/input/label/line-height */
+    color: #637381 !important; /* text/secondary - Đảm bảo text có màu */
+    
+    /* Floating label position - Figma design: label nằm trên border của input */
+    position: absolute !important;
+    top: -6px !important; /* Label nằm chính xác trên border */
+    left: 16px !important; /* 14px padding-left của input + 2px = 16px */
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 2px 0 5px !important; /* padding-left: 5px để tạo khoảng cách từ border trái */
+    background-color: #ffffff !important; /* Label text có background trắng để che border */
+    z-index: 10 !important; /* Phải cao hơn input border để label nằm trên border */
+    pointer-events: none;
+    display: block;
+    height: auto;
+    transform: none !important;
+    transform-origin: 0 0;
+    white-space: nowrap;
+    /* Đảm bảo text hiển thị */
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Global: Label background mask to cover border - dựa trên seo-input-size */
+/* Mask này đảm bảo che border phía sau label text */
+[class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+[class*="col-"] > .form-label:has(+ * .seo-input-size)::before,
+.row [class*="col-"] > .form-label:has(+ .seo-input-size)::before,
+.row [class*="col-"] > .form-label:has(+ * .seo-input-size)::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important; /* Mask bắt đầu từ top của label để che border */
+    height: 12px !important; /* Height đủ để che border (border ở top: 0, label ở top: -6px, mask cần che từ 0 đến 6px) */
+    width: 100% !important;
+    background-color: #ffffff !important; /* background/paper - màu trắng để che border */
+    z-index: -1 !important; /* Nằm phía sau label text (z-index: 10) để không che text */
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
+/* Fallback: Nếu label không phải direct child, target nested label có seo-input-size */
+[class*="col-"] .form-label:first-child:has(+ .seo-input-size),
+[class*="col-"] .form-label:first-child:has(+ * .seo-input-size),
+.row [class*="col-"] .form-label:first-child:has(+ .seo-input-size),
+.row [class*="col-"] .form-label:first-child:has(+ * .seo-input-size) {
+    font-family: 'Public Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 12px !important;
+    color: #637381 !important; /* Đảm bảo text có màu */
+    position: absolute !important;
+    top: -6px !important; /* Label nằm chính xác trên border */
+    left: 16px !important;
+    margin: 0 !important;
+    padding: 0 2px 0 5px !important;
+    background-color: #ffffff !important; /* Label text có background trắng để che border */
+    z-index: 10 !important; /* Phải cao hơn input border */
+    pointer-events: none;
+    display: block;
+    transform: none !important;
+    white-space: nowrap;
+    /* Đảm bảo text hiển thị */
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+[class*="col-"] .form-label:first-child:has(+ .seo-input-size)::before,
+[class*="col-"] .form-label:first-child:has(+ * .seo-input-size)::before,
+.row [class*="col-"] .form-label:first-child:has(+ .seo-input-size)::before,
+.row [class*="col-"] .form-label:first-child:has(+ * .seo-input-size)::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important; /* Mask bắt đầu từ top của label để che border */
+    height: 12px !important; /* Height đủ để che border */
+    width: 100% !important;
+    background-color: #ffffff !important;
+    z-index: -1 !important; /* Nằm phía sau label text (z-index: 10) để không che text */
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
+/* ---------------------------------------------------------------------------
+   SEO Request form: give the content pane a real scrollport.
+
+   #main-content declares overflow:auto but only min-height:100vh, so it grows
+   to fit its content and the window scrolls instead. A scroll container that
+   never scrolls still captures position:sticky, which leaves every sticky
+   child inert. Constraining the height on this page makes the pane the actual
+   scroller so the form's identity bar and save bar can pin.
+
+   Scoped with :has() to the SEO Request form and to the desktop layout, so no
+   other page's scroll behaviour changes.
+   --------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+    #main-content:has(#page-seo-request-form) {
+        height: 100dvh;
+        min-height: 0;
+    }
+}
+
+/* DateTimeRange: popup được portal ra body khi mở, nên CSS scoped của component không
+   với tới — phải đặt ở đây. Sidebar preset cố định 110px làm nhãn dài ("3 tháng gần nhất")
+   bị ngắt thành 2 dòng. Cho co theo nội dung thay vì ép một con số: trang dùng preset ngắn
+   giữ nguyên 110px, trang có nhãn dài tự nới ra. */
+.picker-panel-sidebar {
+    /* Giữ width:110px của thư viện làm sàn; min-width nâng lên khi nhãn dài hơn.
+       width:auto không ăn vì sidebar là flex item có overflow:auto. */
+    min-width: max-content;
+    flex-shrink: 0;
+}
+
+.picker-panel-sidebar .sidebar-item {
+    white-space: nowrap;
+}

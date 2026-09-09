@@ -1,0 +1,28 @@
+# Build
+**/bin/
+**/obj/
+**/out/
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+
+# Secrets and local env
+.env
+*.pfx
+*.backup
+
+# Nested source repos (not part of this monorepo)
+task9-api/
+task9-ui/
+
+# OS / tooling
+.DS_Store
+node_modules/
+*.log
+log_api.txt
+
+# Docker volumes / keys
+dp-keys/

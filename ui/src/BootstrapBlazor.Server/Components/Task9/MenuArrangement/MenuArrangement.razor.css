@@ -1,0 +1,87 @@
+.menu-arrangement-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.menu-arrangement-column {
+    width: 320px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: var(--bs-body-bg);
+    cursor: grab;
+}
+
+.menu-arrangement-column-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg);
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.menu-arrangement-column-body {
+    padding: 0.5rem;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.menu-arrangement-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.4rem;
+    background: var(--bs-tertiary-bg, var(--bs-light));
+    cursor: grab;
+    /* Two button groups leave too little room for the label in a narrow column — let them drop
+       to a second line instead of squeezing the name down to a few characters. */
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+}
+
+.menu-arrangement-card-icon {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    text-align: center;
+    opacity: 0.75;
+}
+
+.menu-arrangement-card-text {
+    flex: 1 1 auto;
+    /* Below this the name is unreadable — the button rows wrap instead. */
+    min-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.menu-arrangement-card-disabled {
+    opacity: 0.5;
+}
+
+/* Inline rename box: takes the room the label had, so the card keeps its height. */
+.menu-arrangement-rename-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.9rem;
+}
+
+.menu-arrangement-add-module {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menu-arrangement-icon-preview {
+    width: 1.5rem;
+    text-align: center;
+    opacity: 0.75;
+}

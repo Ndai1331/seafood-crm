@@ -1,0 +1,36 @@
+@page "/master-data/products"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Mặt hàng / SKU</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_sku.GroupId" placeholder="Group Id" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_sku.Code" placeholder="Mã SKU" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_sku.Name" placeholder="Tên SKU" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_sku.ExportMarket" placeholder="Thị trường" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_sku.DefaultUnitPriceUsd" placeholder="Giá USD" /></div>
+        <div class="col-md-1"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu SKU</Button></div>
+    </div>
+</div>
+@foreach (var group in _groups)
+{
+    <h5 class="mt-3">@group.Name <small class="text-muted">(@group.DefaultMarket) · Id @group.Id</small></h5>
+    <Table TItem="ProductSkuDto" Items="group.Skus" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+}
+
+@code {
+    private List<ProductGroupDto> _groups = new();
+    private ProductSkuDto _sku = new() { IsActive = true };
+    protected override async Task OnInitializedAsync() => _groups = await Api.ProductsAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SaveSkuAsync(_sku);
+        if (saved == null) { await Toast.Error("Không lưu SKU"); return; }
+        await Toast.Success("Đã lưu SKU");
+        _sku = new() { IsActive = true };
+        _groups = await Api.ProductsAsync() ?? new();
+    }
+}

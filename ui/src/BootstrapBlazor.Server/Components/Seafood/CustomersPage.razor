@@ -1,0 +1,31 @@
+@page "/master-data/customers"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Khách hàng</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã" /></div>
+        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên khách" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContactName" placeholder="Người liên hệ" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Purchaser" placeholder="Purchaser" /></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu khách</Button></div>
+    </div>
+</div>
+<Table TItem="CustomerDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<CustomerDto> _rows = new();
+    private CustomerDto _form = new() { IsActive = true, Kind = 1 };
+    protected override async Task OnInitializedAsync() => _rows = await Api.CustomersAsync() ?? new();
+
+    private async Task SaveAsync()
+    {
+        var saved = await Api.SaveCustomerAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu khách"); return; }
+        await Toast.Success("Đã lưu khách hàng");
+        _form = new() { IsActive = true, Kind = 1 };
+        _rows = await Api.CustomersAsync() ?? new();
+    }
+}

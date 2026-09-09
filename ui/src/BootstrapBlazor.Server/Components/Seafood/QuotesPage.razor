@@ -1,0 +1,61 @@
+@page "/export/quotes"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<h3 class="mb-3">Báo giá / Hợp đồng</h3>
+<div class="sf-panel">
+    <div class="row g-2">
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
+        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ (để trống = tự sinh)" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.SkuId" placeholder="SKU Id" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKg" placeholder="KL kg" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyLbs" placeholder="KL lbs" /></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.UnitPriceUsd" placeholder="Giá USD/kg" /></div>
+        <div class="col-md-2"><Button Color="Color.Secondary" OnClick="SuggestAsync">Gợi ý giá</Button></div>
+        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu HĐ</Button></div>
+        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_approveId" placeholder="Id HĐ cần duyệt" /></div>
+        <div class="col-md-2"><Button Color="Color.Success" OnClick="ApproveAsync">Duyệt HĐ</Button></div>
+    </div>
+    @if (_hint != null)
+    {
+        <p class="mt-2 mb-0">Giá gần nhất cùng khách+SKU: <b>@_hint.LastPriceForCustomer</b> (@_hint.LastContractNo). Trung bình khách khác 2 tháng: @_hint.PeerAvgLastTwoMonths</p>
+    }
+</div>
+<Table TItem="SalesContractDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<SalesContractDto> _rows = new();
+    private SalesContractDto _form = new();
+    private SalesContractLineDto _line = new();
+    private PriceSuggestionDto? _hint;
+    private int _approveId;
+
+    protected override async Task OnInitializedAsync() => _rows = await Api.QuotesAsync() ?? new();
+
+    private async Task SuggestAsync()
+    {
+        if (_form.CustomerId == 0 || _line.SkuId == 0) return;
+        _hint = await Api.SuggestPriceAsync(_form.CustomerId, _line.SkuId);
+        if (_hint?.LastPriceForCustomer is decimal price) _line.UnitPriceUsd = price;
+    }
+
+    private async Task SaveAsync()
+    {
+        _form.Lines = new List<SalesContractLineDto> { _line };
+        var saved = await Api.SaveQuoteAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return; }
+        await Toast.Success($"Đã lưu {saved.ContractNo}. Lệch vs HĐ cũ {saved.VarianceVsLastPct}% / khách khác {saved.VarianceVsPeersPct}%");
+        _form = new();
+        _line = new();
+        _rows = await Api.QuotesAsync() ?? new();
+    }
+
+    private async Task ApproveAsync()
+    {
+        var saved = await Api.ApproveAsync(_approveId);
+        if (saved == null) { await Toast.Error("Không duyệt được"); return; }
+        await Toast.Success($"Đã duyệt {saved.ContractNo}");
+        _rows = await Api.QuotesAsync() ?? new();
+    }
+}

@@ -1,0 +1,8 @@
+.git
+task9-api
+task9-ui
+**/bin
+**/obj
+.env
+.cursor
+**/.DS_Store

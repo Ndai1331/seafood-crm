@@ -1,0 +1,70 @@
+/* SEO Tabs - Improved Styling */
+
+/* Tab Navigation - Active State with Blue Underline */
+::deep .tabs {
+    border-bottom: 2px solid #e9ecef;
+}
+
+::deep .tabs .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+}
+
+::deep .tabs .nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #495057;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    background-color: transparent;
+}
+
+::deep .tabs .nav-tabs .nav-link:hover {
+    border-bottom-color: rgba(0, 123, 255, 0.3);
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+::deep .tabs .nav-tabs .nav-link.active {
+    color: #007bff !important;
+    border-bottom-color: #007bff !important;
+    font-weight: 600;
+    background-color: transparent;
+}
+
+::deep .tabs .nav-tabs .nav-link.active i {
+    color: #007bff;
+}
+
+/* Tab Content */
+::deep .tab-content {
+    padding: 1.5rem 0;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Chrome Tab Style Override */
+::deep .tabs.tabs-chrome .nav-tabs .nav-link.active {
+    border-bottom: 3px solid #007bff !important;
+    color: #007bff !important;
+    background-color: transparent !important;
+}
+
+::deep .tabs.tabs-chrome .nav-tabs .nav-link {
+    border-bottom: 3px solid transparent;
+}
+
+::deep .tabs.tabs-chrome .nav-tabs .nav-link:hover {
+    border-bottom-color: rgba(0, 123, 255, 0.5);
+}
+

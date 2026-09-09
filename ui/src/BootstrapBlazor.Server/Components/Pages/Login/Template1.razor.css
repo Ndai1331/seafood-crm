@@ -1,0 +1,722 @@
+/* Seafood CRM login — B2B SaaS navy/teal split-screen. */
+
+.sso-login-page {
+    --primary: #1a7a7a;
+    --primary-deep: #0f5f60;
+    --primary-press: #0b3d4a;
+    --primary-subdued: #9ad4d4;
+    --brand-dark-900: #0b3d4a;
+    --ink: #1c2a32;
+    --ink-secondary: #273951;
+    --ink-mute: #5b6b73;
+    --canvas: #ffffff;
+    --hairline: #d9ebe9;
+    --hairline-input: #7aa8b0;
+    --ruby: #c2410c;
+
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    min-height: 100vh;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: 'Be Vietnam Pro', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+}
+
+/* ===== LEFT: brand panel ===== */
+.brand-panel {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(40px, 4vw, 56px);
+    color: #ffffff;
+    background: var(--brand-dark-900);
+}
+
+.brand-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(120% 80% at 12% -8%, rgba(26, 122, 122, 0.55) 0%, transparent 45%),
+        radial-gradient(110% 90% at 82% -4%, rgba(14, 116, 144, 0.45) 0%, transparent 48%),
+        radial-gradient(120% 120% at 30% 12%, rgba(11, 61, 74, 0.55) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(11, 61, 74, 0) 40%, var(--brand-dark-900) 92%);
+    opacity: 0.95;
+}
+
+/* fine grid texture, masked to top-left */
+.brand-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 46px 46px, 46px 46px;
+    mask-image: linear-gradient(160deg, rgba(0, 0, 0, 0.9), transparent 70%);
+    opacity: 0.5;
+}
+
+.brand-top,
+.brand-headline,
+.brand-bottom {
+    position: relative;
+    z-index: 1;
+}
+
+.brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+}
+
+.brand-logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.brand-headline {
+    margin-top: auto;
+    max-width: 460px;
+}
+
+.brand-headline h1 {
+    margin: 0 0 18px;
+    font-size: clamp(32px, 3.2vw, 44px);
+    line-height: 1.08;
+    font-weight: 300;
+    letter-spacing: -1.1px;
+}
+
+.brand-headline p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.brand-bottom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 44px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 13px;
+}
+
+.brand-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.22);
+}
+
+/* ===== RIGHT: form panel ===== */
+.form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(28px, 5vw, 64px);
+    background: var(--canvas);
+}
+
+.login-box {
+    width: 100%;
+    max-width: 380px;
+}
+
+.login-header {
+    margin-bottom: 26px;
+}
+
+/* mobile brand icon shown only when brand-panel is hidden */
+.mobile-brand-icon {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+    background: var(--brand-dark-900);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.login-kicker {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 5px 10px;
+    border-radius: 9999px;
+    background: rgba(185, 185, 249, 0.35);
+    color: var(--primary-deep);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.login-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: -0.6px;
+    color: var(--ink);
+}
+
+.brand-tagline {
+    margin: 8px 0 0;
+    color: var(--ink-mute);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+/* ===== SSO buttons ===== */
+.sso-providers-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.sso-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 16px;
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.06s ease;
+}
+
+.sso-btn:hover {
+    border-color: var(--hairline-input);
+    box-shadow: 0 2px 8px rgba(13, 37, 61, 0.06);
+}
+
+.sso-btn:active {
+    transform: translateY(1px);
+}
+
+.sso-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.sso-domain-hint {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 8px 0 0;
+    color: var(--ink-mute);
+    font-size: 12.5px;
+}
+
+.sso-domain-hint i {
+    color: var(--primary);
+}
+
+.sso-domain-hint strong {
+    color: var(--ink-secondary);
+    font-weight: 600;
+}
+
+/* ===== divider ===== */
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+}
+
+.login-divider span {
+    color: var(--ink-mute);
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+
+/* ===== Link step — a screen of its own, shown instead of the sign-in form ===== */
+.link-step {
+    text-align: center;
+}
+
+.link-step-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: #eef4fd;
+    border: 1px solid #c6d9f5;
+    color: #1c3d68;
+    font-size: 20px;
+}
+
+.link-step h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: -0.6px;
+    color: var(--ink);
+}
+
+.link-step-lead {
+    margin: 10px 0 24px;
+    color: var(--ink-mute);
+    font-size: 14.5px;
+    font-weight: 300;
+    line-height: 1.6;
+}
+
+.link-step-lead strong {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* The way out has to stay obvious: nothing was withheld, so declining must not look like
+   abandoning the sign-in. */
+.link-step-skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--ink-mute);
+    cursor: pointer;
+}
+
+.link-step-skip span {
+    text-decoration: underline;
+}
+
+.link-step-skip:hover {
+    color: var(--ink);
+}
+
+/* ===== other ways in, when this one fails =====
+   A single centred row: label, then one chip per remaining factor. Chips instead of
+   sentences because the fallbacks are not the main action here — the button above is. */
+.factor-switch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.factor-switch-label {
+    font-size: 12.5px;
+    color: var(--ink-mute);
+}
+
+.factor-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: #ffffff;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.factor-chip i {
+    font-size: 12px;
+    color: var(--ink-mute);
+}
+
+.factor-chip:hover {
+    border-color: var(--primary-subdued);
+    background: #f6f5ff;
+    color: var(--primary-deep);
+}
+
+.factor-chip:hover i {
+    color: var(--primary);
+}
+
+/* ===== login-screen enrollment wizard ===== */
+.enroll-steps {
+    margin-bottom: 10px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+
+.enroll-qr {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 12px;
+}
+
+/* Written down once or lost for good, so they get room to be read rather than a dense block. */
+.recovery-codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 4px 0 18px;
+    padding: 14px;
+    border: 1px dashed var(--hairline-input);
+    border-radius: 10px;
+    background: #f7f9fc;
+}
+
+.recovery-codes code {
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+}
+
+/* ===== SSO error banner ===== */
+.sso-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    background: #fdeef2;
+    border: 1px solid #f6c9d6;
+    color: #b01a44;
+    font-size: 13.5px;
+}
+
+.error-dismiss {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #b01a44;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.error-dismiss:hover {
+    opacity: 1;
+}
+
+/* ===== SSO processing ===== */
+.sso-processing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 28px 0;
+    color: var(--ink-mute);
+    font-size: 14px;
+}
+
+.sso-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--hairline);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: ssoSpin 0.8s linear infinite;
+}
+
+/* ===== form fields ===== */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.field-label {
+    color: var(--ink-secondary);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.field-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.field-icon {
+    position: absolute;
+    left: 13px;
+    color: var(--ink-mute);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.field-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 40px 0 38px;
+    border: 1px solid var(--hairline-input);
+    border-radius: 6px;
+    outline: none;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 400;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.field-input::placeholder {
+    color: #9aa8bd;
+    font-weight: 300;
+}
+
+.field-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.14);
+}
+
+.field-input-wrapper:focus-within .field-icon {
+    color: var(--primary);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--ink-mute);
+    padding: 6px;
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: var(--ink-secondary);
+}
+
+/* ===== remember-me checkbox ===== */
+.login-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 2px 0 18px;
+}
+
+.remember-me {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.remember-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--hairline-input);
+    background: var(--canvas);
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.remember-box i {
+    font-size: 10px;
+    color: #ffffff;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.remember-me input:checked + .remember-box {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.remember-me input:checked + .remember-box i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.remember-me input:focus-visible + .remember-box {
+    box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.18);
+}
+
+.remember-text {
+    font-size: 13px;
+    color: var(--ink-secondary);
+}
+
+/* ===== primary submit — Stripe filled indigo pill ===== */
+.login-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 9999px;
+    background: var(--primary);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(46, 43, 140, 0.35), 0 4px 14px rgba(83, 58, 253, 0.28);
+    transition: background 0.16s ease, transform 0.06s ease;
+}
+
+.login-submit-btn:hover {
+    background: var(--primary-deep);
+}
+
+.login-submit-btn:active {
+    background: var(--primary-press);
+    transform: translateY(1px);
+}
+
+.login-submit-btn:disabled,
+.sso-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none;
+}
+
+.login-submit-btn i {
+    font-size: 0.82rem;
+}
+
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: ssoSpin 0.7s linear infinite;
+}
+
+/* ===== footer ===== */
+.login-footer {
+    margin-top: 28px;
+    text-align: center;
+}
+
+.login-footer p {
+    margin: 0;
+    color: var(--ink-mute);
+    font-size: 12.5px;
+    font-weight: 400;
+}
+
+/* ===== animations ===== */
+.animate-slide-up {
+    animation: slideUp 0.48s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+    animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes ssoSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== responsive — collapse to single form panel on mobile ===== */
+@media (max-width: 880px) {
+    .sso-login-page {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-panel {
+        display: none;
+    }
+
+    .mobile-brand-icon {
+        display: inline-flex;
+    }
+
+    .form-panel {
+        padding: 40px 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

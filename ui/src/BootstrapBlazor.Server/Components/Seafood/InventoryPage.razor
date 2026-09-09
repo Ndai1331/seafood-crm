@@ -1,0 +1,12 @@
+@page "/inventory"
+@layout PageLayout
+@inject SeafoodApiService Api
+
+<h3 class="mb-3">Tồn kho &amp; chứng từ</h3>
+<p class="text-muted">So khớp tồn SKU với hợp đồng mở. Nếu đủ hàng nhưng thiếu COA/EUCC/MSC, hệ thống cảnh báo cần mua thêm nguyên liệu đúng giấy tờ.</p>
+<Table TItem="InventoryRowDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
+
+@code {
+    private List<InventoryRowDto> _rows = new();
+    protected override async Task OnInitializedAsync() => _rows = await Api.InventoryAsync() ?? new();
+}
