@@ -8,7 +8,7 @@
     top: 0;
     left: 0;
     background-color: #ffffff;
-    border-right: 1px solid rgba(145, 158, 171, 0.12);
+    border-right: 1px solid rgba(145, 158, 171, 0.16);
     box-shadow: none;
     z-index: 1000;
     display: flex;
@@ -19,7 +19,7 @@
 
 /* Sidebar Menu Custom Styling */
 .sidebar-content {
-    background-color: #ffffff;
+    background-color: transparent;
     padding: 0px;
     margin-right: 0rem;
     margin-left: 0rem;
@@ -38,7 +38,7 @@
     position: sticky;
     top: 0;
     left: 0;
-    background-color: #ffffff;
+    background-color: transparent;
     padding: 10px 16px;
     margin: 0;
     width: 100%;
@@ -60,7 +60,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #007bff;
+    background-color: #1a7a7a;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -70,11 +70,11 @@
 }
 
 .sidebar-header .brand-name {
-    font-size: 16px;
-    font-weight: 900;
-    color: #1d7bf5;
-    letter-spacing: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1c252e;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: normal;
     text-align: left;
     white-space: nowrap;
@@ -112,7 +112,7 @@
 .sidebar-content .nav-section-title {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6c757d;
+    color: rgba(244, 251, 246, 0.55);
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 1rem 1.25rem 0.5rem;
@@ -137,10 +137,10 @@
 .nav-section-header .section-header-text {
     font-size: 11px;
     font-weight: 700;
-    color: #919eab;
+    color: rgba(244, 251, 246, 0.55);
     text-transform: uppercase;
     letter-spacing: 0;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     padding-left: 0;
     line-height: 18px;
 }
@@ -166,16 +166,16 @@
     height: 36px;
     min-height: 36px;
     padding: 8px 12px;
-    color: #637381;
+    color: #212b36;
     text-decoration: none;
     font-weight: 500;
     border-radius: 0;
     margin: 0;
     transition: all 0.2s ease;
     position: relative;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 26px;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     gap: 10px;
     flex-wrap: wrap;
     width: 100%;
@@ -197,37 +197,35 @@
     top: 0;
     bottom: 0;
     width: 12px; /* Che từ left edge đến vị trí line (12px) */
-    background-color: #FFFFFF; /* Màu mặc định khi đóng - cùng màu với sidebar */
+    background-color: transparent; /* Cover tree line with sidebar surface */
     z-index: 10;
     pointer-events: none;
 }
 
-/* Đảm bảo menu cha có background-color */
-/* Mặc định khi đóng: cùng màu với sidebar (#FFFFFF) */
+/* Parent item closed: same surface as sidebar */
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"] {
-    background-color: #FFFFFF !important; /* Màu nền mặc định khi đóng - cùng màu với sidebar */
+    background-color: transparent !important;
 }
 
-/* CHỈ khi menu cha expanded mới có màu đậm - và ::before cũng phải cùng màu */
+/* Parent item expanded */
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"],
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed) {
-    background-color: #E6E9EC; /* Màu đậm khi expanded */
+    background-color: rgba(26, 122, 122, 0.28);
 }
 
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::before,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::before {
-    background-color: #E6E9EC !important; /* Cùng màu với menu cha khi expanded */
+    background-color: transparent !important;
 }
 
-/* Khi menu cha expanded và active, ưu tiên màu active - và ::before cũng phải cùng màu */
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active {
-    background-color: #ebf3ff; /* Màu nền khi active và expanded */
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a);
 }
 
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active::before,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active::before {
-    background-color: #ebf3ff !important; /* Cùng màu với menu cha khi active và expanded */
+    background-color: transparent !important;
 }
 
 
@@ -238,62 +236,56 @@
 }
 
 .sidebar-content .nav-link:hover {
-    background-color: transparent;
-    color: #637381;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .sidebar-content .nav-link.active {
-    color: #1d7bf5;
-    font-weight: 500;
+    color: #ffffff;
+    font-weight: 600;
     font-style: normal;
     padding: 8px 12px;
-    background-color: #ebf3ff !important;
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a) !important;
 }
 
-/* QUAN TRỌNG: Override cho menu cha active nhưng chưa expanded - phải có màu sidebar (#FFFFFF) */
-/* Đặt sau rule .nav-link.active và có specificity cao hơn để override */
-/* Chỉ áp dụng cho menu cha (có data-bs-toggle="collapse") và chưa expanded */
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"]),
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"],
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed {
-    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng - override rule .nav-link.active */
+    background-color: transparent !important;
 }
 
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"])::before,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"]::before,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed::before {
-    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+    background-color: transparent !important;
 }
 
 
 /* Active state with pink background like design */
 .sidebar-content .collapse .nav-link.active {
-    background-color: var(--bb-sidebar-active-bg, #ff7875) !important;
-    color: var(--bb-sidebar-active-color, #007bff) !important;
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a) !important;
+    color: var(--bb-sidebar-active-color, #ffffff) !important;
 }
 
 /* Khi parent menu được expand, hiển thị background-color ở parent */
 /* CHỈ khi expanded mới có màu đậm */
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] {
-    background-color: #E6E9EC !important; /* Màu đậm khi expanded */
-    color: #1C252E;
+    background-color: rgba(26, 122, 122, 0.28) !important;
+    color: #ffffff;
     border-left: none;
     font-weight: 600;
 }
 
-/* Khi menu cha đóng lại (không expanded), cùng màu với sidebar */
-/* Đặt sau tất cả các rule khác để override */
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="false"],
 .sidebar-content .nav-link[data-bs-toggle="collapse"].collapsed,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="false"],
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].collapsed {
-    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng */
+    background-color: transparent !important;
 }
 
-/* Đảm bảo phần che line dọc cũng có màu #FFFFFF khi menu cha đóng */
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="false"]::before,
 .sidebar-content .nav-item > .nav-link[data-bs-toggle="collapse"].collapsed::before {
-    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+    background-color: transparent !important;
 }
 
 /* Menu cha active khi expanded */
@@ -303,21 +295,21 @@
 
 /* Giữ nguyên màu khi hover vào menu cha đã expanded */
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover {
-    background-color: #E6E9EC;
-    color: #1C252E; /* Giữ nguyên màu text khi hover */
+    background-color: rgba(26, 122, 122, 0.4);
+    color: #ffffff;
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover i {
-    color: #1C252E; /* Giữ nguyên màu icon khi hover */
+    color: #ffffff;
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover svg {
-    color: #1C252E; /* Giữ nguyên màu SVG khi hover */
-    fill: #1C252E;
+    color: #ffffff;
+    fill: #ffffff;
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]:hover svg path {
-    fill: #1C252E !important; /* Giữ nguyên màu fill khi hover */
+    fill: #ffffff !important;
 }
 
 /* Chỉ child items trong collapse mới có border-left, và chỉ khi active mới có background */
@@ -331,18 +323,18 @@
 }
 
 .sidebar-content .collapse .nav-link.active {
-    background-color: rgba(145, 158, 171, 0.06) !important;
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a) !important;
     border-left: none;
-    color: #1d7bf5 !important;
+    color: #ffffff !important;
     font-style: normal;
-    padding-left: 22px !important; /* Đồng nhất với padding-left của nav-link */
-    font-weight: 500;
-    font-size: 12px;
+    padding-left: 22px !important;
+    font-weight: 600;
+    font-size: 14px;
     line-height: 26px;
 }
 
 .sidebar-content .collapse .nav-link.active i {
-    color: #1d7bf5 !important;
+    color: #ffffff !important;
 }
 
 /* Đảm bảo item cuối cùng không có background khi không active */
@@ -362,7 +354,7 @@
     height: 18px;
     flex-shrink: 0;
     text-align: center;
-    color: #637381;
+    color: rgba(244, 251, 246, 0.86);
     opacity: 1;
     transition: all 0.2s ease;
     display: inline-flex;
@@ -377,7 +369,7 @@
 
 /* Icons in Active Menu Items */
 .sidebar-content .nav-link.active i {
-    color: #1d7bf5 !important;
+    color: #ffffff !important;
 }
 
 /* Icon trong span.d-flex - đảm bảo tất cả icons có cùng width và spacing để text thẳng hàng */
@@ -443,7 +435,7 @@
 }
 
 .sidebar-content .nav-link.active i {
-    color: #1d7bf5;
+    color: #ffffff;
     opacity: 1;
 }
 
@@ -454,7 +446,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-weight: inherit;
     font-size: inherit;
     line-height: 26px;
@@ -502,7 +494,7 @@
 
 .sidebar-content .nav-link:hover i {
     opacity: 1;
-    color: #637381;
+    color: #ffffff;
 }
 
 /* Submenu Items */
@@ -542,7 +534,7 @@
     top: 0; /* Bắt đầu từ top của collapse (menu con đầu tiên) */
     bottom: 0; /* Kéo dài đến bottom của collapse */
     width: 1px;
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 0;
 }
 
@@ -555,7 +547,7 @@
     bottom: 0;
     width: 1px;
     height: 8px; /* Độ dài đoạn line nối từ menu cha xuống menu con đầu tiên */
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 1;
     pointer-events: none;
 }
@@ -573,20 +565,20 @@
     bottom: 0;
     width: 1px;
     height: 50%; /* Che phần đường line từ giữa bottom của menu con cuối cùng trở xuống */
-    background-color: #ffffff; /* Màu nền sidebar để che đường line */
+    background-color: var(--bb-sidebar-bg, #0b3d4a); /* Cover tree line with sidebar surface */
     z-index: 2;
     pointer-events: none;
 }
 
 .sidebar-content .collapse .nav-link {
     padding-left: 22px !important; /* Line (12px) + gap (8px) = 20px, thêm 2px để icon không chồng */
-    font-size: 12px;
+    font-size: 14px;
     line-height: 26px;
     padding-top: 8px;
     padding-bottom: 8px;
     padding-right: 12px;
     position: relative;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-weight: 500;
     gap: 6px;
 }
@@ -603,7 +595,7 @@
     top: 50%;
     width: 8px; /* Độ dài đường ngang - từ line (12px) đến icon (20px) */
     height: 1px;
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 1;
     transform: translateY(-50%);
 }
@@ -624,31 +616,31 @@
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"] svg {
-    color: #637381;
-    fill: #637381;
+    color: rgba(244, 251, 246, 0.86);
+    fill: rgba(244, 251, 246, 0.86);
     transition: transform 0.2s ease;
     margin-left: auto;
 }
 
 .sidebar-content .nav-link:hover svg {
-    color: #637381;
-    fill: #637381;
+    color: #ffffff;
+    fill: #ffffff;
 }
 
 .sidebar-content .nav-link:hover svg path {
-    fill: #637381 !important;
+    fill: #ffffff !important;
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] svg,
 .sidebar-content .nav-link.active svg {
     transform: rotate(90deg);
-    color: #1C252E;
-    fill: #1C252E;
+    color: #ffffff;
+    fill: #ffffff;
 }
 
 .sidebar-content .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] svg path,
 .sidebar-content .nav-link.active svg path {
-    fill: #1C252E !important;
+    fill: #ffffff !important;
 }
 
 /* Đảm bảo tất cả SVG toggle có fill color đúng */
@@ -692,14 +684,14 @@
     width: 64px !important;
     min-width: 64px !important;
     max-width: 64px !important;
-    background-color: #ffffff;
+    background-color: var(--bb-sidebar-bg, #0b3d4a);
     overflow: visible;
 }
 
 #sidebar.collapsed .sidebar-header {
     padding: 0.75rem 0.25rem 0.25rem 0.25rem;
     text-align: center;
-    background-color: #ffffff;
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -736,25 +728,6 @@
     white-space: nowrap !important;
 }
 
-#sidebar.collapsed .sidebar-header .brand-name::before {
-    content: 'T9';
-    display: inline-flex;
-    width: 32px;
-    height: 32px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(29, 123, 245, 0.18);
-    border-radius: 9px;
-    background: #f4f8ff;
-    color: #1d7bf5;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.2px;
-    line-height: 1;
-    box-shadow: 0 1px 3px rgba(29, 123, 245, 0.08);
-}
-
 #sidebar.collapsed .sidebar-scrollable {
     width: 100%;
     height: calc(100% - 52px);
@@ -776,14 +749,14 @@
     text-align: center !important;
     width: calc(100% - 8px) !important;
     display: flex !important;
-    color: #495057 !important;
+    color: rgba(244, 251, 246, 0.9) !important;
     margin: 0.18rem 4px !important;
     border-radius: 7px !important;
 }
 
 #sidebar.collapsed .nav-link:hover {
-    background-color: transparent !important;
-    color: #637381 !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
 }
 
 /* Chỉ ẩn span chứa text, không ẩn span chứa icon */
@@ -836,7 +809,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: #637381 !important;
+    color: rgba(244, 251, 246, 0.9) !important;
     opacity: 1 !important;
     font-weight: 400 !important;
     flex-shrink: 0 !important;
@@ -889,13 +862,13 @@
 
 #sidebar.collapsed .nav-link:hover i,
 #sidebar.collapsed .nav-link:hover span i {
-    color: #637381 !important;
+    color: rgba(244, 251, 246, 0.9) !important;
     opacity: 1 !important;
 }
 
 #sidebar.collapsed .nav-link.active i,
 #sidebar.collapsed .nav-link.active span i {
-    color: #1d7bf5 !important;
+    color: #ffffff !important;
     opacity: 1 !important;
 }
 
@@ -906,11 +879,11 @@
     font-style: normal;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    background-color: #ebf3ff !important;
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a) !important;
 }
 
 #sidebar.collapsed .nav-link.active i {
-    color: #1d7bf5 !important;
+    color: #ffffff !important;
     opacity: 1;
 }
 
@@ -1026,18 +999,18 @@
 }
 
 #sidebar.collapsed .collapse .nav-link:hover {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-    color: #637381 !important;
+    background-color: rgba(11, 61, 74, 0.06) !important;
+    color: #0b3d4a !important;
 }
 
 #sidebar.collapsed .collapse .nav-link.active {
-    background-color: rgba(25, 118, 210, 0.08) !important;
-    color: #1d7bf5 !important;
-    font-weight: 500 !important;
+    background-color: #e6f4f4 !important;
+    color: #0b3d4a !important;
+    font-weight: 600 !important;
     font-style: normal !important;
-    padding-left: 22px !important; /* Đồng nhất với padding-left */
+    padding-left: 22px !important;
     border-left: none !important;
-    font-size: 12px !important;
+    font-size: 14px !important;
     line-height: 26px !important;
 }
 
@@ -1049,7 +1022,7 @@
     top: 0; /* Bắt đầu từ top của collapse (menu con đầu tiên) */
     bottom: 0; /* Kéo dài đến bottom của collapse */
     width: 1px;
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 0;
 }
 
@@ -1061,7 +1034,7 @@
     top: 0;
     bottom: 0;
     width: 12px; /* Che từ left edge đến vị trí line (12px) */
-    background-color: #FFFFFF; /* Màu mặc định khi đóng - cùng màu với sidebar */
+    background-color: transparent;
     z-index: 10;
     pointer-events: none;
 }
@@ -1069,43 +1042,39 @@
 /* Đảm bảo menu cha có background-color khi collapsed */
 /* Mặc định khi đóng: cùng màu với sidebar (#FFFFFF) */
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"] {
-    background-color: #FFFFFF !important; /* Màu nền mặc định khi đóng - cùng màu với sidebar */
+    background-color: transparent !important;
 }
 
-/* CHỈ khi menu cha expanded trong collapsed sidebar mới có màu đậm - và ::before cũng phải cùng màu */
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"],
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed) {
-    background-color: #E6E9EC; /* Màu đậm khi expanded */
+    background-color: rgba(26, 122, 122, 0.28);
 }
 
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"]::before,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed)::before {
-    background-color: #E6E9EC !important; /* Cùng màu với menu cha khi expanded */
+    background-color: transparent !important;
 }
 
-/* Khi menu cha expanded và active trong collapsed sidebar, ưu tiên màu active - và ::before cũng phải cùng màu */
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active {
-    background-color: #ebf3ff; /* Màu nền khi active và expanded */
+    background-color: var(--bb-sidebar-active-bg, #1a7a7a);
 }
 
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"].active::before,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"]:not(.collapsed).active::before {
-    background-color: #ebf3ff !important; /* Cùng màu với menu cha khi active và expanded */
+    background-color: transparent !important;
 }
 
-/* Đảm bảo menu cha active nhưng chưa expanded vẫn có màu sidebar (#FFFFFF) */
-/* Override rule .nav-link.active cho menu cha chưa expanded trong collapsed sidebar với specificity cao hơn */
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"],
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"]) {
-    background-color: #FFFFFF !important; /* Cùng màu với sidebar khi đóng */
+    background-color: transparent !important;
 }
 
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active[aria-expanded="false"]::before,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active.collapsed::before,
 #sidebar.collapsed .nav-item > .nav-link[data-bs-toggle="collapse"].active:not([aria-expanded="true"])::before {
-    background-color: #FFFFFF !important; /* Màu sidebar khi menu cha đóng */
+    background-color: transparent !important;
 }
 
 /* Đoạn line ngắn từ menu cha xuống menu con đầu tiên khi collapsed - chỉ hiển thị khi collapse được mở */
@@ -1117,7 +1086,7 @@
     bottom: 0;
     width: 1px;
     height: 8px; /* Độ dài đoạn line nối từ menu cha xuống menu con đầu tiên */
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 11; /* Cao hơn ::before để vẫn hiển thị */
     pointer-events: none;
 }
@@ -1139,8 +1108,8 @@
 }
 #sidebar.collapsed .collapse .nav-link {
     padding: 8px 12px !important;
-    padding-left: 22px !important; /* Đồng nhất với expanded state */
-    color: #637381 !important;
+    padding-left: 22px !important;
+    color: #1c2a32 !important;
     font-size: 12px !important;
     line-height: 26px !important;
     white-space: nowrap !important;
@@ -1153,7 +1122,7 @@
     text-align: left !important;
     width: 100% !important;
     position: relative;
-    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-weight: 500;
 }
 
@@ -1169,7 +1138,7 @@
     top: 50%;
     width: 8px; /* Độ dài đường ngang - từ line đến icon */
     height: 1px;
-    background-color: #E6E9EC;
+    background-color: rgba(255, 255, 255, 0.18);
     z-index: 1;
     transform: translateY(-50%);
 }
@@ -1298,10 +1267,10 @@
 }
 
 #sidebar-offcanvas .offcanvas-title {
-    font-size: 18px;
-    font-weight: 900;
-    color: #1d7bf5;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 #sidebar-offcanvas .offcanvas-body {

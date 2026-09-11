@@ -1,0 +1,88 @@
+@implements IAsyncDisposable
+
+<select id="@_selectId" class="form-select seafood-select2 @Class" aria-label="@Placeholder" disabled="@Disabled"></select>
+
+@code {
+    private readonly string _selectId = $"seafood-select2-{Guid.NewGuid():N}";
+    private DotNetObjectReference<SeafoodSelect2>? _dotNetRef;
+    private bool _initialized;
+    private string _lastSignature = "";
+    private string? _selectedText;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Chọn...";
+    [Parameter] public string? SelectedText { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public int PageSize { get; set; } = 20;
+    [Parameter, EditorRequired] public Func<string, int, int, Task<SeafoodSelect2SearchResponseDto>> Search { get; set; } = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("seafoodSelect2.init", _selectId, _dotNetRef, new
+            {
+                Placeholder,
+                PageSize = Math.Clamp(PageSize, 1, 100),
+                Disabled
+            }, InitialItems());
+            _initialized = true;
+            _lastSignature = Signature();
+            return;
+        }
+
+        var signature = Signature();
+        if (_initialized && signature != _lastSignature)
+        {
+            await JS.InvokeVoidAsync("seafoodSelect2.setSelection", _selectId, InitialItems(), Disabled);
+            _lastSignature = signature;
+        }
+    }
+
+    [JSInvokable]
+    public async Task<SeafoodSelect2SearchResponseDto> SearchAsync(string? term, int page)
+        => Search == null
+            ? new SeafoodSelect2SearchResponseDto()
+            : await Search(term?.Trim() ?? "", Math.Max(1, page), Math.Clamp(PageSize, 1, 100));
+
+    [JSInvokable]
+    public async Task OnSelectionChangeAsync(string? rawId, string? rawText)
+    {
+        int? value = int.TryParse(rawId, out var parsed) && parsed > 0 ? parsed : null;
+        _selectedText = value.HasValue ? rawText : null;
+        if (value != Value)
+            await ValueChanged.InvokeAsync(value);
+    }
+
+    private List<SeafoodSelectOptionDto> InitialItems()
+        => Value is int id && id > 0
+            ? new List<SeafoodSelectOptionDto>
+            {
+                new() { Id = id, Text = string.IsNullOrWhiteSpace(SelectedText) ? (_selectedText ?? $"#{id}") : SelectedText }
+            }
+            : new();
+
+    private string Signature() => $"{Value}|{SelectedText}|{Placeholder}|{Disabled}";
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_initialized)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("seafoodSelect2.destroy", _selectId);
+            }
+            catch (JSDisconnectedException)
+            {
+                // The circuit is already closed.
+            }
+        }
+
+        _dotNetRef?.Dispose();
+    }
+}

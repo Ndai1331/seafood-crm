@@ -1,0 +1,108 @@
+@page "/export/allocations"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject IJSRuntime JS
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Xếp lô &amp; xếp giấy tờ</h3>
+            <p>FIFO theo lô thành phẩm, kiểm tra chứng từ theo thị trường và giữ hàng cho đúng hợp đồng.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>FIFO + reservation</span>
+    </div>
+
+    <div class="sf-form-section">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label">Hợp đồng / đơn hàng</label>
+                <SeafoodSelect2 Value="@(_request.SalesContractId > 0 ? (int?)_request.SalesContractId : null)" ValueChanged="OnContractChanged"
+                               Search="SearchContractsAsync" Placeholder="Tìm số hợp đồng hoặc khách" />
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <BootstrapInput @bind-Value="_etdText" DisplayText="Ngày ETD (yyyy-MM-dd)" ShowLabel="true" placeholder="2026-09-30" />
+            </div>
+            <div class="col-auto"><Button Color="Color.Primary" OnClick="PreviewAsync"><i class="fa-solid fa-magnifying-glass me-1" aria-hidden="true"></i>Preview phương án</Button></div>
+            @if (_preview != null)
+            {
+                <div class="col-auto"><Button Color="Color.Success" OnClick="ConfirmAsync" IsDisabled="@(!_preview.Candidates.Any(x => x.SuggestedKg > 0))"><i class="fa-solid fa-lock me-1" aria-hidden="true"></i>Xác nhận giữ hàng</Button></div>
+                <div class="col-auto"><Button Color="Color.Warning" OnClick="ReleaseAsync"><i class="fa-solid fa-unlock me-1" aria-hidden="true"></i>Giải phóng reservation</Button></div>
+            }
+        </div>
+    </div>
+
+    @if (_preview != null)
+    {
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Nhu cầu hợp đồng</div><div class="sf-kpi-value">@_preview.RequiredKg.ToString("N0") <small>kg</small></div></div></div></div>
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Có thể xếp</div><div class="sf-kpi-value">@_preview.AllocatableKg.ToString("N0") <small>kg</small></div></div></div></div>
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Còn thiếu</div><div class="sf-kpi-value">@_preview.MissingKg.ToString("N0") <small>kg</small></div></div></div></div>
+        </div>
+        <div class="sf-table-shell">
+            <Table TItem="AllocationCandidateDto" Items="@_preview.Candidates" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
+        </div>
+        @if (_preview.Candidates.Any(x => x.MissingDocuments.Count > 0))
+        {
+            <div class="alert alert-warning mt-3 mb-0"><i class="fa-solid fa-file-circle-exclamation me-2" aria-hidden="true"></i>Các lô có hàng nhưng thiếu giấy vẫn được hiển thị để nhân viên biết lý do bị loại; chỉ lô có chứng từ Verified và còn hiệu lực mới được giữ.</div>
+        }
+    }
+    else
+    {
+        <div class="sf-empty-state"><i class="fa-solid fa-arrows-to-circle" aria-hidden="true"></i>Nhập ID hợp đồng để xem phương án xếp lô FIFO.</div>
+    }
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40 };
+    private AllocationPreviewRequestDto _request = new();
+    private AllocationPreviewDto? _preview;
+    private string _etdText = "";
+
+    private Task OnContractChanged(int? value)
+    {
+        _request.SalesContractId = value ?? 0;
+        _preview = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchContractsAsync(string term, int page, int pageSize)
+        => await Api.SearchContractOptionsAsync(term, page, pageSize) ?? new();
+
+    private async Task PreviewAsync()
+    {
+        _request.Etd = DateTime.TryParse(_etdText, out var etd) ? etd : null;
+        _preview = await Api.PreviewAllocationAsync(_request);
+        if (_preview == null) await Toast.Error("Không tải được phương án xếp lô.");
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (_preview == null) return;
+        var result = await Api.ConfirmAllocationAsync(new AllocationConfirmDto
+        {
+            SalesContractId = _preview.SalesContractId,
+            Etd = _request.Etd,
+            Items = _preview.Candidates.Where(x => x.SuggestedKg > 0).Select(x => new AllocationItemDto
+            {
+                SalesContractLineId = x.ContractLineId,
+                InventoryBalanceId = x.InventoryBalanceId,
+                QuantityKg = x.SuggestedKg
+            }).ToList()
+        });
+        if (result == null) { await Toast.Error("Không thể xác nhận giữ hàng."); return; }
+        await Toast.Success($"Đã giữ {result.AllocatedKg:N0} kg cho hợp đồng.");
+        await PreviewAsync();
+    }
+
+    private async Task ReleaseAsync()
+    {
+        if (_request.SalesContractId <= 0 || !await JS.InvokeAsync<bool>("confirm", "Giải phóng toàn bộ hàng đang giữ cho hợp đồng này?")) return;
+        if (await Api.ReleaseAllocationAsync(new AllocationReleaseDto { SalesContractId = _request.SalesContractId, Reason = "Người dùng giải phóng reservation" }))
+        {
+            await Toast.Success("Đã giải phóng reservation.");
+            await PreviewAsync();
+        }
+        else await Toast.Error("Không thể giải phóng reservation.");
+    }
+}

@@ -1,0 +1,23 @@
+<section class="sf-modal-section @Class">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="sf-modal-section__header">
+            @if (!string.IsNullOrWhiteSpace(Icon))
+            {
+                <i class="@Icon" aria-hidden="true"></i>
+            }
+            <span>@Title</span>
+        </div>
+    }
+
+    <div class="sf-modal-section__body">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

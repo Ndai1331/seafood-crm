@@ -3,27 +3,65 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Theo dõi thanh toán</h3>
-<div class="sf-panel">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_id" placeholder="Id đợt TT" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_amount" placeholder="Số nhận USD" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="ReceiveAsync">Ghi nhận đã nhận</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Theo dõi thanh toán</h3>
+            <p>Ghi nhận khoản thu theo từng đợt và theo dõi số tiền còn phải thu.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-warning"><i class="fa-solid fa-money-check-dollar me-1" aria-hidden="true"></i>Finance</span>
+            <Button Color="Color.Primary" OnClick="OpenReceiveAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Ghi nhận thanh toán</Button>
+        </div>
     </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Ghi nhận thanh toán" OnSaveAsync="ReceiveAsync">
+        <SeafoodModalSection Title="Khoản phải thu" Icon="fa-solid fa-file-invoice-dollar">
+            <div class="row g-3">
+                <div class="col-md-6"><VnIntInput Value="@_id" ValueChanged="@(value => _id = value ?? 0)" DisplayText="Đợt thanh toán" ShowLabel="true" Placeholder="Payment installment Id" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Số tiền nhận" Icon="fa-solid fa-money-bill-wave">
+            <div class="row g-3">
+                <div class="col-md-6"><VnNumberInput Value="@_amount" ValueChanged="@(value => _amount = value ?? 0)" DisplayText="Số tiền nhận (USD)" ShowLabel="true" Placeholder="USD" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm invoice, khách hàng hoặc trạng thái..." />
+    <div class="sf-table-shell"><Table TItem="PaymentInstallmentDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
-<Table TItem="PaymentInstallmentDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<PaymentInstallmentDto> _rows = new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<PaymentInstallmentDto>? _table;
     private int _id;
     private decimal _amount;
-    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentsAsync() ?? new();
+    private SeafoodCrudModal? _crudModal;
+    private string _search = "";
+    private int _total;
+    private async Task<QueryData<PaymentInstallmentDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.PaymentsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
 
-    private async Task ReceiveAsync()
+    private async Task OpenReceiveAsync()
+    {
+        _id = 0;
+        _amount = 0;
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
+
+    private async Task<bool> ReceiveAsync()
     {
         var saved = await Api.ReceivePaymentAsync(_id, _amount);
-        if (saved == null) { await Toast.Error("Không ghi nhận được"); return; }
+        if (saved == null) { await Toast.Error("Không ghi nhận được"); return false; }
         await Toast.Success("Đã ghi nhận thanh toán");
-        _rows = await Api.PaymentsAsync() ?? new();
+        if (_table != null) await _table.QueryAsync(1);
+        return true;
     }
 }

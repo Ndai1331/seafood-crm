@@ -1,11 +1,11 @@
-/* Seafood CRM login — B2B SaaS navy/teal split-screen. */
+/* Seafood CRM login — focused B2B SaaS navy/blue split-screen. */
 
 .sso-login-page {
-    --primary: #1a7a7a;
-    --primary-deep: #0f5f60;
-    --primary-press: #0b3d4a;
-    --primary-subdued: #9ad4d4;
-    --brand-dark-900: #0b3d4a;
+    --primary: #0369a1;
+    --primary-deep: #075985;
+    --primary-press: #0f172a;
+    --primary-subdued: #7dd3fc;
+    --brand-dark-900: #0f172a;
     --ink: #1c2a32;
     --ink-secondary: #273951;
     --ink-mute: #5b6b73;
@@ -36,28 +36,12 @@
 }
 
 .brand-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(120% 80% at 12% -8%, rgba(26, 122, 122, 0.55) 0%, transparent 45%),
-        radial-gradient(110% 90% at 82% -4%, rgba(14, 116, 144, 0.45) 0%, transparent 48%),
-        radial-gradient(120% 120% at 30% 12%, rgba(11, 61, 74, 0.55) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(11, 61, 74, 0) 40%, var(--brand-dark-900) 92%);
-    opacity: 0.95;
+    content: none;
 }
 
 /* fine grid texture, masked to top-left */
 .brand-panel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 46px 46px, 46px 46px;
-    mask-image: linear-gradient(160deg, rgba(0, 0, 0, 0.9), transparent 70%);
-    opacity: 0.5;
+    content: none;
 }
 
 .brand-top,
@@ -170,7 +154,7 @@
     margin: 0 0 12px;
     padding: 5px 10px;
     border-radius: 9999px;
-    background: rgba(185, 185, 249, 0.35);
+    background: var(--sf-color-info-soft, #e0f2fe);
     color: var(--primary-deep);
     font-size: 11px;
     font-weight: 600;
@@ -518,7 +502,7 @@
 
 .field-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.14);
+    box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.18);
 }
 
 .field-input-wrapper:focus-within .field-icon {
@@ -597,7 +581,7 @@
 }
 
 .remember-me input:focus-visible + .remember-box {
-    box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.18);
+    box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.22);
 }
 
 .remember-text {
@@ -605,7 +589,7 @@
     color: var(--ink-secondary);
 }
 
-/* ===== primary submit — Stripe filled indigo pill ===== */
+/* ===== primary submit ===== */
 .login-submit-btn {
     display: flex;
     align-items: center;
@@ -621,7 +605,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(46, 43, 140, 0.35), 0 4px 14px rgba(83, 58, 253, 0.28);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.24), 0 4px 14px rgba(3, 105, 161, 0.22);
     transition: background 0.16s ease, transform 0.06s ease;
 }
 

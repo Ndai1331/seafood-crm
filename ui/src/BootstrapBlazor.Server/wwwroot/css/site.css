@@ -13,7 +13,7 @@
     --bb-danger-color: #dc3545;
     
     /* Table Colors - From design */
-    --bb-table-header-bg: #0d6efd;
+    --bb-table-header-bg: #0369a1;
     --bb-table-header-color: #ffffff;
     --bb-table-grouped-row-bg: #e6f0ff;
     --bb-table-hover-bg: #f0f4f8;
@@ -41,23 +41,25 @@
     --bb-font-weight-semibold: 600;
     --bb-font-weight-bold: 700;
 
-    /* ===== Apple-tone overrides (global, token-only) =====
-       Retune the theme toward Apple's restrained palette: single Action Blue
-       for interactive color, parchment app canvas, SF Pro display type. Layout
-       and structure are untouched — only these token values change. */
-    --bb-primary-color: #0066cc;
-    --bb-primary-color-rgb: 0, 102, 204;
-    /* Bootstrap's own primary token — drives .btn-primary / .text-primary / .bg-primary */
-    --bs-primary: #0066cc;
-    --bs-primary-rgb: 0, 102, 204;
-    --bb-font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --bb-main-bg: #f5f5f7;
+    /* BootstrapBlazor /theme palette: purple brand, blue primary, high-contrast type */
+    --bb-primary-color: #0369a1;
+    --bb-primary-color-rgb: 13, 110, 253;
+    --bs-primary: #0369a1;
+    --bs-primary-rgb: 13, 110, 253;
+    --bb-font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --bb-main-bg: #f4f6f8;
     --bb-content-bg: #ffffff;
-    --bb-table-header-bg: #0066cc;
-    --bb-layout-button-bg: #0066cc;
-    --bb-layout-button-hover-bg: #0071e3;
-    --bb-layout-button-active-bg: #0058ad;
-    --bb-layout-button-shadow: 0 1px 2px rgba(0, 102, 204, 0.18);
+    --bb-table-header-bg: #0369a1;
+    --bb-layout-button-bg: #0369a1;
+    --bb-layout-button-hover-bg: #075985;
+    --bb-layout-button-active-bg: #0a58ca;
+    --bb-layout-button-shadow: 0 1px 2px rgba(13, 110, 253, 0.18);
+    --bb-sidebar-bg: #ffffff;
+    --bb-sidebar-navbar-bg: #ffffff;
+    --bb-sidebar-text-color: #212b36;
+    --bb-sidebar-active-bg: #1e3a5f;
+    --bb-sidebar-active-color: #ffffff;
+    --bb-sidebar-hover-bg: #f4f6f8;
 }
 
 /* Typography Improvements */

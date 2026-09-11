@@ -3,45 +3,127 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Deposit</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.AmountUsd" placeholder="Số tiền USD" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Note" placeholder="Ghi chú" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Nhận deposit</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Deposit khách hàng</h3>
+            <p>Nhận tiền đặt cọc và phân bổ vào hợp đồng xuất khẩu tương ứng.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-warning"><i class="fa-solid fa-piggy-bank me-1" aria-hidden="true"></i>Finance</span>
+            <Button Color="Color.Primary" OnClick="OpenDepositAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Nhận deposit</Button>
+            <Button Color="Color.Secondary" OnClick="OpenAllocationAsync"><i class="fa-solid fa-arrow-right-arrow-left me-1" aria-hidden="true"></i>Phân bổ</Button>
+        </div>
     </div>
-    <div class="row g-2 mt-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_depositId" placeholder="Deposit Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_contractId" placeholder="HĐ Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_alloc" placeholder="Allocate USD" /></div>
-        <div class="col-md-2"><Button Color="Color.Secondary" OnClick="AllocateAsync">Allocate vào HĐ</Button></div>
-    </div>
+
+    <SeafoodCrudModal @ref="_depositModal" Title="Nhận deposit khách hàng" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Khoản deposit" Icon="fa-solid fa-piggy-bank">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Khách hàng</label>
+                    <SeafoodSelect2 Value="@(_form.CustomerId > 0 ? (int?)_form.CustomerId : null)" ValueChanged="OnCustomerChanged"
+                                   Search="SearchCustomersAsync" Placeholder="Tìm mã hoặc tên khách" />
+                </div>
+                <div class="col-md-6"><VnNumberInput Value="@_form.AmountUsd" ValueChanged="@(value => _form.AmountUsd = value ?? 0)" DisplayText="Số tiền (USD)" ShowLabel="true" Placeholder="USD" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Ghi chú" Icon="fa-solid fa-note-sticky">
+            <div class="row g-3">
+                <div class="col-12"><Textarea @bind-Value="_form.Note" DisplayText="Nội dung" ShowLabel="true" placeholder="Nội dung" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodCrudModal @ref="_allocationModal" Title="Phân bổ deposit vào hợp đồng" OnSaveAsync="AllocateAsync" Size="Size.Large">
+        <SeafoodModalSection Title="Nguồn tiền" Icon="fa-solid fa-wallet">
+            <div class="row g-3">
+                <div class="col-md-6"><VnIntInput Value="@_depositId" ValueChanged="@(value => _depositId = value ?? 0)" DisplayText="Deposit" ShowLabel="true" Placeholder="Deposit Id" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Phân bổ vào hợp đồng" Icon="fa-solid fa-arrow-right-arrow-left">
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <label class="form-label">Hợp đồng</label>
+                    <SeafoodSelect2 Value="@(_contractId > 0 ? (int?)_contractId : null)" ValueChanged="OnContractChanged"
+                                   Search="SearchContractsAsync" Placeholder="Tìm số hợp đồng hoặc khách" />
+                </div>
+                <div class="col-md-5"><VnNumberInput Value="@_alloc" ValueChanged="@(value => _alloc = value ?? 0)" DisplayText="Số phân bổ (USD)" ShowLabel="true" Placeholder="USD" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm khách hàng, ghi chú, số tiền..." />
+    <div class="sf-table-shell"><Table TItem="CustomerDepositDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
-<Table TItem="CustomerDepositDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<CustomerDepositDto> _rows = new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<CustomerDepositDto>? _table;
     private CustomerDepositDto _form = new();
+    private SeafoodCrudModal? _depositModal;
+    private SeafoodCrudModal? _allocationModal;
     private int _depositId;
     private int _contractId;
     private decimal _alloc;
-
-    protected override async Task OnInitializedAsync() => _rows = await Api.DepositsAsync() ?? new();
-
-    private async Task SaveAsync()
+    private string _search = "";
+    private int _total;
+    private async Task<QueryData<CustomerDepositDto>> OnQueryAsync(QueryPageOptions options)
     {
-        var saved = await Api.SaveDepositAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu deposit"); return; }
-        await Toast.Success("Đã nhận deposit");
+        var page = await Api.DepositsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+
+    private async Task OpenDepositAsync()
+    {
         _form = new();
-        _rows = await Api.DepositsAsync() ?? new();
+        if (_depositModal != null) await _depositModal.ShowAsync();
     }
 
-    private async Task AllocateAsync()
+    private async Task OpenAllocationAsync()
     {
-        await Api.AllocateDepositAsync(_depositId, _contractId, _alloc);
-        await Toast.Success("Đã allocate");
-        _rows = await Api.DepositsAsync() ?? new();
+        _depositId = 0;
+        _contractId = 0;
+        _alloc = 0;
+        if (_allocationModal != null) await _allocationModal.ShowAsync();
+    }
+
+    private async Task<bool> SaveAsync()
+    {
+        var saved = await Api.SaveDepositAsync(_form);
+        if (saved == null) { await Toast.Error("Không lưu deposit"); return false; }
+        await Toast.Success("Đã nhận deposit");
+        _form = new();
+        if (_table != null) await _table.QueryAsync(1);
+        return true;
+    }
+
+    private Task OnCustomerChanged(int? value)
+    {
+        _form.CustomerId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnContractChanged(int? value)
+    {
+        _contractId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize)
+        => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchContractsAsync(string term, int page, int pageSize)
+        => await Api.SearchContractOptionsAsync(term, page, pageSize) ?? new();
+
+    private async Task<bool> AllocateAsync()
+    {
+        var saved = await Api.AllocateDepositAsync(_depositId, _contractId, _alloc);
+        if (saved == null) { await Toast.Error("Không phân bổ được deposit"); return false; }
+        await Toast.Success("Đã phân bổ deposit");
+        if (_table != null) await _table.QueryAsync(1);
+        return true;
     }
 }

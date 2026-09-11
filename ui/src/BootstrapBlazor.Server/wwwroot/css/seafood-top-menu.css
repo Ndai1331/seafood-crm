@@ -1,0 +1,458 @@
+/* Seafood CRM top navigation -------------------------------------------------
+   The menu is permission-driven by PageLayout and intentionally keeps all
+   labels on desktop while switching to an icon rail on small screens. */
+:root {
+  --sf-topbar: #0874eb;
+  --sf-topbar-dark: #0564cf;
+  --sf-topbar-text: rgba(255, 255, 255, 0.92);
+  --sf-topbar-muted: rgba(255, 255, 255, 0.74);
+  --sf-topbar-active: rgba(255, 255, 255, 0.2);
+  --sf-topbar-border: rgba(255, 255, 255, 0.22);
+}
+
+/* The old sidebar and phone bottom rail are no longer part of the application shell. */
+#sidebar,
+#sidebar-offcanvas,
+#mobile-bottom-nav {
+  display: none !important;
+}
+
+#main-content,
+#main-content.sidebar-collapsed {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100vh;
+  min-height: 100vh;
+  margin-left: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #f4f6f8;
+}
+
+#main-content > nav.seafood-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  display: block !important;
+  min-height: 64px !important;
+  height: 64px !important;
+  padding: 0;
+  color: var(--sf-topbar-text);
+  background: var(--sf-topbar) !important;
+  border: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12), 0 7px 20px rgba(4, 57, 125, 0.16);
+}
+
+.seafood-topbar__inner {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  align-items: stretch;
+}
+
+.seafood-topbar__brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 62px;
+  min-width: 62px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  color: #fff;
+  text-decoration: none;
+  border-right: 1px solid var(--sf-topbar-border);
+}
+
+.seafood-topbar__brand:hover,
+.seafood-topbar__brand:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.seafood-topbar__brand-mark {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  color: #0874eb;
+  font-size: 22px;
+  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.74);
+  border-radius: 10px;
+  box-shadow: 0 3px 9px rgba(3, 49, 112, 0.2);
+}
+
+.seafood-topbar__brand-name {
+  display: none;
+}
+
+.seafood-topbar__items {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 0;
+  padding: 6px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.seafood-topbar__items::-webkit-scrollbar {
+  display: none;
+}
+
+/* Let an opened dropdown escape the horizontal scroll rail instead of being clipped. */
+.seafood-topbar__items:has(.dropdown-menu.show) {
+  overflow: visible;
+}
+
+.seafood-topbar__item {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.seafood-topbar__link {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 9px;
+  color: var(--sf-topbar-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.seafood-topbar__link:hover,
+.seafood-topbar__link:focus-visible,
+.seafood-topbar__link.is-active,
+.seafood-topbar__item.show > .seafood-topbar__link {
+  color: #fff;
+  background: var(--sf-topbar-active);
+  outline: none;
+}
+
+.seafood-topbar__link > i:first-child {
+  width: 19px;
+  flex: 0 0 19px;
+  color: currentColor;
+  font-size: 18px;
+  text-align: center;
+}
+
+.seafood-topbar__label {
+  white-space: nowrap;
+}
+
+.seafood-topbar__chevron {
+  margin-left: 1px;
+  color: var(--sf-topbar-muted);
+  font-size: 9px;
+}
+
+.seafood-topbar__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  border-left: 1px solid var(--sf-topbar-border);
+}
+
+.seafood-topbar__culture {
+  display: none !important;
+}
+
+.seafood-topbar__icon-button {
+  position: relative;
+  display: inline-flex;
+  width: 48px;
+  height: 64px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--sf-topbar-text);
+  font-size: 20px;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--sf-topbar-border);
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.seafood-topbar__icon-button:hover,
+.seafood-topbar__icon-button:focus-visible,
+.seafood-topbar__account.show > .seafood-topbar__icon-button {
+  color: #fff;
+  background: var(--sf-topbar-active);
+  outline: none;
+}
+
+.seafood-topbar__avatar-button {
+  border-right: 0;
+}
+
+.seafood-topbar__avatar,
+.seafood-topbar__avatar-fallback {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+}
+
+.seafood-topbar__avatar {
+  object-fit: cover;
+}
+
+.seafood-topbar__avatar-fallback {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--sf-topbar);
+  font-size: 14px;
+  background: #fff;
+}
+
+.seafood-topbar__dropdown,
+.seafood-topbar__account-menu {
+  z-index: 1110;
+  margin-top: 6px !important;
+  padding: 10px;
+  color: #fff;
+  background: linear-gradient(160deg, #0868d9 0%, #075dc0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 16px;
+  box-shadow: 0 20px 42px rgba(3, 35, 84, 0.35);
+}
+
+.seafood-topbar__dropdown {
+  width: min(340px, calc(100vw - 24px));
+  min-width: 280px;
+}
+
+.seafood-topbar__dropdown-title {
+  padding: 7px 12px 9px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.seafood-topbar__dropdown-link {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 13px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.seafood-topbar__dropdown-link > i {
+  width: 22px;
+  flex: 0 0 22px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 18px;
+  text-align: center;
+}
+
+.seafood-topbar__dropdown-link:hover,
+.seafood-topbar__dropdown-link:focus-visible,
+.seafood-topbar__dropdown-link.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  outline: none;
+}
+
+.seafood-topbar__account-menu {
+  width: 220px;
+  min-width: 220px;
+}
+
+.seafood-topbar__account-name {
+  padding: 5px 12px 9px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seafood-topbar__account-menu .dropdown-item {
+  min-height: 38px;
+  color: #fff;
+  border-radius: 9px;
+}
+
+.seafood-topbar__account-menu .dropdown-item:hover,
+.seafood-topbar__account-menu .dropdown-item:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.seafood-topbar__account-menu .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+#main-content > .main-content {
+  min-height: calc(100vh - 64px);
+  padding: 18px 24px 32px !important;
+}
+
+/* Bootstrap's dropdown does not provide a scrim. Keep focus on the open panel,
+   matching the reference desktop and phone states. */
+body:has(.seafood-topbar .dropdown.show)::before {
+  position: fixed;
+  z-index: 1090;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: rgba(20, 35, 58, 0.34);
+}
+
+@media (max-width: 1199.98px) and (min-width: 768px) {
+  .seafood-topbar__link {
+    gap: 5px;
+    padding: 0 7px;
+    font-size: 12px;
+  }
+
+  .seafood-topbar__chevron {
+    display: none;
+  }
+
+  .seafood-topbar__link > i:first-child {
+    width: 18px;
+    flex-basis: 18px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #main-content,
+  #main-content.sidebar-collapsed {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  #main-content > nav.seafood-topbar,
+  .seafood-topbar__inner {
+    min-height: 54px !important;
+    height: 54px !important;
+  }
+
+  .seafood-topbar__brand {
+    min-width: 58px;
+    width: 58px;
+    padding: 5px 8px;
+  }
+
+  .seafood-topbar__brand-mark {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 20px;
+    border-radius: 9px;
+  }
+
+  .seafood-topbar__brand-name,
+  .seafood-topbar__label,
+  .seafood-topbar__chevron,
+  .seafood-topbar__culture {
+    display: none;
+  }
+
+  .seafood-topbar__items {
+    gap: 0;
+    padding: 4px 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .seafood-topbar__items::-webkit-scrollbar {
+    display: none;
+  }
+
+  .seafood-topbar__item {
+    flex: 0 0 43px;
+  }
+
+  .seafood-topbar__link {
+    width: 43px;
+    height: 46px;
+    gap: 0;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .seafood-topbar__link > i:first-child {
+    width: 23px;
+    flex-basis: 23px;
+    font-size: 19px;
+  }
+
+  .seafood-topbar__actions {
+    height: 54px;
+  }
+
+  .seafood-topbar__icon-button {
+    width: 45px;
+    height: 54px;
+    font-size: 18px;
+  }
+
+  .seafood-topbar__avatar,
+  .seafood-topbar__avatar-fallback {
+    width: 27px;
+    height: 27px;
+  }
+
+  .seafood-topbar__dropdown {
+    position: fixed !important;
+    top: 60px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto;
+    min-width: 0;
+    max-height: calc(100dvh - 76px);
+    margin: 0 !important;
+    overflow-y: auto;
+  }
+
+  .seafood-topbar__account-menu {
+    position: fixed !important;
+    top: 60px !important;
+    right: 8px !important;
+    width: min(240px, calc(100vw - 16px));
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  #main-content > .main-content {
+    min-height: calc(100dvh - 54px);
+    padding: 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seafood-topbar__link,
+  .seafood-topbar__icon-button {
+    transition: none;
+  }
+}

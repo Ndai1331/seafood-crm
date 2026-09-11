@@ -1,0 +1,62 @@
+@page "/inventory/traceability"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Truy xuất hai chiều</h3>
+            <p>Tra từ shipment về thành phẩm, mẻ sản xuất, lô nguyên liệu và ngược lại.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-route me-1" aria-hidden="true"></i>Traceability</span>
+    </div>
+
+    <div class="sf-form-section">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <Select @bind-Value="_ownerType" DisplayText="Loại đối tượng" ShowLabel="true">
+                    <Options>
+                        <SelectOption Value="Shipment" Text="Shipment" />
+                        <SelectOption Value="SalesContract" Text="Hợp đồng" />
+                        <SelectOption Value="ProductionLot" Text="Lô thành phẩm" />
+                        <SelectOption Value="RawMaterialLot" Text="Lô nguyên liệu" />
+                        <SelectOption Value="InventoryBalance" Text="Dòng tồn kho" />
+                    </Options>
+                </Select>
+            </div>
+            <div class="col-md-3">
+                <VnIntInput Value="@_ownerId" ValueChanged="@(value => _ownerId = value ?? 0)" DisplayText="ID" ShowLabel="true" />
+            </div>
+            <div class="col-auto"><Button Color="Color.Primary" OnClick="LoadAsync"><i class="fa-solid fa-search me-1" aria-hidden="true"></i>Tra cứu</Button></div>
+        </div>
+    </div>
+
+    @if (_result == null)
+    {
+        <div class="sf-empty-state"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i>Nhập loại và ID để xem chuỗi truy xuất.</div>
+    }
+    else
+    {
+        <div class="row g-3 mb-3">
+            <div class="col-md-6"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Số nút liên quan</div><div class="sf-kpi-value">@_result.Nodes.Count</div></div></div></div>
+            <div class="col-md-6"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Số quan hệ</div><div class="sf-kpi-value">@_result.Edges.Count</div></div></div></div>
+        </div>
+        <div class="sf-table-shell mb-3"><Table TItem="TraceabilityNodeDto" Items="@_result.Nodes" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" /></div>
+        <div class="sf-table-shell"><Table TItem="TraceabilityEdgeDto" Items="@_result.Edges" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" /></div>
+    }
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40 };
+    private string _ownerType = "Shipment";
+    private int _ownerId;
+    private TraceabilityDto? _result;
+
+    private async Task LoadAsync()
+    {
+        if (_ownerId <= 0) { await Toast.Error("ID phải lớn hơn 0."); return; }
+        _result = await Api.TraceabilityAsync(_ownerType, _ownerId);
+        if (_result == null) await Toast.Error("Không tải được dữ liệu truy xuất.");
+    }
+}

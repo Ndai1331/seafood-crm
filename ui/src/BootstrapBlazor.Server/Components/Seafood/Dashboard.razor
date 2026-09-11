@@ -3,26 +3,32 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 
-<div class="seafood-dashboard">
-    <h2 class="mb-4">Tổng quan nhà máy</h2>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Tổng quan nhà máy</h3>
+            <p>Theo dõi nhanh dòng hàng, tồn kho, hợp đồng và công nợ trong tháng.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-chart-line me-1" aria-hidden="true"></i>Operations overview</span>
+    </div>
     @if (_data == null)
     {
-        <div class="text-muted">Đang tải...</div>
+        <div class="sf-panel sf-empty-state"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>Đang tải dữ liệu tổng quan...</div>
     }
     else
     {
-        <div class="row g-3 mb-4">
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Nhập tháng này (kg)</div><div class="kpi-value">@_data.InboundKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">SX tháng này (kg)</div><div class="kpi-value">@_data.ProducedKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Xuất tháng này (kg)</div><div class="kpi-value">@_data.ExportKgThisMonth.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Tồn kho (kg)</div><div class="kpi-value">@_data.OnHandKg.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">HĐ mở (USD)</div><div class="kpi-value">@_data.OpenContractUsd.ToString("N0")</div></div></div>
-            <div class="col-md-2"><div class="kpi-card"><div class="kpi-label">Công nợ (USD)</div><div class="kpi-value">@_data.OutstandingPaymentUsd.ToString("N0")</div></div></div>
+        <div class="sf-kpi-grid">
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-blue"><i class="fa-solid fa-arrow-down" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Nhập tháng này</div><div class="sf-kpi-value">@_data.InboundKgThisMonth.ToString("N0") <small>kg</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-teal"><i class="fa-solid fa-gears" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Sản xuất tháng này</div><div class="sf-kpi-value">@_data.ProducedKgThisMonth.ToString("N0") <small>kg</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-green"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Xuất tháng này</div><div class="sf-kpi-value">@_data.ExportKgThisMonth.ToString("N0") <small>kg</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-amber"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Tồn kho</div><div class="sf-kpi-value">@_data.OnHandKg.ToString("N0") <small>kg</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-slate"><i class="fa-solid fa-file-signature" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Hợp đồng mở</div><div class="sf-kpi-value">@_data.OpenContractUsd.ToString("N0") <small>USD</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-red"><i class="fa-solid fa-coins" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Công nợ</div><div class="sf-kpi-value">@_data.OutstandingPaymentUsd.ToString("N0") <small>USD</small></div></div></div>
         </div>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="sf-panel">
-                    <h5>Tồn theo SKU</h5>
+        <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+                <div class="sf-panel sf-chart-panel">
+                    <div class="sf-panel-heading"><div><h5>Tồn theo SKU</h5><span>Phân bổ tồn kho hiện tại</span></div><i class="fa-solid fa-warehouse" aria-hidden="true"></i></div>
                     @foreach (var slice in _data.StockBySku)
                     {
                         var pct = Max(_data.StockBySku) == 0 ? 0 : (double)(slice.Value / Max(_data.StockBySku) * 100);
@@ -31,12 +37,12 @@
                             <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
                         </div>
                     }
-                    @if (!_data.StockBySku.Any()) { <div class="text-muted">Chưa có tồn kho.</div> }
+                    @if (!_data.StockBySku.Any()) { <div class="sf-empty-state">Chưa có tồn kho.</div> }
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="sf-panel">
-                    <h5>Xuất theo tuyến</h5>
+            <div class="col-lg-6">
+                <div class="sf-panel sf-chart-panel">
+                    <div class="sf-panel-heading"><div><h5>Xuất theo tuyến</h5><span>Sản lượng theo thị trường</span></div><i class="fa-solid fa-route" aria-hidden="true"></i></div>
                     @foreach (var slice in _data.ExportByMarket)
                     {
                         var pct = Max(_data.ExportByMarket) == 0 ? 0 : (double)(slice.Value / Max(_data.ExportByMarket) * 100);
@@ -45,7 +51,7 @@
                             <div class="sf-bar-track"><div class="sf-bar-fill" style="width:@pct.ToString("0")%"></div></div>
                         </div>
                     }
-                    @if (!_data.ExportByMarket.Any()) { <div class="text-muted">Chưa có đơn xuất.</div> }
+                    @if (!_data.ExportByMarket.Any()) { <div class="sf-empty-state">Chưa có đơn xuất.</div> }
                 </div>
             </div>
         </div>

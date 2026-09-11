@@ -44,7 +44,10 @@ public static class PageRegistry
                 new() { Text = "Danh mục chung", Icon = "fa-fw fa-solid fa-list", Url = "master-data/catalog", Permission = "master-data.catalog" },
                 new() { Text = "Mặt hàng / SKU", Icon = "fa-fw fa-solid fa-fish", Url = "master-data/products", Permission = "master-data.products" },
                 new() { Text = "Khách hàng", Icon = "fa-fw fa-solid fa-users", Url = "master-data/customers", Permission = "master-data.customers" },
+                new() { Text = "Đối tác & tàu", Icon = "fa-fw fa-solid fa-people-arrows", Url = "master-data/partners", Permission = "master-data.customers" },
                 new() { Text = "Điều khoản TT", Icon = "fa-fw fa-solid fa-file-invoice-dollar", Url = "master-data/payment-terms", Permission = "master-data.payment-terms" },
+                new() { Text = "Loại chứng từ", Icon = "fa-fw fa-solid fa-file-lines", Url = "master-data/document-types", Permission = "master-data.document-types" },
+                new() { Text = "Quy tắc chứng từ", Icon = "fa-fw fa-solid fa-certificate", Url = "master-data/document-rules", Permission = "master-data.document-rules" },
             }
         },
         new()
@@ -53,6 +56,7 @@ public static class PageRegistry
             Items = new List<PageEntry>
             {
                 new() { Text = "Nhập nguyên liệu", Icon = "fa-fw fa-solid fa-boxes-stacked", Url = "inbound", Permission = "inbound.purchases" },
+                new() { Text = "Import dữ liệu Excel", Icon = "fa-fw fa-solid fa-file-excel", Url = "inbound/import", Permission = "inbound.purchases" },
             }
         },
         new()
@@ -69,6 +73,7 @@ public static class PageRegistry
             Items = new List<PageEntry>
             {
                 new() { Text = "Tồn kho & chứng từ", Icon = "fa-fw fa-solid fa-boxes-packing", Url = "inventory", Permission = "inventory.stock" },
+                new() { Text = "Truy xuất hai chiều", Icon = "fa-fw fa-solid fa-route", Url = "inventory/traceability", Permission = "inventory.stock" },
             }
         },
         new()
@@ -99,6 +104,7 @@ public static class PageRegistry
                 new() { Text = "Cài đặt đăng nhập", Icon = "fa-fw fa-solid fa-shield-halved", Url = "sso-settings", Permission = "system.sso-settings" },
                 new() { Text = "Phân quyền", Icon = "fa-fw fa-solid fa-lock", Url = "permission-matrix", Permission = "system.permission-matrix" },
                 new() { Text = "Sắp xếp menu", Icon = "fa-fw fa-solid fa-bars", Url = "menu-arrangement", Permission = "system.menu-arrangement" },
+                new() { Text = "Nhật ký hệ thống", Icon = "fa-fw fa-solid fa-clock-rotate-left", Url = "system/audit-log", Permission = "system.audit-log" },
             }
         },
     };

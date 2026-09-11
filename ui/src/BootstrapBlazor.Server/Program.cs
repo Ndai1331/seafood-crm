@@ -2,6 +2,7 @@ using BootstrapBlazor.Server.Components;
 using BootstrapBlazor.Server.Http;
 using BootstrapBlazor.Server.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using System.Text;
@@ -9,6 +10,14 @@ using System.Text;
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
+
+// dotnet run can use a non-Development environment when no launch profile is
+// selected. Load the generated Razor/package assets in that case as well;
+// otherwise MapStaticAssets falls back to wwwroot and CSS bundles return 500.
+if (!builder.Environment.IsDevelopment())
+{
+    StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+}
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

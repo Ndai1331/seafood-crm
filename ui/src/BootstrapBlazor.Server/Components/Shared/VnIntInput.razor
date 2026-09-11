@@ -1,6 +1,10 @@
 @using BootstrapBlazor.Server.Helper
 
 <div class="vn-number-input">
+    @if (ShowLabel && !string.IsNullOrWhiteSpace(DisplayText))
+    {
+        <label class="form-label">@DisplayText</label>
+    }
     <input type="text"
            class="form-control @CssClass"
            value="@_display"
@@ -13,6 +17,8 @@
 @code {
     [Parameter] public int? Value { get; set; }
     [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public string? DisplayText { get; set; }
+    [Parameter] public bool ShowLabel { get; set; }
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public string? CssClass { get; set; }
     [Parameter] public bool IsDisabled { get; set; }

@@ -1,0 +1,71 @@
+@page "/system/audit-log"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Nhật ký hệ thống</h3><p>Theo dõi ai đã làm gì, thời điểm nào, IP, trình duyệt, thiết bị và kết quả xử lý.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_total.ToString("N0") lượt gọi</span><Button Color="Color.Primary" Icon="fa-solid fa-rotate" Text="Làm mới" OnClick="ApplyFiltersAsync" /></div>
+    </div>
+
+    <div class="sf-toolbar align-items-end" role="search">
+        <div class="sf-filter-search flex-grow-1"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><BootstrapInput @bind-Value="_filter.Search" PlaceHolder="Tìm người dùng, đường dẫn, IP, user agent..." ShowLabel="false" Class="sf-filter-input" /></div>
+        <div><Select @bind-Value="_filter.DeviceType" DisplayText="Thiết bị" ShowLabel="true"><Options><SelectOption Value="" Text="Tất cả" /><SelectOption Value="Desktop" Text="Desktop" /><SelectOption Value="Mobile" Text="Mobile" /><SelectOption Value="Tablet" Text="Tablet" /></Options></Select></div>
+        <div><Select @bind-Value="_resultFilter" DisplayText="Kết quả" ShowLabel="true"><Options><SelectOption Value="" Text="Tất cả" /><SelectOption Value="success" Text="Thành công" /><SelectOption Value="failed" Text="Lỗi" /></Options></Select></div>
+        <div><Button Color="Color.Primary" Icon="fa-solid fa-filter" Text="Lọc" OnClick="ApplyFiltersAsync" /></div>
+    </div>
+
+    <div class="sf-table-shell">
+        <Table TItem="AppHistoryDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="AppHistoryDto" TType="DateTime" @bind-Field="@context.Date" Text="Thời gian" Width="190"><Template Context="value">@value.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="string" @bind-Field="@context.FullName" Text="Người dùng" Width="220"><Template Context="value"><strong>@value.Value</strong><div class="small text-muted">User #@value.Row.UserId</div></Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="string" @bind-Field="@context.Operation" Text="Hành động" Width="150"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="string" @bind-Field="@context.Functions" Text="Chức năng / URL" Width="300" TextWrap="true"><Template Context="value"><span class="small">@value.Value</span><div class="small text-muted">@value.Row.RequestId</div></Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="string" @bind-Field="@context.IpAddress" Text="IP" Width="150" />
+                <TableColumn TItem="AppHistoryDto" TType="string" @bind-Field="@context.DeviceType" Text="Thiết bị" Width="180"><Template Context="value">@value.Value · @value.Row.Browser<div class="small text-muted">@value.Row.OperatingSystem</div></Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="bool" @bind-Field="@context.Succeeded" Text="Kết quả" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" ActiveText="@SuccessText(value.Row.StatusCode)" InactiveText="@FailureText(value.Row.StatusCode)" /></Template></TableColumn>
+                <TableColumn TItem="AppHistoryDto" TType="long" @bind-Field="@context.DurationMs" Text="ms" Width="90" Align="Alignment.Right" />
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 20, 50, 100 };
+    private readonly AppHistoryFilterPagingDto _filter = new() { Take = 50 };
+    private Table<AppHistoryDto>? _table;
+    private int _total;
+    private string _resultFilter = "";
+
+    private async Task<QueryData<AppHistoryDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        _filter.Skip = Math.Max(0, options.PageIndex - 1) * options.PageItems;
+        _filter.Take = options.PageItems;
+        _filter.Succeeded = _resultFilter switch { "success" => true, "failed" => false, _ => null };
+        try
+        {
+            var response = await Api.SearchAuditLogsAsync(_filter);
+            if (!string.IsNullOrWhiteSpace(response?.Message)) await Toast.Error(response.Message);
+            var result = response?.Data;
+            _total = result?.TotalItem ?? 0;
+            return new QueryData<AppHistoryDto> { Items = result?.Result ?? new List<AppHistoryDto>(), TotalCount = _total, IsFiltered = true, IsSorted = true, IsSearch = !string.IsNullOrWhiteSpace(_filter.Search) };
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error($"Không tải được nhật ký: {ex.Message}");
+            _total = 0;
+            return new QueryData<AppHistoryDto>();
+        }
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        _filter.Skip = 0;
+        if (_table != null) await _table.QueryAsync(1);
+    }
+
+    private static string SuccessText(int code) => $"OK {code}";
+    private static string FailureText(int code) => $"Lỗi {code}";
+}

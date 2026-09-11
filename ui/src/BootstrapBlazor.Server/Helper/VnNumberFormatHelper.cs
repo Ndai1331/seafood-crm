@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace BootstrapBlazor.Server.Helper;
 
@@ -53,8 +52,16 @@ public static class VnNumberFormatHelper
 
     public static int? ParseInt(string? input)
     {
-        var dec = ParseDecimal(input);
-        return dec.HasValue ? (int)dec.Value : null;
+        if (string.IsNullOrWhiteSpace(input))
+            return null;
+
+        var normalized = input.Trim()
+            .Replace(".", string.Empty)
+            .Replace(",", string.Empty);
+
+        return int.TryParse(normalized, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result)
+            ? result
+            : null;
     }
 
     public static string SanitizeInput(string? input)
@@ -62,7 +69,25 @@ public static class VnNumberFormatHelper
         if (string.IsNullOrEmpty(input))
             return string.Empty;
 
-        return Regex.Replace(input, @"[^\d,]", string.Empty);
+        var trimmed = input.Trim();
+        var hasLeadingMinus = trimmed.StartsWith('-');
+        var hasComma = false;
+        var sanitized = new System.Text.StringBuilder(trimmed.Length);
+
+        foreach (var character in trimmed)
+        {
+            if (char.IsDigit(character))
+            {
+                sanitized.Append(character);
+            }
+            else if (character == ',' && !hasComma)
+            {
+                hasComma = true;
+                sanitized.Append(character);
+            }
+        }
+
+        return hasLeadingMinus ? $"-{sanitized}" : sanitized.ToString();
     }
 
     public static string FormatWhileTyping(string? raw, int maxDecimals = 2, bool integerOnly = false)
@@ -73,15 +98,23 @@ public static class VnNumberFormatHelper
 
         var hasTrailingComma = cleaned.EndsWith(',');
         var parts = cleaned.Split(',', 2);
-        var intDigits = parts[0];
+        var isNegative = parts[0].StartsWith('-');
+        var intDigits = isNegative ? parts[0][1..] : parts[0];
 
         if (string.IsNullOrEmpty(intDigits))
-            return hasTrailingComma && !integerOnly && maxDecimals > 0 ? "," : string.Empty;
+        {
+            if (isNegative)
+                return hasTrailingComma && !integerOnly && maxDecimals > 0 ? "-," : "-";
 
-        if (!ulong.TryParse(intDigits, out var intValue))
+            return hasTrailingComma && !integerOnly && maxDecimals > 0 ? "," : string.Empty;
+        }
+
+        if (!decimal.TryParse(intDigits, NumberStyles.None, CultureInfo.InvariantCulture, out var intValue))
             intValue = 0;
 
         var formatted = intValue.ToString("#,##0", VnCulture);
+        if (isNegative)
+            formatted = $"-{formatted}";
 
         if (integerOnly)
             return formatted;

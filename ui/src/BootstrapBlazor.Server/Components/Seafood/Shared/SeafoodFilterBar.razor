@@ -1,0 +1,35 @@
+<div class="sf-toolbar" role="search">
+    <div class="sf-filter-search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <BootstrapInput Value="@Search"
+                        OnValueChanged="@OnSearchChangedAsync"
+                        UseInputEvent="true"
+                        PlaceHolder="@Placeholder"
+                        ShowLabel="false"
+                        IsClearable="true"
+                        Class="sf-filter-input"
+                        aria-label="@Placeholder" />
+    </div>
+
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+
+    <span class="sf-result-count">@ResultCount.ToString("N0") kết quả</span>
+</div>
+
+@code {
+    [Parameter] public string Search { get; set; } = "";
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Tìm kiếm...";
+    [Parameter] public int ResultCount { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task OnSearchChangedAsync(string? value)
+    {
+        Search = value ?? "";
+        await SearchChanged.InvokeAsync(Search);
+    }
+
+}

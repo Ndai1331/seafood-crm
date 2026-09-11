@@ -2,42 +2,143 @@
 @layout PageLayout
 @inject SeafoodApiService Api
 @inject ToastService Toast
+@inject NavigationManager Navigation
 
-<h3 class="mb-3">Nhập nguyên liệu</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ nhập" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.BlNumber" placeholder="BL" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContainerNo" placeholder="Cont" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Purchaser" placeholder="Người mua" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.MissingDocuments" placeholder="Thiếu chứng từ" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_line.Commodity" placeholder="Hàng (WR/GG)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLongLine" placeholder="kg LL" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgHandline" placeholder="kg HL" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgPs" placeholder="kg PS" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKgLand" placeholder="kg Land" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.PriceUsd" placeholder="Giá USD" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.InvoiceAmountUsd" placeholder="Thành tiền" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu phiếu nhập</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Nhập nguyên liệu</h3>
+            <p>Ghi nhận phiếu nhập, thông tin container, chứng từ và khối lượng nguyên liệu.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-info"><i class="fa-solid fa-truck me-1" aria-hidden="true"></i>Inbound</span>
+            <Button Color="Color.Secondary" IsOutline="true" Icon="fa-solid fa-file-import" Text="Import Excel" OnClick="OpenImportAsync" />
+            <Button Color="Color.Primary" OnClick="OpenCreateAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Thêm phiếu nhập</Button>
+        </div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm phiếu nhập" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
+        <SeafoodModalSection Title="Thông tin lô nhập" Icon="fa-solid fa-file-import">
+            <div class="row g-3">
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.ContractNo" DisplayText="Số HĐ nhập" ShowLabel="true" placeholder="Số hợp đồng" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.Purchaser" DisplayText="Người mua" ShowLabel="true" placeholder="Purchaser" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.BlNumber" DisplayText="Số BL" ShowLabel="true" placeholder="Bill of Lading" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.ContainerNo" DisplayText="Container" ShowLabel="true" placeholder="Số container" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Hàng & khối lượng" Icon="fa-solid fa-weight-hanging">
+            <div class="row g-3">
+                <div class="col-md-6"><BootstrapInput @bind-Value="_line.Commodity" DisplayText="Mặt hàng" ShowLabel="true" placeholder="WR / GG" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKgLongLine" ValueChanged="@(value => _line.QtyKgLongLine = value ?? 0)" DisplayText="Longline (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKgHandline" ValueChanged="@(value => _line.QtyKgHandline = value ?? 0)" DisplayText="Handline (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKgPs" ValueChanged="@(value => _line.QtyKgPs = value ?? 0)" DisplayText="PS (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKgLand" ValueChanged="@(value => _line.QtyKgLand = value ?? 0)" DisplayText="Land (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Giá & chi phí nhập" Icon="fa-solid fa-coins">
+            <div class="row g-3">
+                <div class="col-md-4"><VnNumberInput Value="@_line.PriceUsd" ValueChanged="@(value => _line.PriceUsd = value ?? 0)" DisplayText="Đơn giá (USD/kg)" ShowLabel="true" Placeholder="USD/kg" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_line.InvoiceAmountUsd" ValueChanged="@(value => _line.InvoiceAmountUsd = value ?? 0)" DisplayText="Thành tiền (USD)" ShowLabel="true" Placeholder="USD" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_form.ReleaseOrderFeeUsd" ValueChanged="@(value => _form.ReleaseOrderFeeUsd = value ?? 0)" DisplayText="Phí lấy lệnh" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_form.ColdStorageFeeUsd" ValueChanged="@(value => _form.ColdStorageFeeUsd = value ?? 0)" DisplayText="Phí điện lạnh" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_form.HandlingFeeUsd" ValueChanged="@(value => _form.HandlingFeeUsd = value ?? 0)" DisplayText="Phí nâng hạ" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_form.CustomsFeeUsd" ValueChanged="@(value => _form.CustomsFeeUsd = value ?? 0)" DisplayText="Phí hải quan" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_form.InfrastructureFeeUsd" ValueChanged="@(value => _form.InfrastructureFeeUsd = value ?? 0)" DisplayText="Phí hạ tầng" ShowLabel="true" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Chứng từ & hồ sơ" Icon="fa-solid fa-folder-open">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Loại chứng từ</label>
+                    <SeafoodSelect2 Value="@_documentTypeId" ValueChanged="OnDocumentTypeChanged"
+                                   Search="SearchDocumentTypesAsync" Placeholder="Tìm mã hoặc tên chứng từ" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">File chứng từ thật</label>
+                    <InputFile OnChange="OnDocumentSelectedAsync" multiple accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.doc,.docx" />
+                    <small class="text-muted">File được lưu private trên MinIO, mặc định Pending chờ kiểm duyệt.</small>
+                </div>
+                <div class="col-12"><Textarea @bind-Value="_form.MissingDocuments" DisplayText="Chứng từ còn thiếu" ShowLabel="true" placeholder="COA, EUCC, MSC..." rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm HĐ, BL, container, purchaser..." />
+    <div class="sf-table-shell">
+        <Table TItem="InboundPurchaseDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" />
     </div>
 </div>
-<Table TItem="InboundPurchaseDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
 
 @code {
-    private List<InboundPurchaseDto> _rows = new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
     private InboundPurchaseDto _form = new();
     private InboundLineDto _line = new();
+    private IReadOnlyList<IBrowserFile> _selectedFiles = Array.Empty<IBrowserFile>();
+    private int? _documentTypeId;
+    private SeafoodCrudModal? _crudModal;
+    private Table<InboundPurchaseDto>? _table;
+    private string _search = "";
+    private int _total;
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.InboundAsync() ?? new();
+    private async Task<QueryData<InboundPurchaseDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.InboundPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
 
-    private async Task SaveAsync()
+    private Task OnDocumentSelectedAsync(InputFileChangeEventArgs args)
+    {
+        _selectedFiles = args.GetMultipleFiles(10);
+        return Task.CompletedTask;
+    }
+
+    private Task OnDocumentTypeChanged(int? value)
+    {
+        _documentTypeId = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchDocumentTypesAsync(string term, int page, int pageSize)
+        => await Api.SearchDocumentTypeOptionsAsync(term, page, pageSize) ?? new();
+
+    private async Task OpenCreateAsync()
+    {
+        _form = new();
+        _line = new();
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
+
+    private async Task<bool> SaveAsync()
     {
         _form.Lines = new List<InboundLineDto> { _line };
         var saved = await Api.SaveInboundAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được phiếu nhập"); return; }
+        if (saved == null) { await Toast.Error("Không lưu được phiếu nhập"); return false; }
+        foreach (var file in _selectedFiles)
+        {
+            if (await Api.UploadDocumentAsync("InboundPurchase", saved.Id, _documentTypeId, file) == null)
+                await Toast.Warning($"Không tải được chứng từ {file.Name}");
+        }
         await Toast.Success("Đã lưu phiếu nhập");
         _form = new();
         _line = new();
-        _rows = await Api.InboundAsync() ?? new();
+        _selectedFiles = Array.Empty<IBrowserFile>();
+        _documentTypeId = null;
+        await RefreshAsync();
+        return true;
     }
+
+    private Task OpenImportAsync()
+    {
+        Navigation.NavigateTo("/inbound/import");
+        return Task.CompletedTask;
+    }
+
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }

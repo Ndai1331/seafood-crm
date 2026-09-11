@@ -1,0 +1,113 @@
+@page "/master-data/document-types"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Loại chứng từ</h3><p>Danh mục chứng từ cấu hình được cho lô nhập, sản xuất, xuất khẩu và thanh toán.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_total.ToString("N0") loại</span><Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm loại chứng từ" OnClick="OpenCreateAsync" /></div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm hoặc cập nhật loại chứng từ" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Thông tin loại chứng từ" Icon="fa-solid fa-file-lines">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Code" DisplayText="Mã chứng từ" ShowLabel="true" placeholder="COA / EUCC / MSC" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_form.Name" DisplayText="Tên chứng từ" ShowLabel="true" /></div>
+                <div class="col-12"><Textarea @bind-Value="_form.Description" DisplayText="Mô tả / quy tắc sử dụng" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm mã, tên hoặc mô tả chứng từ..." />
+    <div class="sf-table-shell">
+        <Table TItem="DocumentTypeDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
+               IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false"
+               ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false"
+               ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="DocumentTypeDto" TType="string" @bind-Field="@context.Code" Text="Mã" Width="180"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="DocumentTypeDto" TType="string" @bind-Field="@context.Name" Text="Tên chứng từ" Width="300"><Template Context="value"><strong>@value.Value</strong></Template></TableColumn>
+                <TableColumn TItem="DocumentTypeDto" TType="string" @bind-Field="@context.Description" Text="Mô tả" Width="420" TextWrap="true"><Template Context="value">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</Template></TableColumn>
+                <TableColumn TItem="DocumentTypeDto" TType="bool" @bind-Field="@context.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                <TableColumn TItem="DocumentTypeDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditAsync(value.Row)" OnToggle="() => ToggleActiveAsync(value.Row)" /></Template></TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private DocumentTypeDto _form = NewForm();
+    private SeafoodCrudModal? _crudModal;
+    private Table<DocumentTypeDto>? _table;
+    private string _search = "";
+    private int _total;
+
+    private static DocumentTypeDto NewForm() => new() { IsActive = true };
+
+    private async Task<QueryData<DocumentTypeDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.DocumentTypesPageAsync(true, _search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+
+    private async Task OnSearchChangedAsync(string value)
+    {
+        _search = value;
+        if (_table != null) await _table.QueryAsync(1);
+    }
+
+    private async Task OpenCreateAsync() { _form = NewForm(); if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(DocumentTypeDto item) { _form = new() { Id = item.Id, Code = item.Code, Name = item.Name, Description = item.Description, IsActive = item.IsActive }; if (_crudModal != null) await _crudModal.ShowAsync(); }
+
+    private async Task<bool> SaveAsync()
+    {
+        try
+        {
+            if (await Api.SaveDocumentTypeAsync(_form) == null)
+            {
+                await Toast.Error("Không thể lưu loại chứng từ", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu loại chứng từ.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu loại chứng từ", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã chứng từ và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleActiveAsync(DocumentTypeDto item)
+    {
+        try
+        {
+            var ok = item.IsActive
+                ? await Api.DeleteDocumentTypeAsync(item.Id)
+                : await Api.SaveDocumentTypeAsync(new DocumentTypeDto { Id = item.Id, Code = item.Code, Name = item.Name, Description = item.Description, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật loại chứng từ", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(item.IsActive ? "Đã khóa loại chứng từ." : "Đã mở lại loại chứng từ.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật loại chứng từ", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (_table != null) await _table.QueryAsync(1);
+    }
+}

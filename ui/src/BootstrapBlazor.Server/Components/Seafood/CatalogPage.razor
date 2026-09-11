@@ -3,29 +3,217 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Danh mục chung</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.Category" placeholder="Category (0=loài...)" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Description" placeholder="Mô tả" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu danh mục</Button></div>
+<div class="sf-page catalog-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Danh mục</h3>
+            <p>Quản lý từng nhóm danh mục riêng cho nguyên liệu, thị trường và chứng từ.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-info"><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>@_total.ToString("N0") mục</span>
+            <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm danh mục" OnClick="OpenCreateAsync" />
+        </div>
+    </div>
+
+    <div class="catalog-category-panel" aria-label="Nhóm danh mục">
+        <div class="catalog-category-tabs" role="tablist">
+            @foreach (var category in Categories)
+            {
+                <Button Color="Color.None"
+                        class="@GetCategoryTabClass(category.Value)"
+                        role="tab"
+                        aria-selected="@(category.Value == _activeCategory)"
+                        OnClick="() => SelectCategoryAsync(category.Value)">
+                    <i class="@category.Icon" aria-hidden="true"></i>
+                    <span>@category.Label</span>
+                </Button>
+            }
+        </div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm hoặc cập nhật danh mục" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Thông tin danh mục" Icon="fa-solid fa-list">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Code" DisplayText="Mã danh mục" ShowLabel="true" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_form.Name" DisplayText="Tên danh mục" ShowLabel="true" /></div>
+                <div class="col-12"><Textarea @bind-Value="_form.Description" DisplayText="Mô tả" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Hiển thị" Icon="fa-solid fa-sliders">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.SortOrder" DisplayText="Thứ tự hiển thị" ShowLabel="true" /></div>
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm theo mã, tên hoặc mô tả..." />
+    <div class="sf-table-shell catalog-list-surface">
+        <Table TItem="CatalogLookupDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
+               IsPagination="true" IsStriped="false" IsBordered="false"
+               ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true"
+               ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="CatalogLookupDto" TType="string" @bind-Field="@context.Code" Text="Mã" Width="180">
+                    <Template Context="value">
+                        <span class="code-chip">@value.Value</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="CatalogLookupDto" TType="string" @bind-Field="@context.Name" Text="Tên danh mục" Width="300" TextWrap="true">
+                    <Template Context="value">
+                        <span class="catalog-name">@value.Value</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="CatalogLookupDto" TType="string" @bind-Field="@context.Description" Text="Mô tả" Width="360" TextWrap="true">
+                    <Template Context="value">
+                        <span class="catalog-description">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</span>
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="CatalogLookupDto" TType="int" @bind-Field="@context.SortOrder" Text="Thứ tự" Width="110" Align="Alignment.Center" />
+                <TableColumn TItem="CatalogLookupDto" TType="bool" @bind-Field="@context.IsActive" Text="Trạng thái" Width="130" Align="Alignment.Center">
+                    <Template Context="value">
+                        <SeafoodStatusBadge IsActive="value.Value" />
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="CatalogLookupDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true">
+                    <Template Context="value">
+                        <SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditAsync(value.Row)" OnToggle="() => ToggleActiveAsync(value.Row)" />
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
     </div>
 </div>
-<Table TItem="CatalogLookupDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
 
 @code {
-    private List<CatalogLookupDto> _rows = new();
-    private CatalogLookupDto _form = new() { IsActive = true };
-    protected override async Task OnInitializedAsync() => _rows = await Api.CatalogAsync() ?? new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40 };
 
-    private async Task SaveAsync()
+    private static readonly (int Value, string Label, string Icon)[] Categories =
     {
-        var saved = await Api.SaveCatalogAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu danh mục"); return; }
-        await Toast.Success("Đã lưu danh mục");
-        _form = new() { IsActive = true };
-        _rows = await Api.CatalogAsync() ?? new();
+        (1, "Loài cá", "fa-solid fa-fish"),
+        (2, "Dạng nguyên liệu", "fa-solid fa-shapes"),
+        (3, "Cỡ / Grade", "fa-solid fa-ruler-horizontal"),
+        (4, "Cảm quan", "fa-solid fa-eye"),
+        (5, "Cách đánh bắt", "fa-solid fa-anchor"),
+        (6, "Cách cấp đông", "fa-solid fa-snowflake"),
+        (7, "Chứng nhận", "fa-solid fa-certificate"),
+        (8, "Xuất xứ", "fa-solid fa-earth-asia"),
+        (9, "Thị trường", "fa-solid fa-globe"),
+        (10, "Kho", "fa-solid fa-warehouse"),
+        (11, "Hãng tàu", "fa-solid fa-truck"),
+        (12, "Loại container", "fa-solid fa-box")
+    };
+
+    private int _activeCategory = 1;
+    private CatalogLookupDto _form = NewForm();
+    private SeafoodCrudModal? _crudModal;
+    private Table<CatalogLookupDto>? _table;
+    private string _search = "";
+    private int _total;
+
+    private string ActiveCategoryLabel => Categories.FirstOrDefault(x => x.Value == _activeCategory).Label ?? "Danh mục";
+    private string GetCategoryTabClass(int category) => $"catalog-category-tab {(category == _activeCategory ? "is-active" : "")}";
+    private static CatalogLookupDto NewForm() => new() { IsActive = true, SortOrder = 1 };
+
+    private async Task SelectCategoryAsync(int category)
+    {
+        if (_activeCategory == category)
+        {
+            return;
+        }
+
+        _activeCategory = category;
+        if (_table != null)
+        {
+            await _table.QueryAsync(1);
+        }
     }
+
+    private async Task<QueryData<CatalogLookupDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.CatalogPageAsync(_activeCategory, _search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+
+    private async Task OnSearchChangedAsync(string value)
+    {
+        _search = value;
+        if (_table != null) await _table.QueryAsync(1);
+    }
+
+    private async Task OpenCreateAsync()
+    {
+        _form = NewForm();
+        _form.Category = _activeCategory;
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
+
+    private async Task OpenEditAsync(CatalogLookupDto item)
+    {
+        _form = new() { Id = item.Id, Category = item.Category, Code = item.Code, Name = item.Name, Description = item.Description, SortOrder = item.SortOrder, IsActive = item.IsActive };
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
+
+    private async Task<bool> SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Code) || string.IsNullOrWhiteSpace(_form.Name))
+        {
+            await Toast.Warning("Thiếu thông tin", "Vui lòng nhập mã và tên danh mục.");
+            return false;
+        }
+
+        _form.Category = _activeCategory;
+        _form.Code = _form.Code.Trim();
+        _form.Name = _form.Name.Trim();
+        _form.Description = _form.Description?.Trim();
+
+        try
+        {
+            var saved = await Api.SaveCatalogAsync(_form);
+            if (saved == null)
+            {
+                await Toast.Error("Lỗi", "Không thể lưu danh mục.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu danh mục.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu danh mục", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã danh mục và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleActiveAsync(CatalogLookupDto item)
+    {
+        try
+        {
+            var ok = item.IsActive
+                ? await Api.DeleteCatalogAsync(item.Id)
+                : await Api.SaveCatalogAsync(new CatalogLookupDto { Id = item.Id, Category = item.Category, Code = item.Code, Name = item.Name, Description = item.Description, SortOrder = item.SortOrder, IsActive = true }) != null;
+            if (!ok)
+            {
+                await Toast.Error("Lỗi", "Không thể cập nhật trạng thái danh mục.");
+                return;
+            }
+
+            await RefreshAsync();
+            await Toast.Success(item.IsActive ? "Đã khóa danh mục." : "Đã mở lại danh mục.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật danh mục", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (_table != null) await _table.QueryAsync(1);
+    }
+
 }

@@ -5,11 +5,11 @@
    ============================================================ */
 
 .team-list-surface {
-    --tl-border: #e7eaf0;
-    --tl-header-bg: #f8fafc;
-    --tl-header-fg: #64748b;
-    --tl-text: #334155;
-    --tl-row-hover: #f5f8fc;
+    --tl-border: var(--sf-color-border);
+    --tl-header-bg: var(--sf-color-surface-muted);
+    --tl-header-fg: var(--sf-color-muted);
+    --tl-text: var(--sf-color-foreground);
+    --tl-row-hover: #f0f9ff;
 }
 
 /* ---- Header: quiet, uppercase ---- */
@@ -84,16 +84,30 @@
 .team-list-surface ::deep .table-toolbar .btn {
     flex: 0 0 auto;
     width: auto;
-    height: 36px;
+    min-height: var(--sf-control-height);
+    height: var(--sf-control-height);
     padding: 0 0.85rem;
     font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1;
-    border-radius: 8px;
+    border-radius: var(--sf-radius-md);
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     box-shadow: none;
+    white-space: nowrap;
+}
+
+/* Keep the Add/Delete actions as separate, readable controls. The shared
+   TableToolbar renders them inside Bootstrap's .btn-group by default. */
+.team-list-surface ::deep .table-toolbar .table-toolbar-button > .btn-toolbar {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sf-space-2);
+}
+
+.team-list-surface ::deep .table-toolbar .table-toolbar-button > .btn-toolbar > .btn {
+    border-radius: var(--sf-radius-md) !important;
 }
 
 /* Primary CTA (Thêm mới / Add) — the only solid-colored button */
@@ -110,18 +124,18 @@
 
 /* Sửa (Edit) — ghost blue, not a solid block */
 .team-list-surface ::deep .table-toolbar .btn-primary {
-    background: #eff6ff;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
+    background: var(--sf-color-accent);
+    color: #ffffff;
+    border: 1px solid var(--sf-color-accent);
 }
 .team-list-surface ::deep .table-toolbar .btn-primary:hover {
-    background: #dbeafe;
-    border-color: #93c5fd;
+    background: var(--sf-color-accent-hover);
+    border-color: var(--sf-color-accent-hover);
 }
 .team-list-surface ::deep .table-toolbar .btn-primary:disabled {
-    background: #f8fafc;
-    color: #cbd5e1;
-    border-color: #e2e8f0;
+    background: var(--sf-color-surface-muted);
+    color: #94a3b8;
+    border-color: var(--sf-color-border);
 }
 
 /* Xóa (Delete) — ghost red, not a solid block */
@@ -135,25 +149,45 @@
     border-color: #fca5a5;
 }
 .team-list-surface ::deep .table-toolbar .btn-danger:disabled {
-    background: #f8fafc;
-    color: #cbd5e1;
-    border-color: #e2e8f0;
+    background: var(--sf-color-surface-muted) !important;
+    color: var(--sf-color-muted) !important;
+    border-color: var(--sf-color-border) !important;
+    text-shadow: none;
+    opacity: 1;
+}
+
+.team-list-surface ::deep .table-toolbar .btn-danger[disabled] {
+    background: var(--sf-color-surface-muted) !important;
+    color: var(--sf-color-muted) !important;
+    border-color: var(--sf-color-border) !important;
+    text-shadow: none;
+    opacity: 1;
+}
+
+/* PopConfirmButton uses aria-disabled instead of the native disabled
+   attribute. Keep the bulk-delete action readable when no row is selected. */
+.team-list-surface ::deep .table-toolbar .btn-danger[aria-disabled="true"] {
+    background: var(--sf-color-surface-muted) !important;
+    color: var(--sf-color-muted) !important;
+    border-color: var(--sf-color-border) !important;
+    text-shadow: none;
+    opacity: 1;
 }
 
 /* Secondary toolbar buttons (Làm mới / Xem / Cột) → soft ghost */
 .team-list-surface ::deep .table-toolbar .btn-secondary {
-    background: #ffffff;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    background: var(--sf-color-surface);
+    color: var(--sf-color-primary);
+    border: 1px solid var(--sf-color-border);
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .team-list-surface ::deep .table-toolbar .btn-secondary:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #cbd5e1;
+    background: var(--sf-color-info-soft);
+    color: var(--sf-color-accent);
+    border-color: #7dd3fc;
 }
 .team-list-surface ::deep .table-toolbar .btn:focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid var(--sf-color-accent);
     outline-offset: 2px;
 }
 
@@ -163,51 +197,113 @@
 }
 
 .team-list-surface ::deep .table-toolbar-search {
-    height: 36px;
-    border-color: #e2e8f0;
+    min-height: var(--sf-control-height);
+    height: var(--sf-control-height);
+    border-color: var(--sf-color-border);
     font-size: 0.8125rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .team-list-surface ::deep .table-toolbar-search:focus {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    border-color: var(--sf-color-accent) !important;
+    box-shadow: var(--sf-focus-ring) !important;
     outline: none;
     position: relative;
     z-index: 3;
 }
 
 .team-list-surface ::deep .table-toolbar .input-group .btn {
-    height: 36px;
+    min-height: var(--sf-control-height);
+    height: var(--sf-control-height);
     font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     border-color: #e2e8f0;
 }
+
+/* Search and reset are rendered as siblings in the same input group. Keep
+   the two actions visually separate so the labels do not read as one button. */
+.team-list-surface ::deep .table-toolbar .table-toolbar-button > .input-group > .btn + .btn {
+    margin-left: var(--sf-space-2);
+    border-radius: var(--sf-radius-md) !important;
+}
 .team-list-surface ::deep .table-toolbar .input-group .btn-primary {
-    background: #4f46e5;
-    border-color: #4f46e5;
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25);
+    background: var(--sf-color-accent);
+    border-color: var(--sf-color-accent);
+    box-shadow: var(--sf-shadow-sm);
 }
 .team-list-surface ::deep .table-toolbar .input-group .btn-primary:hover {
-    background: #4338ca;
-    border-color: #4338ca;
+    background: var(--sf-color-accent-hover);
+    border-color: var(--sf-color-accent-hover);
 }
 .team-list-surface ::deep .table-toolbar .input-group .btn-secondary {
-    background: #ffffff;
-    color: #475569;
+    background: var(--sf-color-surface);
+    color: var(--sf-color-primary);
     box-shadow: none;
 }
 .team-list-surface ::deep .table-toolbar .input-group .btn-secondary:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: var(--sf-color-info-soft);
+    color: var(--sf-color-accent);
     border-color: #cbd5e1;
 }
 
 /* ---- Row action buttons (built-in Edit/Delete extend buttons) ---- */
 .team-list-surface ::deep .table-cell .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    height: 36px;
     border-radius: 8px;
     font-weight: 500;
+    min-height: 36px;
+    padding: 0 0.75rem;
+    line-height: 1;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.team-list-surface ::deep .table-cell .btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sf-space-2);
+}
+
+.team-list-surface ::deep .table-cell .btn-group > .btn {
+    border-radius: var(--sf-radius-md) !important;
+}
+
+/* Table's edit dialog is the single CRUD surface for Team. */
+.team-list-surface ::deep .modal-dialog {
+    max-width: 520px;
+}
+
+.team-list-surface ::deep .modal-content {
+    border: 1px solid var(--sf-color-border);
+    border-radius: var(--sf-radius-lg);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+.team-list-surface ::deep .modal-header,
+.team-list-surface ::deep .modal-footer {
+    padding: 1rem 1.25rem;
+    border-color: var(--sf-color-border);
+}
+
+.team-list-surface ::deep .modal-body {
+    padding: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .team-list-surface ::deep .table-toolbar .input-group {
+        width: 100%;
+        order: 3;
+    }
+
+    .team-list-surface ::deep .table-toolbar .input-group .table-toolbar-search {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

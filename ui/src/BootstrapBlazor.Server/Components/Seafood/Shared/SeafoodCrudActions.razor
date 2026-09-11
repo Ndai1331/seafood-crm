@@ -1,0 +1,14 @@
+<div class="text-end text-nowrap">
+    <Button Color="Color.Primary" IsOutline="true" Size="Size.ExtraSmall" class="me-1"
+            StopPropagation="@StopPropagation" Icon="fa-solid fa-pen-to-square" Text="Sửa" OnClick="OnEdit" />
+    <Button Color="@(IsActive ? Color.Danger : Color.Success)" IsOutline="true" Size="Size.ExtraSmall"
+            StopPropagation="@StopPropagation" Icon="@(IsActive ? "fa-solid fa-lock" : "fa-solid fa-unlock")"
+            Text="@(IsActive ? "Khóa" : "Mở lại")" OnClick="OnToggle" />
+</div>
+
+@code {
+    [Parameter] public bool IsActive { get; set; }
+    [Parameter] public bool StopPropagation { get; set; }
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnToggle { get; set; }
+}

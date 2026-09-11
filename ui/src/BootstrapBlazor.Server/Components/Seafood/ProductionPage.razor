@@ -3,39 +3,158 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Đưa vào sản xuất</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.LotNumber" placeholder="Lot number" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.RawMaterialKg" placeholder="NL kg" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_certs" placeholder="Chứng từ (EUCC,COA,MSC)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.SkuId" placeholder="SKU Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RecoveredKg" placeholder="TP thu hồi kg" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_output.RawUsedKg" placeholder="NL dùng kg" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_output.ExportMarket" placeholder="Thị trường" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu lô SX</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Đưa vào sản xuất</h3>
+            <p>Ghi nhận lô sản xuất, thành phẩm thu hồi, yield và chứng từ đi kèm.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-info"><i class="fa-solid fa-industry me-1" aria-hidden="true"></i>Production</span>
+            <Button Color="Color.Primary" OnClick="OpenCreateAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Thêm lô sản xuất</Button>
+        </div>
     </div>
-    <p class="text-muted mt-2 mb-0">Yield = thành phẩm thu hồi / nguyên liệu. Gắn chứng từ lô để matching xuất khẩu.</p>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm lô sản xuất" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
+        <SeafoodModalSection Title="Thông tin mẻ sản xuất" Icon="fa-solid fa-industry">
+            <div class="row g-3">
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.LotNumber" DisplayText="Số lot sản xuất" ShowLabel="true" placeholder="Lot number" /></div>
+                <div class="col-md-6"><VnNumberInput Value="@_form.RawMaterialKg" ValueChanged="@(value => _form.RawMaterialKg = value ?? 0)" DisplayText="Nguyên liệu (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Nguyên liệu đầu vào" Icon="fa-solid fa-boxes-stacked">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Lô nguyên liệu đầu vào</label>
+                    <SeafoodSelect2 Value="@(_inputRawLotId > 0 ? (int?)_inputRawLotId : null)" ValueChanged="OnRawLotChanged"
+                                   Search="SearchRawLotsAsync" Placeholder="Tìm số lot, dạng hoặc size" />
+                </div>
+                <div class="col-md-4"><VnNumberInput Value="@_inputQtyKg" ValueChanged="@(value => _inputQtyKg = value ?? 0)" DisplayText="Sử dụng (kg)" ShowLabel="true" Placeholder="Kg nguyên liệu" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Thành phẩm & thị trường" Icon="fa-solid fa-box-open">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">SKU thành phẩm</label>
+                    <SeafoodSelect2 Value="@(_output.SkuId > 0 ? (int?)_output.SkuId : null)" ValueChanged="OnSkuChanged"
+                                   Search="SearchSkusAsync" Placeholder="Tìm mã hoặc tên SKU" />
+                </div>
+                <div class="col-md-3"><VnNumberInput Value="@_output.RecoveredKg" ValueChanged="@(value => _output.RecoveredKg = value ?? 0)" DisplayText="Thành phẩm (kg)" ShowLabel="true" Placeholder="Kg thu hồi" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_output.RawUsedKg" ValueChanged="@(value => _output.RawUsedKg = value ?? 0)" DisplayText="Nguyên liệu dùng (kg)" ShowLabel="true" Placeholder="Kg sử dụng" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_output.ExportMarket" DisplayText="Thị trường xuất khẩu" ShowLabel="true" placeholder="EU / US..." /></div>
+                <div class="col-12"><small class="sf-modal-field-hint">Yield = thành phẩm thu hồi / nguyên liệu. Hệ thống kế thừa nguồn gốc và chứng từ từ lô nguyên liệu.</small></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Chứng từ & hồ sơ" Icon="fa-solid fa-folder-open">
+            <div class="row g-3">
+                <div class="col-md-6"><BootstrapInput @bind-Value="_certs" DisplayText="Chứng từ / mã chứng từ" ShowLabel="true" placeholder="EUCC, COA, MSC" /></div>
+                <div class="col-md-6">
+                    <label class="form-label">Loại chứng từ file</label>
+                    <SeafoodSelect2 Value="@_documentTypeId" ValueChanged="OnDocumentTypeChanged"
+                                   Search="SearchDocumentTypesAsync" Placeholder="Tìm mã hoặc tên chứng từ" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">File hồ sơ lô</label>
+                    <InputFile OnChange="OnDocumentSelectedAsync" multiple accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.doc,.docx" />
+                </div>
+            </div>
+        </SeafoodModalSection>
+
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm theo số lot, SKU, thị trường, chứng từ..." />
+    <div class="sf-table-shell"><Table TItem="ProductionLotDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
-<Table TItem="ProductionLotDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<ProductionLotDto> _rows = new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<ProductionLotDto>? _table;
     private ProductionLotDto _form = new();
     private ProductionOutputDto _output = new();
+    private SeafoodCrudModal? _crudModal;
     private string _certs = "COA";
+    private string _search = "";
+    private IReadOnlyList<IBrowserFile> _selectedFiles = Array.Empty<IBrowserFile>();
+    private int? _documentTypeId;
+    private int _inputRawLotId;
+    private decimal _inputQtyKg;
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.ProductionAsync() ?? new();
+    private int _total;
+    private async Task<QueryData<ProductionLotDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.ProductionPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
 
-    private async Task SaveAsync()
+    private Task OnDocumentSelectedAsync(InputFileChangeEventArgs args)
+    {
+        _selectedFiles = args.GetMultipleFiles(10);
+        return Task.CompletedTask;
+    }
+
+    private Task OnDocumentTypeChanged(int? value)
+    {
+        _documentTypeId = value;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchDocumentTypesAsync(string term, int page, int pageSize)
+        => await Api.SearchDocumentTypeOptionsAsync(term, page, pageSize) ?? new();
+
+    private Task OnRawLotChanged(int? value)
+    {
+        _inputRawLotId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSkuChanged(int? value)
+    {
+        _output.SkuId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchRawLotsAsync(string term, int page, int pageSize)
+        => await Api.SearchRawLotOptionsAsync(term, page, pageSize) ?? new();
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchSkusAsync(string term, int page, int pageSize)
+        => await Api.SearchSkusAsync(term, page, pageSize) ?? new();
+
+    private async Task OpenCreateAsync()
+    {
+        _form = new();
+        _output = new();
+        _certs = "COA";
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
+
+    private async Task<bool> SaveAsync()
     {
         _form.CertificateCodes = _certs.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         _form.Outputs = new List<ProductionOutputDto> { _output };
+        _form.Inputs = _inputRawLotId > 0 ? new List<ProductionInputDto> { new() { RawMaterialLotId = _inputRawLotId, QuantityKg = _inputQtyKg > 0 ? _inputQtyKg : _form.RawMaterialKg } } : new();
         var saved = await Api.SaveProductionAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được lô sản xuất"); return; }
+        if (saved == null) { await Toast.Error("Không lưu được lô sản xuất"); return false; }
+        foreach (var file in _selectedFiles)
+        {
+            if (await Api.UploadDocumentAsync("ProductionLot", saved.Id, _documentTypeId, file) == null)
+                await Toast.Warning($"Không tải được hồ sơ {file.Name}");
+        }
         await Toast.Success($"Đã lưu lô {saved.LotNumber}, yield {saved.RecoveryRatio:P1}");
         _form = new();
         _output = new();
-        _rows = await Api.ProductionAsync() ?? new();
+        _inputRawLotId = 0;
+        _inputQtyKg = 0;
+        _selectedFiles = Array.Empty<IBrowserFile>();
+        _documentTypeId = null;
+        await RefreshAsync();
+        return true;
     }
+
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }

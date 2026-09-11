@@ -17,8 +17,11 @@ namespace BootstrapBlazor.Server.Services;
 public static class ApiErrorMessage
 {
     public static string Describe(Exception ex, string fallback = "Có lỗi xảy ra.")
+        => Describe(ex.Message, fallback);
+
+    public static string Describe(string? raw, string fallback = "Có lỗi xảy ra.")
     {
-        var raw = ex.Message ?? string.Empty;
+        raw ??= string.Empty;
 
         var start = raw.IndexOf('{');
         var end = raw.LastIndexOf('}');
@@ -44,6 +47,6 @@ public static class ApiErrorMessage
             }
         }
 
-        return string.IsNullOrWhiteSpace(raw) ? fallback : raw;
+        return string.IsNullOrWhiteSpace(raw) || (start >= 0 && end > start) ? fallback : raw;
     }
 }

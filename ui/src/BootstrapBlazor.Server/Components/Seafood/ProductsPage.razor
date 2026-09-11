@@ -3,34 +3,236 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Mặt hàng / SKU</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_sku.GroupId" placeholder="Group Id" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_sku.Code" placeholder="Mã SKU" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_sku.Name" placeholder="Tên SKU" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_sku.ExportMarket" placeholder="Thị trường" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_sku.DefaultUnitPriceUsd" placeholder="Giá USD" /></div>
-        <div class="col-md-1"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu SKU</Button></div>
+<div class="sf-page products-page">
+    <div class="sf-page-header">
+        <div><h3>Mặt hàng / SKU</h3><p>Quản lý nhóm sản phẩm, SKU, thị trường, giá mặc định và phụ phẩm.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_totalGroups.ToString("N0") nhóm</span><Button Color="Color.Secondary" Icon="fa-solid fa-layer-group" Text="Thêm nhóm" OnClick="OpenCreateGroupAsync" /><Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm SKU" OnClick="OpenCreateSkuAsync" /></div>
     </div>
+
+    <SeafoodCrudModal @ref="_groupModal" Title="Thêm hoặc cập nhật nhóm sản phẩm" OnSaveAsync="SaveGroupAsync">
+        <SeafoodModalSection Title="Thông tin nhóm sản phẩm" Icon="fa-solid fa-layer-group">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_group.Code" DisplayText="Mã nhóm" ShowLabel="true" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_group.Name" DisplayText="Tên nhóm" ShowLabel="true" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_group.DefaultMarket" DisplayText="Thị trường mặc định" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnIntInput Value="@_group.SortOrder" ValueChanged="@(value => _group.SortOrder = value ?? 0)" DisplayText="Thứ tự hiển thị" ShowLabel="true" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_group.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodCrudModal @ref="_skuModal" Title="Thêm hoặc cập nhật SKU" OnSaveAsync="SaveSkuAsync">
+        <SeafoodModalSection Title="Định danh SKU" Icon="fa-solid fa-barcode">
+            <div class="row g-3">
+                <div class="col-12"><label class="form-label">Nhóm sản phẩm</label><SeafoodSelect2 Value="@(_sku.GroupId > 0 ? (int?)_sku.GroupId : null)" SelectedText="@_sku.GroupName" ValueChanged="OnGroupChanged" Search="SearchGroupsAsync" Placeholder="Tìm mã hoặc tên nhóm" /></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_sku.Code" DisplayText="Mã SKU" ShowLabel="true" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_sku.Name" DisplayText="Tên SKU" ShowLabel="true" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Phân loại & giá" Icon="fa-solid fa-tags">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_sku.ExportMarket" DisplayText="Thị trường xuất khẩu" ShowLabel="true" placeholder="USA / EU" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_sku.DefaultUnitPriceUsd" ValueChanged="@(value => _sku.DefaultUnitPriceUsd = value ?? 0)" DisplayText="Giá mặc định (USD/kg)" ShowLabel="true" /></div>
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_sku.IsByproduct" DisplayText="Phụ phẩm" ShowLabel="true" OnText="Có" OffText="Không" OnColor="Color.Warning" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_sku.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_totalGroups" Placeholder="Tìm mã, tên, nhóm hoặc thị trường...">
+        <ChildContent>
+            <span class="small text-muted d-none d-md-inline">Bấm mũi tên để xem danh sách SKU trong nhóm</span>
+        </ChildContent>
+    </SeafoodFilterBar>
+    <div class="sf-table-shell">
+            <Table TItem="ProductGroupDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
+                   IsPagination="true" IsDetails="true" IsStriped="false" IsBordered="false"
+                   ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false"
+                   ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnGroupsQueryAsync" @ref="_groupTable"
+                   RenderMode="TableRenderMode.Table">
+                <TableColumns Context="groupColumn">
+                    <TableColumn TItem="ProductGroupDto" TType="string" @bind-Field="@groupColumn.Code" Text="Mã nhóm" Width="180">
+                        <Template Context="value">
+                            <span class="code-chip">@value.Value</span>
+                        </Template>
+                    </TableColumn>
+                    <TableColumn TItem="ProductGroupDto" TType="string" @bind-Field="@groupColumn.Name" Text="Nhóm sản phẩm" Width="300" TextWrap="true">
+                        <Template Context="value">
+                            <strong>@value.Value</strong>
+                            <div class="small text-muted">@(value.Row.IsActive ? "Nhóm đang dùng" : "Nhóm đã khóa")</div>
+                        </Template>
+                    </TableColumn>
+                    <TableColumn TItem="ProductGroupDto" TType="string" @bind-Field="@groupColumn.DefaultMarket" Text="Thị trường mặc định" Width="180">
+                        <Template Context="value">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</Template>
+                    </TableColumn>
+                    <TableColumn TItem="ProductGroupDto" TType="int" @bind-Field="@groupColumn.Id" Text="Số SKU" Width="110" Align="Alignment.Center">
+                        <Template Context="value">@value.Row.SkuCount</Template>
+                    </TableColumn>
+                    <TableColumn TItem="ProductGroupDto" TType="bool" @bind-Field="@groupColumn.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center">
+                        <Template Context="value">
+                            <SeafoodStatusBadge IsActive="value.Value" />
+                        </Template>
+                    </TableColumn>
+                    <TableColumn TItem="ProductGroupDto" TType="int" @bind-Field="@groupColumn.Id" Text="Thao tác" Width="230" Align="Alignment.Right" IgnoreWhenExport="true">
+                        <Template Context="value">
+                            <SeafoodCrudActions IsActive="value.Row.IsActive" StopPropagation="true" OnEdit="() => OpenEditGroupAsync(value.Row)" OnToggle="() => ToggleGroupAsync(value.Row)" />
+                        </Template>
+                    </TableColumn>
+                </TableColumns>
+                <DetailRowTemplate Context="group">
+                    <div class="sf-product-detail p-2 p-md-3">
+                        <div class="sf-product-detail-toolbar d-flex justify-content-between align-items-center mb-2">
+                            <div><strong>Danh sách SKU</strong><span class="small text-muted ms-2">@group.SkuCount mặt hàng thuộc nhóm @group.Code</span></div>
+                            <Button Color="Color.Primary" Size="Size.Small" class="sf-detail-add-button" StopPropagation="true" Icon="fa-solid fa-plus" Text="Thêm SKU" OnClick="() => OpenCreateSkuAsync(group)" />
+                        </div>
+                            <Table TItem="ProductSkuDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false"
+                                   IsPagination="true" IsStriped="true" IsBordered="false"
+                                   ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false"
+                                   ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@(options => OnSkusQueryAsync(group.Id, options))"
+                                   RenderMode="TableRenderMode.Table">
+                                <TableColumns Context="skuColumn">
+                                    <TableColumn TItem="ProductSkuDto" TType="string" @bind-Field="@skuColumn.Code" Text="Mã SKU" Width="170">
+                                        <Template Context="value"><span class="code-chip">@value.Value</span></Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="string" @bind-Field="@skuColumn.Name" Text="Tên SKU" Width="280" TextWrap="true">
+                                        <Template Context="value"><strong>@value.Value</strong></Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="string" @bind-Field="@skuColumn.ExportMarket" Text="Thị trường" Width="160">
+                                        <Template Context="value">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="decimal" @bind-Field="@skuColumn.DefaultUnitPriceUsd" Text="Giá USD/kg" Width="150" Align="Alignment.Right">
+                                        <Template Context="value">@value.Value.ToString("N2")</Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="bool" @bind-Field="@skuColumn.IsByproduct" Text="Loại" Width="130" Align="Alignment.Center">
+                                        <Template Context="value">@(value.Value ? "Phụ phẩm" : "Thành phẩm")</Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="bool" @bind-Field="@skuColumn.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center">
+                                        <Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template>
+                                    </TableColumn>
+                                    <TableColumn TItem="ProductSkuDto" TType="int" @bind-Field="@skuColumn.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true">
+                                        <Template Context="value">
+                                            <SeafoodCrudActions IsActive="value.Row.IsActive" StopPropagation="true" OnEdit="() => OpenEditSkuAsync(value.Row, group)" OnToggle="() => ToggleSkuAsync(value.Row)" />
+                                        </Template>
+                                    </TableColumn>
+                                </TableColumns>
+                            </Table>
+                    </div>
+                </DetailRowTemplate>
+            </Table>
+        </div>
 </div>
-@foreach (var group in _groups)
-{
-    <h5 class="mt-3">@group.Name <small class="text-muted">(@group.DefaultMarket) · Id @group.Id</small></h5>
-    <Table TItem="ProductSkuDto" Items="group.Skus" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
-}
 
 @code {
-    private List<ProductGroupDto> _groups = new();
-    private ProductSkuDto _sku = new() { IsActive = true };
-    protected override async Task OnInitializedAsync() => _groups = await Api.ProductsAsync() ?? new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private ProductGroupDto _group = NewGroup();
+    private ProductSkuDto _sku = NewSku();
+    private SeafoodCrudModal? _groupModal;
+    private SeafoodCrudModal? _skuModal;
+    private Table<ProductGroupDto>? _groupTable;
+    private string _search = "";
+    private int _totalGroups;
 
-    private async Task SaveAsync()
+    private static ProductGroupDto NewGroup() => new() { IsActive = true };
+    private static ProductSkuDto NewSku() => new() { IsActive = true };
+    private async Task<QueryData<ProductGroupDto>> OnGroupsQueryAsync(QueryPageOptions options)
     {
-        var saved = await Api.SaveSkuAsync(_sku);
-        if (saved == null) { await Toast.Error("Không lưu SKU"); return; }
-        await Toast.Success("Đã lưu SKU");
-        _sku = new() { IsActive = true };
-        _groups = await Api.ProductsAsync() ?? new();
+        var page = await Api.ProductsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _totalGroups = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
     }
+    private async Task<QueryData<ProductSkuDto>> OnSkusQueryAsync(int groupId, QueryPageOptions options)
+    {
+        var page = await Api.ProductSkusPageAsync(groupId, _search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_groupTable != null) await _groupTable.QueryAsync(1); }
+    private async Task OpenCreateGroupAsync() { _group = NewGroup(); if (_groupModal != null) await _groupModal.ShowAsync(); }
+    private async Task OpenEditGroupAsync(ProductGroupDto item) { _group = new() { Id = item.Id, Code = item.Code, Name = item.Name, DefaultMarket = item.DefaultMarket, SortOrder = item.SortOrder, IsActive = item.IsActive }; if (_groupModal != null) await _groupModal.ShowAsync(); }
+    private async Task<bool> SaveGroupAsync()
+    {
+        try
+        {
+            if (await Api.SaveProductGroupAsync(_group) == null)
+            {
+                await Toast.Error("Không thể lưu nhóm sản phẩm", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu nhóm sản phẩm.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu nhóm sản phẩm", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã nhóm và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleGroupAsync(ProductGroupDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeleteProductGroupAsync(item.Id) : await Api.SaveProductGroupAsync(new ProductGroupDto { Id = item.Id, Code = item.Code, Name = item.Name, DefaultMarket = item.DefaultMarket, SortOrder = item.SortOrder, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật nhóm sản phẩm", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa nhóm sản phẩm." : "Đã mở lại nhóm sản phẩm.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật nhóm sản phẩm", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private async Task OpenCreateSkuAsync() => await OpenCreateSkuAsync(null);
+    private async Task OpenCreateSkuAsync(ProductGroupDto? group) { _sku = NewSku(); if (group != null) { _sku.GroupId = group.Id; _sku.GroupName = group.Name; } if (_skuModal != null) await _skuModal.ShowAsync(); }
+    private async Task OpenEditSkuAsync(ProductSkuDto item, ProductGroupDto group) { _sku = new() { Id = item.Id, GroupId = group.Id, GroupName = group.Name, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, IsActive = item.IsActive }; if (_skuModal != null) await _skuModal.ShowAsync(); }
+    private async Task<bool> SaveSkuAsync()
+    {
+        try
+        {
+            if (await Api.SaveSkuAsync(_sku) == null)
+            {
+                await Toast.Error("Không thể lưu SKU", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu SKU.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu SKU", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã SKU và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleSkuAsync(ProductSkuDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeleteSkuAsync(item.Id) : await Api.SaveSkuAsync(new ProductSkuDto { Id = item.Id, GroupId = item.GroupId, GroupName = item.GroupName, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật SKU", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa SKU." : "Đã mở lại SKU.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật SKU", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private Task OnGroupChanged(int? value) { _sku.GroupId = value ?? 0; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchGroupsAsync(string term, int page, int pageSize) => await Api.SearchProductGroupOptionsAsync(term, page, pageSize) ?? new SeafoodSelect2SearchResponseDto();
+    private async Task RefreshAsync() { if (_groupTable != null) await _groupTable.QueryAsync(1); }
 }

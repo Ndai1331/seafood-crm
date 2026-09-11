@@ -23,7 +23,8 @@
                     <div class="sidebar-header">
                         <NavLink class="text-decoration-none" href="/">
                             <div class="logo-container">
-                                <span class="brand-name">SEAFOOD CRM</span>
+                                <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-fish-fins"></i></span>
+                                <span class="brand-name">SEAFOOD <em>CRM</em></span>
                             </div>
                         </NavLink>
                     </div>
@@ -50,7 +51,7 @@
                                             if (menu.Text == "Tools SEO" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEO" aria-expanded="false" aria-controls="toolsSEO">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEO" aria-expanded="false" aria-controls="toolsSEO">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-chart-pie"></i>
                                                             <span>@menu.Text</span>
@@ -58,7 +59,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsSEO">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -77,7 +78,7 @@
                                             else if (menu.Text == "Chi phí SEO" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoice" aria-expanded="false" aria-controls="toolsSEOInvoice">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoice" aria-expanded="false" aria-controls="toolsSEOInvoice">
                                                         <span class="d-flex align-items-center">
                                                             <i class="@menu.Icon me-2"></i>
                                                             <span>@menu.Text</span>
@@ -85,7 +86,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsSEOInvoice">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -104,7 +105,7 @@
                                             else if (menu.Text == "Tools HRTA" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsHRTA" aria-expanded="false" aria-controls="toolsHRTA">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsHRTA" aria-expanded="false" aria-controls="toolsHRTA">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-users"></i>
                                                             <span>@menu.Text</span>
@@ -112,7 +113,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsHRTA">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -131,7 +132,7 @@
                                             else if (menu.Text == "SEO Thái" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOThai" aria-expanded="false" aria-controls="toolsSEOThai">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEOThai" aria-expanded="false" aria-controls="toolsSEOThai">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-flag"></i>
                                                             <span>@menu.Text</span>
@@ -139,7 +140,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsSEOThai">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -158,7 +159,7 @@
                                             else if (menu.Text == "Tools QC" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsQC" aria-expanded="false" aria-controls="toolsQC">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsQC" aria-expanded="false" aria-controls="toolsQC">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-circle-check"></i>
                                                             <span>@menu.Text</span>
@@ -166,7 +167,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsQC">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -185,7 +186,7 @@
                                             else if (menu.Text == "Tools Assistant" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsAssistant" aria-expanded="false" aria-controls="toolsAssistant">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsAssistant" aria-expanded="false" aria-controls="toolsAssistant">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-layer-group"></i>
                                                             <span>@menu.Text</span>
@@ -193,7 +194,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsAssistant">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -212,7 +213,7 @@
                                             else if (menu.Text == "Quản trị hệ thống" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSystem" aria-expanded="false" aria-controls="toolsSystem">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSystem" aria-expanded="false" aria-controls="toolsSystem">
                                                         <span class="d-flex align-items-center">
                                                             <i class="@menu.Icon me-2"></i>
                                                             <span>@menu.Text</span>
@@ -220,7 +221,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsSystem">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -239,7 +240,7 @@
                                             else if (menu.Text == "ETL Management" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsETL" aria-expanded="false" aria-controls="toolsETL">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsETL" aria-expanded="false" aria-controls="toolsETL">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-gears"></i>
                                                             <span>@menu.Text</span>
@@ -247,7 +248,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsETL">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -266,7 +267,7 @@
                                             else if (menu.Text == "Dashboard" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsDashboard" aria-expanded="false" aria-controls="toolsDashboard">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsDashboard" aria-expanded="false" aria-controls="toolsDashboard">
                                                         <span class="d-flex align-items-center">
                                                             <i class="fa-solid fa-gauge-high"></i>
                                                             <span>@menu.Text</span>
@@ -274,7 +275,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsDashboard">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -293,7 +294,7 @@
                                             else if (menu.Text == "SEO Monitoring" && menu.Items != null && menu.Items.Any())
                                             {
                                                 <li class="nav-item">
-                                                    <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoring" aria-expanded="false" aria-controls="toolsSeoMonitoring">
+                                                    <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoring" aria-expanded="false" aria-controls="toolsSeoMonitoring">
                                                         <span class="d-flex align-items-center">
                                                             <i class="@menu.Icon"></i>
                                                             <span>@menu.Text</span>
@@ -301,7 +302,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                         </svg>
-                                                    </NavLink>
+                                                    </a>
                                                     <div class="collapse" id="toolsSeoMonitoring">
                                                         <ul class="nav flex-column">
                                                             @foreach (var child in menu.Items)
@@ -331,10 +332,10 @@
                                                 }
                                                 else if (menu.Items != null && menu.Items.Any())
                                                 {
-                                                    var dynamicMenuId = $"sidebarDynamic{Menus.IndexOf(menu)}";
+                                                    var dynamicMenuId = GetSidebarMenuId(menu, mobile: false);
                                                     <li class="nav-item">
-                                                        <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);"
-                                                                 data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
+                                                        <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button"
+                                                                 data-menu-key="@dynamicMenuId" data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
                                                                  aria-expanded="false" aria-controls="@dynamicMenuId">
                                                             <span class="d-flex align-items-center">
                                                                 <i class="@menu.Icon me-2"></i>
@@ -343,7 +344,7 @@
                                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                 <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19" />
                                                             </svg>
-                                                        </NavLink>
+                                                        </a>
                                                         <div class="collapse" id="@dynamicMenuId">
                                                             <ul class="nav flex-column">
                                                                 @foreach (var child in menu.Items)
@@ -383,15 +384,6 @@
                     </div>
                     <div class="offcanvas-body p-0">
                         <div id="sidebar-mobile">
-                            <!-- Fixed Header Area -->
-                            <div class="sidebar-header">
-                                <NavLink class="text-decoration-none" href="/">
-                                    <div class="logo-container">
-                                        <span class="brand-name">SEAFOOD CRM</span>
-                                    </div>
-                                </NavLink>
-                            </div>
-                            
                             <!-- Scrollable Content Area -->
                             <div class="sidebar-scrollable">
                                 <div class="sidebar-content h-100">
@@ -414,7 +406,7 @@
                                                     if (menu.Text == "Tools SEO" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOMobile" aria-expanded="false" aria-controls="toolsSEOMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEOMobile" aria-expanded="false" aria-controls="toolsSEOMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-chart-pie"></i>
                                                                     <span>@menu.Text</span>
@@ -422,7 +414,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsSEOMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -441,7 +433,7 @@
                                                     else if (menu.Text == "Chi phí SEO" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoiceMobile" aria-expanded="false" aria-controls="toolsSEOInvoiceMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEOInvoiceMobile" aria-expanded="false" aria-controls="toolsSEOInvoiceMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="@menu.Icon me-2"></i>
                                                                     <span>@menu.Text</span>
@@ -449,7 +441,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsSEOInvoiceMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -468,7 +460,7 @@
                                                     else if (menu.Text == "Tools HRTA" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsHRTAMobile" aria-expanded="false" aria-controls="toolsHRTAMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsHRTAMobile" aria-expanded="false" aria-controls="toolsHRTAMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-users"></i>
                                                                     <span>@menu.Text</span>
@@ -476,7 +468,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsHRTAMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -495,7 +487,7 @@
                                                     else if (menu.Text == "SEO Thái" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSEOThaiMobile" aria-expanded="false" aria-controls="toolsSEOThaiMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSEOThaiMobile" aria-expanded="false" aria-controls="toolsSEOThaiMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-flag"></i>
                                                                     <span>@menu.Text</span>
@@ -503,7 +495,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsSEOThaiMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -522,7 +514,7 @@
                                                     else if (menu.Text == "Tools QC" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsQCMobile" aria-expanded="false" aria-controls="toolsQCMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsQCMobile" aria-expanded="false" aria-controls="toolsQCMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-circle-check"></i>
                                                                     <span>@menu.Text</span>
@@ -530,7 +522,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsQCMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -549,7 +541,7 @@
                                                     else if (menu.Text == "Tools Assistant" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsAssistantMobile" aria-expanded="false" aria-controls="toolsAssistantMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsAssistantMobile" aria-expanded="false" aria-controls="toolsAssistantMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-layer-group"></i>
                                                                     <span>@menu.Text</span>
@@ -557,7 +549,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsAssistantMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -576,7 +568,7 @@
                                                     else if (menu.Text == "Quản trị hệ thống" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSystemMobile" aria-expanded="false" aria-controls="toolsSystemMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSystemMobile" aria-expanded="false" aria-controls="toolsSystemMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="@menu.Icon me-2"></i>
                                                                     <span>@menu.Text</span>
@@ -584,7 +576,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsSystemMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -603,7 +595,7 @@
                                                     else if (menu.Text == "ETL Management" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsETLMobile" aria-expanded="false" aria-controls="toolsETLMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsETLMobile" aria-expanded="false" aria-controls="toolsETLMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-gears"></i>
                                                                     <span>@menu.Text</span>
@@ -611,7 +603,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsETLMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -630,7 +622,7 @@
                                                     else if (menu.Text == "Dashboard" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsDashboardMobile" aria-expanded="false" aria-controls="toolsDashboardMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsDashboardMobile" aria-expanded="false" aria-controls="toolsDashboardMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="fa-solid fa-gauge-high"></i>
                                                                     <span>@menu.Text</span>
@@ -638,7 +630,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsDashboardMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -657,7 +649,7 @@
                                                     else if (menu.Text == "SEO Monitoring" && menu.Items != null && menu.Items.Any())
                                                     {
                                                         <li class="nav-item">
-                                                            <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoringMobile" aria-expanded="false" aria-controls="toolsSeoMonitoringMobile">
+                                                            <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button" data-bs-toggle="collapse" data-bs-target="#toolsSeoMonitoringMobile" aria-expanded="false" aria-controls="toolsSeoMonitoringMobile">
                                                                 <span class="d-flex align-items-center">
                                                                     <i class="@menu.Icon"></i>
                                                                     <span>@menu.Text</span>
@@ -665,7 +657,7 @@
                                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                     <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19"/>
                                                                 </svg>
-                                                            </NavLink>
+                                                            </a>
                                                             <div class="collapse" id="toolsSeoMonitoringMobile">
                                                                 <ul class="nav flex-column">
                                                                     @foreach (var child in menu.Items)
@@ -695,10 +687,10 @@
                                                         }
                                                         else if (menu.Items != null && menu.Items.Any())
                                                         {
-                                                            var dynamicMenuId = $"sidebarDynamicMobile{Menus.IndexOf(menu)}";
+                                                            var dynamicMenuId = GetSidebarMenuId(menu, mobile: true);
                                                             <li class="nav-item">
-                                                                <NavLink class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);"
-                                                                         data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
+                                                                <a class="nav-link d-flex align-items-center justify-content-between py-2" href="javascript:void(0);" role="button"
+                                                                         data-menu-key="@dynamicMenuId" data-bs-toggle="collapse" data-bs-target="@($"#{dynamicMenuId}")"
                                                                          aria-expanded="false" aria-controls="@dynamicMenuId">
                                                                     <span class="d-flex align-items-center">
                                                                         <i class="@menu.Icon me-2"></i>
@@ -707,7 +699,7 @@
                                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                                         <path d="M10 19a1 1 0 0 1-.64-.23a1 1 0 0 1-.13-1.41L13.71 12L9.39 6.63a1 1 0 0 1 .15-1.41a1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19" />
                                                                     </svg>
-                                                                </NavLink>
+                                                                </a>
                                                                 <div class="collapse" id="@dynamicMenuId">
                                                                     <ul class="nav flex-column">
                                                                         @foreach (var child in menu.Items)
@@ -743,42 +735,77 @@
 
                 <!-- Main Content Column -->
                 <div id="main-content" class="overflow-auto main-content-transition">
-                    <!-- Top Navigation Bar with Toggle Button -->
-                    <nav class="navbar navbar-expand-lg bg-white">
-                        <div class="container-fluid px-4 py-3">
-                            <!-- Mobile Toggle Button -->
-                            <button id="sidebar-toggle-mobile" class="d-lg-none me-3" type="button" onclick="toggleMobileSidebar()">
-                                <i class="fas fa-bars"></i>
-                            </button>
-                            
-                            <!-- Desktop Toggle Button -->
-                            <button id="sidebar-toggle-desktop" class="d-none d-lg-block me-3" type="button" onclick="toggleSidebar()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            
-                            <!-- Page Title -->
-                            <div class="flex-grow-1">
-                                <h1 class="h4 mb-0 fw-bold text-dark">@CurrentPageTitle</h1>
+                    <!-- Primary top navigation: desktop labels, mobile icons. -->
+                    <nav class="navbar seafood-topbar" aria-label="Điều hướng chính">
+                        <div class="seafood-topbar__inner">
+                            <NavLink class="seafood-topbar__brand" href="/" aria-label="Trang chủ">
+                                <span class="seafood-topbar__brand-mark" aria-hidden="true">
+                                    <i class="fa-solid fa-fish-fins"></i>
+                                </span>
+                            </NavLink>
+
+                            <div class="seafood-topbar__items" role="menubar">
+                                @if (Menus != null && Menus.Any())
+                                {
+                                    foreach (var menu in Menus)
+                                    {
+                                        var isActive = IsTopMenuActive(menu);
+                                        var topMenuId = GetTopMenuId(menu);
+                                        var menuItems = menu.Items?.ToList();
+                                        if (menuItems is { Count: > 0 })
+                                        {
+                                            <div class="dropdown seafood-topbar__item @(isActive ? "is-active" : string.Empty)">
+                                                <button class="seafood-topbar__link @(isActive ? "is-active" : string.Empty)"
+                                                        type="button"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-auto-close="true"
+                                                        data-bs-display="static"
+                                                        aria-expanded="false"
+                                                        aria-controls="@topMenuId"
+                                                        title="@menu.Text">
+                                                    <i class="@menu.Icon" aria-hidden="true"></i>
+                                                    <span class="seafood-topbar__label">@menu.Text</span>
+                                                    <i class="fa-solid fa-chevron-down seafood-topbar__chevron" aria-hidden="true"></i>
+                                                </button>
+                                                <ul id="@topMenuId" class="dropdown-menu seafood-topbar__dropdown" role="menu">
+                                                    <li class="seafood-topbar__dropdown-title">@menu.Text</li>
+                                                    @foreach (var child in menuItems)
+                                                    {
+                                                        <li role="none">
+                                                            <NavLink class="seafood-topbar__dropdown-link" href="@child.Url" Match="NavLinkMatch.All" role="menuitem">
+                                                                <i class="@child.Icon" aria-hidden="true"></i>
+                                                                <span>@child.Text</span>
+                                                            </NavLink>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                }
                             </div>
-                            
-                            <!-- Top Right User Menu -->
-                            <div class="top-account-menu d-flex align-items-center">
-                                <span class="top-account-name d-none d-md-inline-flex">@CurrentUserName</span>
-                                <div class="dropdown top-account-dropdown">
-                                    <button class="btn top-account-button"
+
+                            <div class="seafood-topbar__actions">
+                                <button class="seafood-topbar__icon-button" type="button" aria-label="Thông báo" title="Thông báo">
+                                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                                </button>
+                                <div class="dropdown seafood-topbar__account">
+                                    <button class="seafood-topbar__icon-button seafood-topbar__avatar-button"
                                             type="button"
                                             data-bs-toggle="dropdown"
+                                            data-bs-display="static"
                                             aria-label="Mở menu tài khoản"
                                             aria-expanded="false">
                                         <img src="@CurrentUserAvatar"
                                              alt="@CurrentUserName"
-                                             class="top-account-avatar"
+                                             class="seafood-topbar__avatar"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                                        <span class="top-account-fallback">
-                                            <i class="fa-solid fa-user"></i>
+                                        <span class="seafood-topbar__avatar-fallback">
+                                            <i class="fa-solid fa-user" aria-hidden="true"></i>
                                         </span>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end top-account-dropdown-menu">
+                                    <ul class="dropdown-menu dropdown-menu-end seafood-topbar__account-menu">
+                                        <li class="seafood-topbar__account-name">@CurrentUserName</li>
                                         <li>
                                             <a class="dropdown-item" href="/my-profile">
                                                 <i class="fa-solid fa-user-pen me-2"></i>Thông tin cá nhân
@@ -792,7 +819,7 @@
                                         <li><hr class="dropdown-divider" /></li>
                                         <li>
                                             <a class="dropdown-item" href="javascript:void(0);" @onclick="OnLogout">
-                                                <i class="fa-solid fa-sign-out-alt me-2"></i>Đăng xuất
+                                                <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
                                             </a>
                                         </li>
                                     </ul>
@@ -821,9 +848,17 @@
                 </div>
             </div>
         </div>
+
         <!-- Modal for Change Password -->
         <Modal @ref="Modal" Size="Size.Small" ShowResize="true" IsKeyboard="true">
-            <ModalDialog Title="Đổi mật khẩu" ShowSaveButton="true" OnSaveAsync="OnChangePasswordAsync">
+            <ModalDialog Title="Đổi mật khẩu"
+                         ShowSaveButton="true"
+                         ShowCloseButton="true"
+                         CloseButtonText="Đóng"
+                         CloseButtonIcon="fa-solid fa-xmark"
+                         SaveButtonText="Lưu"
+                         SaveButtonIcon="fa-solid fa-floppy-disk"
+                         OnSaveAsync="OnChangePasswordAsync">
                 <BodyTemplate>
                     <BootstrapInput PlaceHolder="Nhập mật khẩu mới" @bind-Value="@NewPassword.NewPassword"
                                     DisplayText="Mật khẩu mới" ShowLabel="true" />
@@ -927,6 +962,10 @@
 
     // Ngăn chặn toggle liên tục cho collapse menu
     function setupCollapseTogglePrevention() {
+        // Sidebar state is owned by RouteMenuHandler.js. Keeping a second capture
+        // listener here causes the delayed double-toggle regression.
+        return;
+        /*
         const sidebar = document.getElementById('sidebar');
         const sidebarMobile = document.getElementById('sidebar-mobile');
         
@@ -1018,6 +1057,7 @@
         
         setupForContainer(sidebar);
         setupForContainer(sidebarMobile);
+        */
     }
     
     // Setup khi DOM ready
@@ -1090,8 +1130,33 @@
             document.body.style.overflow = 'hidden';
         }
     }
+
+    // Close the mobile drawer before a quick-nav link changes the route.
+    function closeMobileSidebar() {
+        const offcanvasElement = document.getElementById('sidebar-offcanvas');
+        if (!offcanvasElement) return;
+
+        const Bootstrap = window.bootstrap;
+        if (Bootstrap?.Offcanvas) {
+            Bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement).hide();
+            return;
+        }
+
+        offcanvasElement.classList.remove('show');
+        offcanvasElement.style.visibility = '';
+        document.querySelector('.offcanvas-backdrop')?.remove();
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+    }
+
+    window.closeMobileSidebar = closeMobileSidebar;
     
     function toggleSidebar() {
+        if (window.seafoodSidebar?.toggleSidebar) {
+            window.seafoodSidebar.toggleSidebar();
+            return;
+        }
+
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('main-content');
         const toggleIcon = document.querySelector('#sidebar-toggle-desktop i');
@@ -1143,19 +1208,14 @@
                 toggleIcon.style.visibility = 'visible';
                 toggleIcon.style.opacity = '1';
                 
-                if (sidebar.classList.contains('collapsed')) {
-                    toggleIcon.classList.remove('fa-chevron-left');
-                    toggleIcon.classList.add('fa-chevron-right');
-                } else {
-                    toggleIcon.classList.remove('fa-chevron-right');
-                    toggleIcon.classList.add('fa-chevron-left');
-                }
+                toggleIcon.classList.remove('fa-chevron-left', 'fa-chevron-right', 'fas');
+                toggleIcon.classList.add('fa-solid', 'fa-bars');
             } else {
                 // Nếu icon bị mất, tạo lại
                 const toggleButton = document.querySelector('#sidebar-toggle-desktop');
                 if (toggleButton && !toggleButton.querySelector('i')) {
                     const icon = document.createElement('i');
-                    icon.className = sidebar.classList.contains('collapsed') ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                    icon.className = 'fa-solid fa-bars';
                     icon.style.display = 'flex';
                     icon.style.alignItems = 'center';
                     icon.style.justifyContent = 'center';
@@ -1169,6 +1229,8 @@
     
     // Khôi phục trạng thái sidebar từ localStorage khi trang load
     function restoreSidebarState(retryCount = 0) {
+        // RouteMenuHandler.js is the single owner of sidebar persistence.
+        return;
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('main-content');
         const toggleIcon = document.querySelector('#sidebar-toggle-desktop i');
@@ -1201,19 +1263,14 @@
                     toggleIcon.style.visibility = 'visible';
                     toggleIcon.style.opacity = '1';
                     
-                    if (shouldBeCollapsed) {
-                        toggleIcon.classList.remove('fa-chevron-left');
-                        toggleIcon.classList.add('fa-chevron-right');
-                    } else {
-                        toggleIcon.classList.remove('fa-chevron-right');
-                        toggleIcon.classList.add('fa-chevron-left');
-                    }
+                    toggleIcon.classList.remove('fa-chevron-left', 'fa-chevron-right', 'fas');
+                    toggleIcon.classList.add('fa-solid', 'fa-bars');
                 } else {
                     // Nếu icon bị mất, tạo lại
                     const toggleButton = document.querySelector('#sidebar-toggle-desktop');
                     if (toggleButton && !toggleButton.querySelector('i')) {
                         const icon = document.createElement('i');
-                        icon.className = shouldBeCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+                        icon.className = 'fa-solid fa-bars';
                         icon.style.display = 'flex';
                         icon.style.alignItems = 'center';
                         icon.style.justifyContent = 'center';
@@ -1280,6 +1337,10 @@
     
     // Xử lý hover để hiển thị submenu khi sidebar collapsed
     function setupCollapsedSubmenuHover(retryCount = 0) {
+        // The unified sidebar controller handles state and accessibility. CSS
+        // exposes the collapsed navigation affordance without duplicate handlers.
+        return;
+        /*
         const sidebar = document.getElementById('sidebar');
         if (!sidebar) {
             // Retry after a short delay if sidebar not found (max 20 retries = 2 seconds)
@@ -1297,18 +1358,18 @@
             return;
         }
         
-        const isCollapsed = sidebar.classList.contains('collapsed');
-        
         const handleNavItemHover = (navItem) => {
             const collapse = navItem.querySelector('.collapse');
             if (!collapse) return;
+
+            const sidebarIsCollapsed = sidebar.classList.contains('collapsed');
             
             // Skip nếu đã setup và trạng thái không đổi
-            if (navItem.dataset.hoverSetup === 'true' && navItem.dataset.lastState === (isCollapsed ? 'collapsed' : 'expanded')) {
+            if (navItem.dataset.hoverSetup === 'true' && navItem.dataset.lastState === (sidebarIsCollapsed ? 'collapsed' : 'expanded')) {
                 return;
             }
             navItem.dataset.hoverSetup = 'true';
-            navItem.dataset.lastState = isCollapsed ? 'collapsed' : 'expanded';
+            navItem.dataset.lastState = sidebarIsCollapsed ? 'collapsed' : 'expanded';
             
             const navLink = navItem.querySelector('.nav-link[data-bs-toggle="collapse"]');
             if (!navLink) return;
@@ -1320,7 +1381,7 @@
             }
             
             // Chỉ add click handler khi sidebar collapsed
-            if (isCollapsed) {
+            if (sidebarIsCollapsed) {
                 disableNavLinkCollapse(navLink);
                 const clickHandler = function(e) {
                     if (sidebar.classList.contains('collapsed')) {
@@ -1389,6 +1450,10 @@
         if (!sidebar.dataset.observerSetup) {
             sidebar.dataset.observerSetup = 'true';
             const observer = new MutationObserver(() => {
+                // Stale collapsed-mode handlers must not strip open submenus.
+                if (!sidebar.classList.contains('collapsed')) {
+                    return;
+                }
                 const navItems = sidebar.querySelectorAll('.nav-item');
                 navItems.forEach(item => {
                     const collapse = item.querySelector('.collapse');
@@ -1400,6 +1465,7 @@
             
             observer.observe(sidebar, { childList: true, subtree: true });
         }
+        */
     }
     
     // Setup khi DOM ready và sau khi Blazor render
@@ -1415,44 +1481,8 @@
         initSubmenuHover();
     }
     
-    // Setup lại khi sidebar toggle
-    const originalToggleSidebar = window.toggleSidebar;
-    if (typeof originalToggleSidebar === 'function') {
-        window.toggleSidebar = function() {
-            originalToggleSidebar();
-            // Đợi sidebar toggle xong rồi mới setup lại
-            setTimeout(() => {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar) return;
-                
-                // Reset hover setup để setup lại với trạng thái mới
-                const navItems = sidebar.querySelectorAll('.nav-item');
-                navItems.forEach(item => {
-                    delete item.dataset.hoverSetup;
-                    delete item.dataset.lastState;
-                    // Remove click handler nếu có
-                    const navLink = item.querySelector('.nav-link[data-bs-toggle="collapse"], .nav-link[data-bs-toggle-disabled="true"]');
-                    if (navLink && navLink._collapseClickHandler) {
-                        const handler = navLink._collapseClickHandler;
-                        navLink.removeEventListener('click', handler, true);
-                        delete navLink._collapseClickHandler;
-                    }
-                    if (navLink) {
-                        enableNavLinkCollapse(navLink);
-                    }
-                });
-                
-                // Setup lại hover handlers với trạng thái mới
-                setupCollapsedSubmenuHover();
-                
-                // Clear và reapply active parent menu styles
-                applyActiveParentMenuStyles();
-                
-                // Expand active menu sau khi toggle sidebar
-                window.expandActiveMenu?.();
-            }, 100);
-        };
-    }
+    // RouteMenuHandler.js owns sidebar state. Do not wrap its toggle here:
+    // delayed wrappers were the source of the submenu closing regression.
     
     // Setup lại sau khi restore sidebar state và khi Blazor render xong
     setTimeout(setupCollapsedSubmenuHover, 600);
@@ -1495,7 +1525,9 @@ function applyActiveParentMenuStyles(retryCount = 0) {
     // CSS classes sẽ xử lý active states, collapsed states, etc.
 }
     // Áp dụng styles khi DOM ready
-    function initActiveParentMenuStyles() {
+function initActiveParentMenuStyles() {
+        // Parent active state is synchronized by RouteMenuHandler.js.
+        return;
         applyActiveParentMenuStyles();
         window.expandActiveMenu?.();
         
@@ -1507,7 +1539,6 @@ function applyActiveParentMenuStyles(retryCount = 0) {
                 const menuObserver = new MutationObserver(function() {
                     setTimeout(() => {
                         applyActiveParentMenuStyles();
-                        window.expandActiveMenu?.();
                     }, 200);
                 });
                 menuObserver.observe(sidebar, { childList: true, subtree: true });

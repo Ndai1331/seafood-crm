@@ -1,0 +1,106 @@
+@page "/master-data/document-rules"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Quy tắc chứng từ theo thị trường</h3><p>Cấu hình giấy bắt buộc và giấy bổ sung để hệ thống xếp lô đúng theo USA, EU hoặc thị trường khác.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_total.ToString("N0") quy tắc</span><Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm quy tắc" OnClick="OpenCreateAsync" /></div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm hoặc cập nhật quy tắc chứng từ" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Phạm vi áp dụng" Icon="fa-solid fa-globe">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.MarketCode" DisplayText="Mã thị trường" ShowLabel="true" placeholder="USA / EU / OTHER" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Bộ chứng từ" Icon="fa-solid fa-folder-open">
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Chứng từ bắt buộc</label><SeafoodSelect2 Value="@_form.RequiredDocumentTypeId" SelectedText="@_form.RequiredDocumentTypeCode" ValueChanged="OnRequiredDocumentChanged" Search="SearchDocumentTypesAsync" Placeholder="Tìm mã hoặc tên chứng từ" /></div>
+                <div class="col-md-6"><label class="form-label">Chứng từ bổ sung</label><SeafoodSelect2 Value="@_form.SupplementalDocumentTypeId" SelectedText="@_form.SupplementalDocumentTypeCode" ValueChanged="OnSupplementalDocumentChanged" Search="SearchDocumentTypesAsync" Placeholder="Tìm mã hoặc tên chứng từ" /></div>
+                <div class="col-12"><Textarea @bind-Value="_form.Note" DisplayText="Ghi chú" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm USA, EU, COA, EUCC, MSC..." />
+    <div class="sf-table-shell">
+        <Table TItem="MarketCertificateRuleDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="string" @bind-Field="@context.MarketCode" Text="Thị trường" Width="160"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="string" @bind-Field="@context.RequiredDocumentTypeCode" Text="Bắt buộc" Width="260"><Template Context="value"><strong>@DocText(value.Value, value.Row.RequiredDocumentTypeName, "Không")</strong></Template></TableColumn>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="string" @bind-Field="@context.SupplementalDocumentTypeCode" Text="Bổ sung" Width="260"><Template Context="value">@DocText(value.Value, value.Row.SupplementalDocumentTypeName, "Không")</Template></TableColumn>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="string" @bind-Field="@context.Note" Text="Ghi chú" Width="320" TextWrap="true"><Template Context="value">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</Template></TableColumn>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="bool" @bind-Field="@context.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                <TableColumn TItem="MarketCertificateRuleDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditAsync(value.Row)" OnToggle="() => ToggleActiveAsync(value.Row)" /></Template></TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private MarketCertificateRuleDto _form = NewForm();
+    private SeafoodCrudModal? _crudModal;
+    private Table<MarketCertificateRuleDto>? _table;
+    private string _search = "";
+    private int _total;
+    private static MarketCertificateRuleDto NewForm() => new() { IsActive = true };
+
+    private async Task<QueryData<MarketCertificateRuleDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.MarketDocumentRulesPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+    private async Task OnRequiredDocumentChanged(int? value) { _form.RequiredDocumentTypeId = value; _form.RequiredDocumentTypeCode = null; await Task.CompletedTask; }
+    private async Task OnSupplementalDocumentChanged(int? value) { _form.SupplementalDocumentTypeId = value; _form.SupplementalDocumentTypeCode = null; await Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchDocumentTypesAsync(string term, int page, int pageSize) => await Api.SearchDocumentTypeOptionsAsync(term, page, pageSize) ?? new();
+    private async Task OpenCreateAsync() { _form = NewForm(); if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(MarketCertificateRuleDto item) { _form = new() { Id = item.Id, MarketCode = item.MarketCode, RequiredDocumentTypeId = item.RequiredDocumentTypeId, RequiredDocumentTypeCode = item.RequiredDocumentTypeCode, SupplementalDocumentTypeId = item.SupplementalDocumentTypeId, SupplementalDocumentTypeCode = item.SupplementalDocumentTypeCode, Note = item.Note, IsActive = item.IsActive }; if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task<bool> SaveAsync()
+    {
+        try
+        {
+            if (await Api.SaveMarketDocumentRuleAsync(_form) == null)
+            {
+                await Toast.Error("Không thể lưu quy tắc chứng từ", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu quy tắc chứng từ.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu quy tắc chứng từ", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra thị trường và thử lại."));
+            return false;
+        }
+    }
+    private async Task ToggleActiveAsync(MarketCertificateRuleDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeleteMarketDocumentRuleAsync(item.Id) : await Api.SaveMarketDocumentRuleAsync(new MarketCertificateRuleDto { Id = item.Id, MarketCode = item.MarketCode, RequiredDocumentTypeId = item.RequiredDocumentTypeId, SupplementalDocumentTypeId = item.SupplementalDocumentTypeId, Note = item.Note, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật quy tắc chứng từ", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa quy tắc." : "Đã mở lại quy tắc.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật quy tắc chứng từ", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
+    private static string DocText(string? code, string? name, string fallback) => string.IsNullOrWhiteSpace(code) ? fallback : $"{code} — {name}";
+}

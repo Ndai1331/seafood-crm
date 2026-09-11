@@ -1,0 +1,217 @@
+@page "/master-data/partners"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page partners-page">
+    <div class="sf-page-header">
+        <div><h3>Đối tác &amp; tàu</h3><p>Quản lý supplier, chủ tàu, forwarder, hãng tàu, nhà xe, kho và tàu nguồn.</p></div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-info">@ActiveCount.ToString("N0") @ActiveCountLabel</span>
+            @if (IsPartnerView) { <Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm đối tác" OnClick="OpenCreatePartnerAsync" /> }
+            else { <Button Color="Color.Secondary" Icon="fa-solid fa-ship" Text="Thêm tàu" OnClick="OpenCreateVesselAsync" /> }
+        </div>
+    </div>
+
+    <SeafoodCrudModal @ref="_partnerModal" Title="Thêm hoặc cập nhật đối tác" OnSaveAsync="SavePartnerAsync">
+        <SeafoodModalSection Title="Định danh & vai trò" Icon="fa-solid fa-handshake">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_partner.Code" DisplayText="Mã đối tác" ShowLabel="true" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_partner.Name" DisplayText="Tên đối tác" ShowLabel="true" /></div>
+                <div class="col-md-7"><BootstrapInput @bind-Value="_rolesText" DisplayText="Vai trò" ShowLabel="true" placeholder="Mã vai trò, cách nhau bằng dấu phẩy" /></div>
+                <div class="col-12"><small class="sf-modal-field-hint">1 Buyer · 2 Supplier · 3 VesselOwner · 4 Forwarder · 5 Carrier · 6 Transporter · 7 Warehouse</small></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Thông tin liên hệ" Icon="fa-solid fa-address-card">
+            <div class="row g-3">
+                <div class="col-md-6"><BootstrapInput @bind-Value="_partner.ContactName" DisplayText="Người liên hệ" ShowLabel="true" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_partner.TaxCode" DisplayText="Mã số thuế" ShowLabel="true" /></div>
+                <div class="col-12"><Textarea @bind-Value="_partner.Note" DisplayText="Ghi chú" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_partner.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodCrudModal @ref="_vesselModal" Title="Thêm hoặc cập nhật tàu" OnSaveAsync="SaveVesselAsync">
+        <SeafoodModalSection Title="Thông tin tàu" Icon="fa-solid fa-ship">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_vessel.Code" DisplayText="Mã tàu" ShowLabel="true" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_vessel.Name" DisplayText="Tên tàu" ShowLabel="true" /></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_vessel.Flag" DisplayText="Quốc kỳ" ShowLabel="true" /></div>
+                <div class="col-md-8"><label class="form-label">Chủ tàu</label><SeafoodSelect2 Value="@_vessel.OwnerPartnerId" SelectedText="@_vessel.OwnerPartnerName" ValueChanged="OnOwnerChanged" Search="SearchOwnerOptionsAsync" Placeholder="Tìm chủ tàu" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái & ghi chú" Icon="fa-solid fa-sliders">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_vessel.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+                <div class="col-md-8"><Textarea @bind-Value="_vessel.Note" DisplayText="Ghi chú" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <div class="partners-category-panel" aria-label="Phân loại dữ liệu đối tác">
+        <div class="partners-category-tabs" role="tablist">
+            <Button Color="Color.None" class="@GetCategoryTabClass(true)" role="tab" aria-selected="@IsPartnerView" aria-controls="partners-table" OnClick="() => SelectViewAsync(true)"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Đối tác</span></Button>
+            <Button Color="Color.None" class="@GetCategoryTabClass(false)" role="tab" aria-selected="@(!IsPartnerView)" aria-controls="vessels-table" OnClick="() => SelectViewAsync(false)"><i class="fa-solid fa-ship" aria-hidden="true"></i><span>Tàu / chủ hàng</span></Button>
+        </div>
+    </div>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@ActiveCount" Placeholder="@ActivePlaceholder" />
+
+    @if (IsPartnerView)
+    {
+        <div id="partners-table" class="sf-table-shell" role="tabpanel">
+            <Table TItem="BusinessPartnerDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnPartnersQueryAsync" @ref="_partnerTable">
+                <TableColumns Context="column">
+                    <TableColumn TItem="BusinessPartnerDto" TType="string" @bind-Field="@column.Code" Text="Mã" Width="160"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                    <TableColumn TItem="BusinessPartnerDto" TType="string" @bind-Field="@column.Name" Text="Tên đối tác" Width="300" TextWrap="true"><Template Context="value"><strong>@value.Value</strong><div class="small text-muted">@value.Row.TaxCode @value.Row.Note</div></Template></TableColumn>
+                    <TableColumn TItem="BusinessPartnerDto" TType="string" @bind-Field="@column.ContactName" Text="Liên hệ" Width="180" />
+                    <TableColumn TItem="BusinessPartnerDto" TType="string" @bind-Field="@column.Code" Text="Vai trò" Width="230"><Template Context="value">@RoleText(value.Row.Roles)</Template></TableColumn>
+                    <TableColumn TItem="BusinessPartnerDto" TType="bool" @bind-Field="@column.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                    <TableColumn TItem="BusinessPartnerDto" TType="int" @bind-Field="@column.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditPartnerAsync(value.Row)" OnToggle="() => TogglePartnerAsync(value.Row)" /></Template></TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+    }
+    else
+    {
+        <div id="vessels-table" class="sf-table-shell" role="tabpanel">
+            <Table TItem="VesselDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnVesselsQueryAsync" @ref="_vesselTable">
+                <TableColumns Context="column">
+                    <TableColumn TItem="VesselDto" TType="string" @bind-Field="@column.Code" Text="Mã tàu" Width="160"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                    <TableColumn TItem="VesselDto" TType="string" @bind-Field="@column.Name" Text="Tên tàu" Width="300" TextWrap="true"><Template Context="value"><strong>@value.Value</strong><div class="small text-muted">@value.Row.Note</div></Template></TableColumn>
+                    <TableColumn TItem="VesselDto" TType="string" @bind-Field="@column.Flag" Text="Quốc kỳ" Width="140" />
+                    <TableColumn TItem="VesselDto" TType="string" @bind-Field="@column.OwnerPartnerName" Text="Chủ tàu" Width="240" />
+                    <TableColumn TItem="VesselDto" TType="bool" @bind-Field="@column.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                    <TableColumn TItem="VesselDto" TType="int" @bind-Field="@column.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditVesselAsync(value.Row)" OnToggle="() => ToggleVesselAsync(value.Row)" /></Template></TableColumn>
+                </TableColumns>
+            </Table>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private BusinessPartnerDto _partner = NewPartner();
+    private VesselDto _vessel = NewVessel();
+    private SeafoodCrudModal? _partnerModal;
+    private SeafoodCrudModal? _vesselModal;
+    private Table<BusinessPartnerDto>? _partnerTable;
+    private Table<VesselDto>? _vesselTable;
+    private string _rolesText = "2";
+    private string _search = "";
+    private bool _isPartnerView = true;
+    private int _partnerTotal;
+    private int _vesselTotal;
+    private bool IsPartnerView => _isPartnerView;
+    private int ActiveCount => IsPartnerView ? _partnerTotal : _vesselTotal;
+    private string ActiveCountLabel => IsPartnerView ? "đối tác" : "tàu";
+    private string ActivePlaceholder => IsPartnerView ? "Tìm mã, tên, liên hệ hoặc MST..." : "Tìm mã tàu, tên tàu hoặc chủ tàu...";
+
+    private async Task<QueryData<BusinessPartnerDto>> OnPartnersQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.PartnersPageAsync(null, _search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _partnerTotal = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task<QueryData<VesselDto>> OnVesselsQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.VesselsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _vesselTotal = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (IsPartnerView && _partnerTable != null) await _partnerTable.QueryAsync(1); else if (!IsPartnerView && _vesselTable != null) await _vesselTable.QueryAsync(1); }
+
+    protected override Task OnInitializedAsync() => Task.CompletedTask;
+    private static BusinessPartnerDto NewPartner() => new() { IsActive = true, Roles = new() { 2 } };
+    private static VesselDto NewVessel() => new() { IsActive = true };
+    private Task SelectViewAsync(bool isPartnerView) { _isPartnerView = isPartnerView; _search = ""; return InvokeAsync(StateHasChanged); }
+    private string GetCategoryTabClass(bool isPartnerView) => $"partners-category-tab {(isPartnerView == IsPartnerView ? "is-active" : "")}";
+    private async Task OpenCreatePartnerAsync() { _partner = NewPartner(); _rolesText = "2"; if (_partnerModal != null) await _partnerModal.ShowAsync(); }
+    private async Task OpenEditPartnerAsync(BusinessPartnerDto item) { _partner = new() { Id = item.Id, Code = item.Code, Name = item.Name, ContactName = item.ContactName, TaxCode = item.TaxCode, Note = item.Note, IsActive = item.IsActive, Roles = item.Roles.ToList() }; _rolesText = string.Join(',', _partner.Roles); if (_partnerModal != null) await _partnerModal.ShowAsync(); }
+    private async Task<bool> SavePartnerAsync()
+    {
+        try
+        {
+            _partner.Roles = _rolesText.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => int.TryParse(x.Trim(), out var role) ? role : 0).Where(x => x > 0).Distinct().ToList();
+            if (await Api.SavePartnerAsync(_partner) == null)
+            {
+                await Toast.Error("Không thể lưu đối tác", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu đối tác.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu đối tác", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã đối tác và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task TogglePartnerAsync(BusinessPartnerDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeletePartnerAsync(item.Id) : await Api.SavePartnerAsync(new BusinessPartnerDto { Id = item.Id, Code = item.Code, Name = item.Name, ContactName = item.ContactName, TaxCode = item.TaxCode, Note = item.Note, Roles = item.Roles.ToList(), IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật trạng thái đối tác", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa đối tác." : "Đã mở lại đối tác.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật trạng thái đối tác", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private async Task OpenCreateVesselAsync() { _vessel = NewVessel(); if (_vesselModal != null) await _vesselModal.ShowAsync(); }
+    private async Task OpenEditVesselAsync(VesselDto item) { _vessel = new() { Id = item.Id, Code = item.Code, Name = item.Name, Flag = item.Flag, OwnerPartnerId = item.OwnerPartnerId, OwnerPartnerName = item.OwnerPartnerName, Note = item.Note, IsActive = item.IsActive }; if (_vesselModal != null) await _vesselModal.ShowAsync(); }
+    private async Task<bool> SaveVesselAsync()
+    {
+        try
+        {
+            if (await Api.SaveVesselAsync(_vessel) == null)
+            {
+                await Toast.Error("Không thể lưu tàu", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu tàu.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu tàu", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã tàu và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleVesselAsync(VesselDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeleteVesselAsync(item.Id) : await Api.SaveVesselAsync(new VesselDto { Id = item.Id, Code = item.Code, Name = item.Name, Flag = item.Flag, OwnerPartnerId = item.OwnerPartnerId, Note = item.Note, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật trạng thái tàu", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa tàu." : "Đã mở lại tàu.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật trạng thái tàu", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private Task OnOwnerChanged(int? value) { _vessel.OwnerPartnerId = value; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchOwnerOptionsAsync(string term, int page, int pageSize) => await Api.SearchPartnerOptionsAsync(term, 3, page, pageSize) ?? new();
+    private async Task RefreshAsync() { if (IsPartnerView && _partnerTable != null) await _partnerTable.QueryAsync(1); else if (!IsPartnerView && _vesselTable != null) await _vesselTable.QueryAsync(1); }
+    private static string RoleText(IEnumerable<int> roles) => string.Join(", ", roles.Select(x => x switch { 1 => "Buyer", 2 => "Supplier", 3 => "Chủ tàu", 4 => "Forwarder", 5 => "Hãng tàu", 6 => "Nhà xe", 7 => "Kho", _ => $"#{x}" }));
+}

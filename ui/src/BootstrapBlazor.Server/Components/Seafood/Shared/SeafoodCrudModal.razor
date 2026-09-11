@@ -1,0 +1,39 @@
+<Modal @ref="_modal" IsKeyboard="true" IsBackdrop="true">
+    <ModalDialog Title="@Title"
+                 Class="@ModalClass"
+                 Size="@Size"
+                 FullScreenSize="FullScreenSize.Medium"
+                 IsCentered="true"
+                 IsScrolling="true"
+                 ShowSaveButton="true"
+                 ShowCloseButton="true"
+                 CloseButtonText="Đóng"
+                 CloseButtonIcon="fa-solid fa-xmark"
+                 SaveButtonText="Lưu"
+                 SaveButtonIcon="fa-solid fa-floppy-disk"
+                 IsAutoCloseAfterSave="true"
+                 OnSaveAsync="SaveAsync">
+        <BodyTemplate>
+            @ChildContent
+        </BodyTemplate>
+    </ModalDialog>
+</Modal>
+
+@code {
+    private Modal? _modal;
+
+    [Parameter] public string Title { get; set; } = "Cập nhật dữ liệu";
+    [Parameter] public Size Size { get; set; } = Size.Large;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public Func<Task<bool>>? OnSaveAsync { get; set; }
+
+    private string ModalClass => Size == Size.ExtraExtraLarge
+        ? "seafood-crud-modal seafood-crud-modal--wide"
+        : "seafood-crud-modal";
+
+    public Task ShowAsync() => _modal?.Show() ?? Task.CompletedTask;
+
+    public Task CloseAsync() => _modal?.Close() ?? Task.CompletedTask;
+
+    private Task<bool> SaveAsync() => OnSaveAsync?.Invoke() ?? Task.FromResult(false);
+}

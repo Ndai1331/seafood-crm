@@ -219,73 +219,17 @@ public sealed partial class PageLayout : IDisposable
         // Force UI update after location change to ensure menu is visible
         await InvokeAsync(() => StateHasChanged());
         
-        // Re-initialize sidebar after navigation
-        if (JSRuntime != null && Menus != null && Menus.Any())
+        // Sidebar state has a single JavaScript owner. Re-sync after Blazor has
+        // rendered the new active NavLink; do not run delayed restore races here.
+        if (JSRuntime != null)
         {
             try
             {
-                await Task.Delay(200);
-                // Gọi function để handle route change
-                await JSRuntime.InvokeVoidAsync("handleRouteChange");
-                
-                // Re-initialize sidebar functions
-                await JSRuntime.InvokeVoidAsync("eval", @"
-                    if (typeof restoreSidebarState === 'function') {
-                        restoreSidebarState();
-                    }
-                    if (typeof setupCollapsedSubmenuHover === 'function') {
-                        setupCollapsedSubmenuHover();
-                    }
-                ");
-                
-                // Reposition floating labels after navigation
-                await Task.Delay(100);
-                if (JSRuntime != null)
-                {
-                    try
-                    {
-                        await JSRuntime.InvokeVoidAsync("eval", @"
-                            if (typeof window.floatingLabelPositioner !== 'undefined' && 
-                                typeof window.floatingLabelPositioner.processAll === 'function') {
-                                window.floatingLabelPositioner.processAll();
-                            }
-                            if (typeof window.tableRowspanStyler !== 'undefined' && 
-                                typeof window.tableRowspanStyler.processAll === 'function') {
-                                window.tableRowspanStyler.processAll();
-                            }
-                        ");
-                    }
-                    catch
-                    {
-                        // Ignore JS errors
-                    }
-                }
+                await JSRuntime.InvokeVoidAsync("seafoodSidebar.handleRouteChange");
             }
             catch
             {
-                // Ignore JS errors
-            }
-        }
-        else if (JSRuntime != null)
-        {
-            // Reposition floating labels even if menus are not loaded
-            try
-            {
-                await Task.Delay(300);
-                await JSRuntime.InvokeVoidAsync("eval", @"
-                    if (typeof window.floatingLabelPositioner !== 'undefined' && 
-                        typeof window.floatingLabelPositioner.processAll === 'function') {
-                        window.floatingLabelPositioner.processAll();
-                    }
-                    if (typeof window.tableRowspanStyler !== 'undefined' && 
-                        typeof window.tableRowspanStyler.processAll === 'function') {
-                        window.tableRowspanStyler.processAll();
-                    }
-                ");
-            }
-            catch
-            {
-                // Ignore JS errors
+                // Optional client-side helpers must not block navigation.
             }
         }
     }
@@ -497,33 +441,84 @@ public sealed partial class PageLayout : IDisposable
         Menus = await AuthorizationService.BuildMenusAsync();
     }
 
+    private static string GetSidebarMenuId(MenuItem menu, bool mobile)
+    {
+        var seed = SidebarMenuNavigation.ResolveDirectUrl(menu)
+            ?? menu.Items?.FirstOrDefault()?.Url
+            ?? menu.Text;
+        var normalized = System.Text.RegularExpressions.Regex.Replace(seed ?? menu.Text, @"[^a-zA-Z0-9]+", "-")
+            .Trim('-')
+            .ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(normalized)) normalized = "menu";
+        return $"sidebar-{(mobile ? "mobile-" : string.Empty)}{normalized}";
+    }
+
+    private bool IsTopMenuActive(MenuItem menu)
+    {
+        var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri)
+            .Split('?')[0]
+            .Split('#')[0]
+            .Trim('/');
+
+        var directUrl = SidebarMenuNavigation.ResolveDirectUrl(menu);
+        if (IsTopMenuRouteMatch(currentUrl, directUrl))
+        {
+            return true;
+        }
+
+        return menu.Items?.Any(item => IsTopMenuRouteMatch(currentUrl, item.Url)) == true;
+    }
+
+    private static bool IsTopMenuRouteMatch(string currentUrl, string? menuUrl)
+    {
+        if (string.IsNullOrWhiteSpace(menuUrl))
+        {
+            return false;
+        }
+
+        var normalizedMenuUrl = menuUrl.TrimStart('/').Split('?')[0].Split('#')[0].Trim('/');
+        return currentUrl.Equals(normalizedMenuUrl, StringComparison.OrdinalIgnoreCase)
+            || currentUrl.StartsWith(normalizedMenuUrl + "/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetTopMenuId(MenuItem menu)
+    {
+        var seed = SidebarMenuNavigation.ResolveDirectUrl(menu)
+            ?? menu.Items?.FirstOrDefault()?.Url
+            ?? menu.Text;
+        var normalized = System.Text.RegularExpressions.Regex.Replace(seed ?? menu.Text, @"[^a-zA-Z0-9]+", "-")
+            .Trim('-')
+            .ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(normalized)) normalized = "menu";
+        return $"top-menu-{normalized}";
+    }
+
     /// <summary>
     /// Called after component has rendered
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && JSRuntime != null)
+        {
+            try
+            {
+                var clientUserAgent = await JSRuntime.InvokeAsync<string>("seafoodAudit.getUserAgent");
+                RequestClient.SetClientUserAgent(clientUserAgent);
+            }
+            catch
+            {
+                // Device detection remains available from the API request headers when JS is unavailable.
+            }
+        }
         
-        // Initialize sidebar and menu after render
+        // Initialize the idempotent sidebar controller after render.
         if (Menus != null && Menus.Any() && JSRuntime != null)
         {
             try
             {
-                // Wait a bit to ensure DOM is fully rendered
-                await Task.Delay(100);
-                
-                // Call JavaScript functions to initialize sidebar
-                await JSRuntime.InvokeVoidAsync("eval", @"
-                    if (typeof restoreSidebarState === 'function') {
-                        restoreSidebarState();
-                    }
-                    if (typeof setupCollapsedSubmenuHover === 'function') {
-                        setupCollapsedSubmenuHover();
-                    }
-                    if (typeof applyActiveParentMenuStyles === 'function') {
-                        applyActiveParentMenuStyles();
-                    }
-                ");
+                await JSRuntime.InvokeVoidAsync("seafoodSidebar.init");
             }
             catch
             {

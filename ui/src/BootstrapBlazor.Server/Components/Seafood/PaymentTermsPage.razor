@@ -3,28 +3,102 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Điều khoản thanh toán</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã (TT20_80)" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.RatiosJson" placeholder='Tỷ lệ JSON, vd [0.2,0.8]' /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu điều khoản</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Điều khoản thanh toán</h3><p>Chuẩn hóa TT/LC, tỷ lệ từng đợt và hạn thanh toán để sinh công nợ.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_total.ToString("N0") điều khoản</span><Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm điều khoản" OnClick="OpenCreateAsync" /></div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm hoặc cập nhật điều khoản" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Thông tin điều khoản" Icon="fa-solid fa-file-invoice-dollar">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Code" DisplayText="Mã điều khoản" ShowLabel="true" placeholder="TT20_80" /></div>
+                <div class="col-md-8"><BootstrapInput @bind-Value="_form.Name" DisplayText="Tên điều khoản" ShowLabel="true" /></div>
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsLc" DisplayText="Phương thức" ShowLabel="true" OnText="LC" OffText="TT" OnColor="Color.Info" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Lịch thanh toán" Icon="fa-solid fa-calendar-days">
+            <div class="row g-3">
+                <div class="col-md-8"><BootstrapInput @bind-Value="_form.RatiosJson" DisplayText="Tỷ lệ các đợt (JSON)" ShowLabel="true" placeholder="[0.2,0.8]" /><small class="sf-modal-field-hint">Tỷ lệ phải là số thập phân, ví dụ 20% + 80%: [0.2,0.8]. Tổng tỷ lệ phải bằng 1.</small></div>
+                <div class="col-md-4"><VnIntInput @bind-Value="_form.DueDays" DisplayText="Hạn thanh toán (ngày)" ShowLabel="true" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
+            <div class="row g-3">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm theo mã, tên điều khoản hoặc TT/LC..." />
+    <div class="sf-table-shell">
+        <Table TItem="PaymentTermDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.Code" Text="Mã" Width="150"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.Name" Text="Tên điều khoản" Width="260"><Template Context="value"><strong>@value.Value</strong></Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="string" @bind-Field="@context.RatiosJson" Text="Tỷ lệ" Width="220"><Template Context="value"><code>@value.Value</code></Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="int?" @bind-Field="@context.DueDays" Text="Hạn thanh toán" Width="180"><Template Context="value">@(value.Value.HasValue ? $"{value.Value} ngày" : "Theo thỏa thuận")</Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="bool" @bind-Field="@context.IsLc" Text="Loại" Width="110"><Template Context="value">@(value.Value ? "LC" : "TT")</Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="bool" @bind-Field="@context.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                <TableColumn TItem="PaymentTermDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditAsync(value.Row)" OnToggle="() => ToggleActiveAsync(value.Row)" /></Template></TableColumn>
+            </TableColumns>
+        </Table>
     </div>
 </div>
-<Table TItem="PaymentTermDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<PaymentTermDto> _rows = new();
-    private PaymentTermDto _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
-    protected override async Task OnInitializedAsync() => _rows = await Api.PaymentTermsAsync() ?? new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private PaymentTermDto _form = NewForm();
+    private SeafoodCrudModal? _crudModal;
+    private Table<PaymentTermDto>? _table;
+    private string _search = "";
+    private int _total;
 
-    private async Task SaveAsync()
+    private static PaymentTermDto NewForm() => new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
+    private async Task<QueryData<PaymentTermDto>> OnQueryAsync(QueryPageOptions options)
     {
-        var saved = await Api.SavePaymentTermAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu điều khoản"); return; }
-        await Toast.Success("Đã lưu điều khoản");
-        _form = new() { IsActive = true, RatiosJson = "[0.2,0.8]" };
-        _rows = await Api.PaymentTermsAsync() ?? new();
+        var page = await Api.PaymentTermsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
     }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+    private async Task OpenCreateAsync() { _form = NewForm(); if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(PaymentTermDto item) { _form = new() { Id = item.Id, Code = item.Code, Name = item.Name, RatiosJson = item.RatiosJson, DueDays = item.DueDays, IsLc = item.IsLc, IsActive = item.IsActive }; if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task<bool> SaveAsync()
+    {
+        try
+        {
+            if (await Api.SavePaymentTermAsync(_form) == null)
+            {
+                await Toast.Error("Không thể lưu điều khoản thanh toán", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu điều khoản.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu điều khoản thanh toán", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã điều khoản và thử lại."));
+            return false;
+        }
+    }
+    private async Task ToggleActiveAsync(PaymentTermDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeletePaymentTermAsync(item.Id) : await Api.SavePaymentTermAsync(new PaymentTermDto { Id = item.Id, Code = item.Code, Name = item.Name, RatiosJson = item.RatiosJson, DueDays = item.DueDays, IsLc = item.IsLc, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật điều khoản thanh toán", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa điều khoản." : "Đã mở lại điều khoản.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật điều khoản thanh toán", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }

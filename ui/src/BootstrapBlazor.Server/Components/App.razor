@@ -13,7 +13,7 @@
     <meta name="keywords" content="Seafood CRM">
     <meta name="description" content="Seafood processing CRM">
     <meta name="author" content="NKaisel">
-    <meta name="theme-color" content="#0b3d4a">
+    <meta name="theme-color" content="#6814d0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -39,6 +39,9 @@
     <link rel="stylesheet" href="@Assets["css/seafood-saas.css"]" asp-append-version="true" />
     <link rel="stylesheet" href="@Assets["css/ncc-catalog.css"]" asp-append-version="true" />
     <link rel="stylesheet" href="@Assets["css/wiki.css"]" asp-append-version="true" />
+    <link rel="stylesheet" href="@Assets["css/seafood-tokens.css"]" asp-append-version="true" />
+    <link rel="stylesheet" href="@Assets["css/seafood-top-menu.css"]" asp-append-version="true" />
+    <link rel="stylesheet" href="@Assets["lib/select2/css/select2.min.css"]" asp-append-version="true" />
     <ImportMap></ImportMap>
 
     <HeadOutlet @rendermode="new InteractiveServerRenderMode(false)" />
@@ -54,7 +57,9 @@
     <BlazorReconnector @rendermode="new InteractiveServerRenderMode(false)" />
 
     <script src="_content/BootstrapBlazor.SummerNote/js/jquery-3.6.0.min.js"></script>
+    <script src="lib/select2/js/select2.min.js" asp-append-version="true"></script>
     <script src="_content/BootstrapBlazor/js/bootstrap.blazor.bundle.min.js"></script>
+    <script src="js/seafood-select2.js" asp-append-version="true"></script>
     <script src="js/tabsAlignment.js" asp-append-version="true"></script>
     <script src="js/floating-label-positioner.js" asp-append-version="true"></script>
     <script src="js/table-rowspan-styler.js" asp-append-version="true"></script>

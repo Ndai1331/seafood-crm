@@ -1,399 +1,227 @@
-// Note: Data and EventHandler are not used in this module, but kept for consistency
-// If needed, import from: /_content/BootstrapBlazor/modules/data.js
+const OPENED_MENUS_STORAGE_KEY = 'sidebarOpenedMenus';
+const controllers = new Map();
+const openedMenuKeys = new Set();
 
-// Flag để tránh gọi expandActiveMenu nhiều lần đồng thời
-let isExpandingMenu = false;
+function readStoredMenuKeys() {
+    try {
+        const raw = sessionStorage.getItem(OPENED_MENUS_STORAGE_KEY);
+        if (!raw) return;
+        const keys = JSON.parse(raw);
+        if (Array.isArray(keys)) keys.forEach(key => openedMenuKeys.add(String(key)));
+    } catch {
+        // Storage is an optional UX preference, never a runtime dependency.
+    }
+}
 
-// Track các menu đã được user manually đóng (không tự động mở lại)
-const manuallyClosedMenus = new Set();
+function persistMenuKeys() {
+    try {
+        sessionStorage.setItem(OPENED_MENUS_STORAGE_KEY, JSON.stringify([...openedMenuKeys]));
+    } catch {
+        // Ignore private-browsing/storage quota failures.
+    }
+}
 
-// Tự động mở menu cha khi URL khớp với menu con
-function expandActiveMenu(retryCount = 0) {
-    // Tránh gọi nhiều lần đồng thời (nhưng cho phép retry)
-    if (isExpandingMenu && retryCount === 0) {
-        return;
+function getCollapseFromToggle(toggle, root) {
+    const target = toggle?.getAttribute('data-bs-target');
+    if (!target || !target.startsWith('#')) return null;
+    try {
+        return root.querySelector(target) || document.querySelector(target);
+    } catch {
+        return null;
     }
-    
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar) {
-        if (retryCount < 30) {
-            setTimeout(() => expandActiveMenu(retryCount + 1), 100);
-        }
-        return;
-    }
-    
-    // Check if menu items are rendered
-    const menuItems = sidebar.querySelectorAll('.nav-item');
-    if ((!menuItems || menuItems.length === 0) && retryCount < 30) {
-        setTimeout(() => expandActiveMenu(retryCount + 1), 100);
-        return;
-    }
-    
-    // Chỉ expand khi sidebar không collapsed
-    const isCollapsed = sidebar.classList.contains('collapsed');
-    if (isCollapsed) {
-        return;
-    }
-    
-    // Kiểm tra Bootstrap có sẵn sàng không
-    if (typeof bootstrap === 'undefined' || !bootstrap.Collapse) {
-        // Retry nếu Bootstrap chưa load
-        if (retryCount < 15) {
-            setTimeout(() => expandActiveMenu(retryCount + 1), 100);
-        }
-        return;
-    }
-    
-    // Set flag để tránh gọi lại (chỉ khi không phải retry)
-    if (retryCount === 0) {
-        isExpandingMenu = true;
-    }
-    
-    // Lấy current URL path và normalize (chỉ lấy pathname, bỏ query string và hash)
-    const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, '');
-    
-    // Tìm tất cả NavLink trong collapse (menu con) - tìm cả trong collapse chưa mở
-    const allNavLinks = sidebar.querySelectorAll('.nav-link[href]');
-    const childNavLinks = Array.from(allNavLinks).filter(link => {
-        const href = link.getAttribute('href');
-        // Loại bỏ các link không hợp lệ
-        if (!href || href === '#' || href === '' || href.startsWith('#') || 
-            href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) {
-            return false;
-        }
-        // Chỉ lấy những NavLink nằm trong collapse (menu con)
-        return link.closest('.collapse') !== null;
-    });
-    
-    let foundActiveChild = false;
-    let activeCollapse = null;
-    let activeParentNavLink = null;
-    
-    // Ưu tiên tìm NavLink có class "active" (Blazor tự động thêm khi route khớp)
-    childNavLinks.forEach(childLink => {
-        // Kiểm tra xem NavLink có class "active" không (Blazor tự động thêm)
-        const hasActiveClass = childLink.classList.contains('active');
-        
-        if (hasActiveClass) {
-            foundActiveChild = true;
-            
-            // Tìm collapse chứa NavLink này
-            const collapse = childLink.closest('.collapse');
-            if (collapse) {
-                // Tìm parent nav-link có data-bs-toggle="collapse"
-                const parentNavItem = collapse.closest('.nav-item');
-                if (parentNavItem) {
-                    const parentNavLink = parentNavItem.querySelector('.nav-link[data-bs-toggle="collapse"]');
-                    if (parentNavLink) {
-                        const targetId = parentNavLink.getAttribute('data-bs-target');
-                        if (targetId && collapse.id === targetId.substring(1)) {
-                            activeCollapse = collapse;
-                            activeParentNavLink = parentNavLink;
-                        }
-                    }
-                }
-            }
-        }
-    });
-    
-    // Nếu không tìm thấy bằng class "active", thử so sánh href với current URL
-    if (!foundActiveChild) {
-        childNavLinks.forEach(childLink => {
-            const href = childLink.getAttribute('href');
-            if (href && href !== '#') {
-                // Parse href để lấy pathname (bỏ query string và hash nếu có)
-                let hrefPath = href;
-                try {
-                    // Nếu href là relative path, sử dụng trực tiếp
-                    if (href.startsWith('/')) {
-                        hrefPath = href.split('?')[0].split('#')[0];
-                    } else if (href.includes('://')) {
-                        // Nếu là absolute URL, parse nó
-                        const url = new URL(href);
-                        hrefPath = url.pathname;
-                    } else {
-                        // Relative path
-                        hrefPath = href.split('?')[0].split('#')[0];
-                    }
-                } catch (e) {
-                    // Fallback: chỉ lấy phần trước ? và #
-                    hrefPath = href.split('?')[0].split('#')[0];
-                }
-                
-                // Normalize href path
-                const normalizedHref = hrefPath.toLowerCase().replace(/\/$/, '');
-                
-                // So sánh chính xác hơn
-                const hrefMatches = currentPath === normalizedHref || 
-                                   (normalizedHref !== '' && currentPath.startsWith(normalizedHref + '/')) ||
-                                   (normalizedHref === '' && currentPath === '');
-                
-                if (hrefMatches) {
-                    foundActiveChild = true;
-                    
-                    // Tìm collapse chứa NavLink này
-                    const collapse = childLink.closest('.collapse');
-                    if (collapse) {
-                        // Tìm parent nav-link có data-bs-toggle="collapse"
-                        const parentNavItem = collapse.closest('.nav-item');
-                        if (parentNavItem) {
-                            const parentNavLink = parentNavItem.querySelector('.nav-link[data-bs-toggle="collapse"]');
-                            if (parentNavLink) {
-                                const targetId = parentNavLink.getAttribute('data-bs-target');
-                                if (targetId && collapse.id === targetId.substring(1)) {
-                                    activeCollapse = collapse;
-                                    activeParentNavLink = parentNavLink;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    // Đóng tất cả các menu cha trước (chỉ giữ menu chứa active child mở)
-    const allCollapses = sidebar.querySelectorAll('.collapse');
-    const allParentNavLinks = sidebar.querySelectorAll('.nav-link[data-bs-toggle="collapse"]');
-    
-    // Đóng tất cả collapse (trừ collapse chứa active child)
-    allCollapses.forEach(collapse => {
-        if (collapse !== activeCollapse && collapse.classList.contains('show')) {
-            try {
-                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapse, {
-                    toggle: false
-                });
-                bsCollapse.hide();
-            } catch (e) {
-                collapse.classList.remove('show');
-            }
-        }
-    });
-    
-    // Reset aria-expanded cho tất cả parent nav-links (trừ parent của active)
-    allParentNavLinks.forEach(parentNavLink => {
-        if (parentNavLink !== activeParentNavLink) {
-            parentNavLink.setAttribute('aria-expanded', 'false');
-        }
-    });
-    
-    // Mở menu cha chứa menu con active (chỉ khi có active child thực sự)
-    if (foundActiveChild && activeCollapse && activeParentNavLink) {
-        // Kiểm tra xem menu này có được user manually đóng không
-        const collapseId = activeCollapse.id;
-        if (!manuallyClosedMenus.has(collapseId)) {
-            try {
-                // Sử dụng Bootstrap Collapse API để mở
-                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(activeCollapse, {
-                    toggle: false
-                });
-                if (!activeCollapse.classList.contains('show')) {
-                    bsCollapse.show();
-                }
-                // Đảm bảo aria-expanded được set
-                activeParentNavLink.setAttribute('aria-expanded', 'true');
-                // Xóa khỏi manually closed set vì đã tự động mở lại do có active child
-                manuallyClosedMenus.delete(collapseId);
-            } catch (e) {
-                // Fallback: thêm class show nếu API không hoạt động
-                activeCollapse.classList.add('show');
-                activeParentNavLink.setAttribute('aria-expanded', 'true');
-                manuallyClosedMenus.delete(collapseId);
-            }
-        }
-        
-        // Reset flag sau khi mở thành công
-        setTimeout(() => {
-            isExpandingMenu = false;
-        }, 100);
+}
+
+function isExpanded(collapse) {
+    return collapse?.classList.contains('show') || collapse?.classList.contains('collapsing');
+}
+
+function setExpanded(toggle, collapse, expanded) {
+    if (!toggle || !collapse) return;
+
+    const Bootstrap = window.bootstrap;
+    if (Bootstrap?.Collapse) {
+        const instance = Bootstrap.Collapse.getOrCreateInstance(collapse, { toggle: false });
+        expanded ? instance.show() : instance.hide();
     } else {
-        // Nếu không tìm thấy active child, KHÔNG tự động mở menu nào cả
-        // Chỉ retry nếu retryCount còn nhỏ (có thể Blazor chưa render xong)
-        if (retryCount < 5) {
-            // Reset flag để cho phép retry
-            isExpandingMenu = false;
-            // Tăng delay mỗi lần retry
-            const delay = Math.min(300 + (retryCount * 100), 1000);
-            setTimeout(() => expandActiveMenu(retryCount + 1), delay);
-        } else {
-            // Reset flag sau khi hết retry
-            isExpandingMenu = false;
+        collapse.classList.toggle('show', expanded);
+    }
+
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    toggle.classList.toggle('collapsed', !expanded);
+}
+
+function menuKey(toggle, collapse) {
+    return toggle?.dataset.menuKey || collapse?.id || '';
+}
+
+function syncExpandedState(root) {
+    root.querySelectorAll('.nav-link[data-bs-toggle="collapse"][data-bs-target]').forEach(toggle => {
+        const collapse = getCollapseFromToggle(toggle, root);
+        if (!collapse) return;
+        const key = menuKey(toggle, collapse);
+        if (key && openedMenuKeys.has(key) && !isExpanded(collapse)) {
+            setExpanded(toggle, collapse, true);
         }
+        toggle.setAttribute('aria-expanded', isExpanded(collapse) ? 'true' : 'false');
+    });
+}
+
+function normalizePath(value) {
+    if (!value) return '';
+    try {
+        const url = new URL(value, window.location.origin);
+        return url.pathname.toLowerCase().replace(/\/$/, '') || '/';
+    } catch {
+        return value.split('?')[0].split('#')[0].toLowerCase().replace(/\/$/, '') || '/';
     }
 }
 
-// Function để handle route change - expose ra window để gọi từ C#
-export function handleRouteChange() {
-    // Đợi một chút để Blazor render và đánh dấu active NavLink
-    setTimeout(() => {
-        if (typeof applyActiveParentMenuStyles === 'function') {
-            applyActiveParentMenuStyles();
-        }
-        expandActiveMenu();
-    }, 400);
-}
+function syncActiveRoute(root) {
+    if (!root || root.classList.contains('collapsed')) return;
 
-// Expose function ra window để có thể gọi từ C# hoặc inline script
-window.handleRouteChange = handleRouteChange;
-window.expandActiveMenu = expandActiveMenu;
-
-// Setup observer để detect khi NavLink trở thành active
-function setupActiveMenuObserver() {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar) {
-        setTimeout(setupActiveMenuObserver, 100);
-        return;
-    }
-    
-    // Nếu đã setup rồi, không setup lại
-    if (sidebar.dataset.activeObserverSetup) {
-        return;
-    }
-    sidebar.dataset.activeObserverSetup = 'true';
-    
-    // Observe changes to class attribute on nav-links (để detect khi NavLink trở thành active)
-    const activeObserver = new MutationObserver((mutations) => {
-        let hasActiveChange = false;
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const target = mutation.target;
-                if (target.classList && target.classList.contains('nav-link')) {
-                    // Kiểm tra xem có phải là menu con không (nằm trong collapse)
-                    const isChildLink = target.closest('.collapse');
-                    if (isChildLink) {
-                        // Kiểm tra xem class "active" có được thêm vào không
-                        const wasActive = mutation.oldValue && mutation.oldValue.includes('active');
-                        const isActive = target.classList.contains('active');
-                        if (isActive && !wasActive) {
-                            hasActiveChange = true;
-                        }
-                    }
-                }
-            }
+    const currentPath = normalizePath(window.location.pathname);
+    root.querySelectorAll('.nav-item > .nav-link[data-bs-toggle="collapse"]').forEach(toggle => {
+        const collapse = getCollapseFromToggle(toggle, root);
+        if (!collapse) return;
+        const hasActiveChild = [...collapse.querySelectorAll('.nav-link[href]')].some(link => {
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('javascript:') || href.startsWith('#')) return false;
+            const linkPath = normalizePath(href);
+            return link.classList.contains('active') || currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
         });
-        
-        if (hasActiveChange && !isExpandingMenu) {
-            // Đợi một chút để đảm bảo Blazor đã cập nhật xong
-            // Chỉ expand nếu có active child thực sự
-            setTimeout(() => {
-                expandActiveMenu();
-            }, 300);
+
+        toggle.classList.toggle('is-active-parent', hasActiveChild);
+        if (hasActiveChild && !isExpanded(collapse)) {
+            const key = menuKey(toggle, collapse);
+            if (key) openedMenuKeys.add(key);
+            setExpanded(toggle, collapse, true);
         }
     });
-    
-    // Observe tất cả nav-links hiện có
-    const observeNavLinks = () => {
-        const navLinks = sidebar.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            activeObserver.observe(link, { 
-                attributes: true, 
-                attributeFilter: ['class'],
-                attributeOldValue: true 
-            });
-        });
+    persistMenuKeys();
+}
+
+function bindRoot(root) {
+    if (!root || controllers.has(root)) return;
+
+    const onClick = event => {
+        const toggle = event.target.closest('.nav-link[data-bs-toggle="collapse"][data-bs-target]');
+        if (!toggle || !root.contains(toggle)) return;
+
+        // Parent items are controls, not navigation links. Stop Bootstrap's data API
+        // from running a second toggle after this controller handles the click.
+        event.preventDefault();
+        event.stopPropagation();
+
+        const collapse = getCollapseFromToggle(toggle, root);
+        if (!collapse) return;
+
+        const expanded = !isExpanded(collapse);
+        const key = menuKey(toggle, collapse);
+        if (key) {
+            expanded ? openedMenuKeys.add(key) : openedMenuKeys.delete(key);
+            persistMenuKeys();
+        }
+        setExpanded(toggle, collapse, expanded);
     };
-    
-    observeNavLinks();
-    
-    // Observe new nav-links being added
-    const navObserver = new MutationObserver(() => {
-        observeNavLinks();
+
+    root.addEventListener('click', onClick, true);
+    controllers.set(root, { onClick });
+    syncExpandedState(root);
+    syncActiveRoute(root);
+}
+
+function unbindRoot(root) {
+    const controller = controllers.get(root);
+    if (!controller) return;
+    root.removeEventListener('click', controller.onClick, true);
+    controllers.delete(root);
+}
+
+function getRoots() {
+    return [document.getElementById('sidebar'), document.getElementById('sidebar-mobile')].filter(Boolean);
+}
+
+function applySidebarCollapsedState() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const toggleIcon = document.querySelector('#sidebar-toggle-desktop i');
+    if (!sidebar || !mainContent) return;
+
+    const collapsed = sidebar.classList.contains('collapsed');
+    mainContent.classList.toggle('sidebar-collapsed', collapsed);
+    if (toggleIcon) {
+        toggleIcon.classList.remove('fa-chevron-left', 'fa-chevron-right', 'fas');
+        toggleIcon.classList.add('fa-solid', 'fa-bars');
+    }
+}
+
+export function init() {
+    readStoredMenuKeys();
+    getRoots().forEach(root => bindRoot(root));
+    applySidebarCollapsedState();
+    getRoots().forEach(root => syncExpandedState(root));
+    syncActiveRoute(document.getElementById('sidebar'));
+}
+
+export function handleRouteChange() {
+    getRoots().forEach(root => {
+        bindRoot(root);
+        syncExpandedState(root);
+        syncActiveRoute(root);
     });
-    navObserver.observe(sidebar, { childList: true, subtree: true });
-    
-    // Kiểm tra active menu ngay sau khi setup observer (trường hợp NavLink đã có class active từ đầu)
-    // Chỉ expand nếu có active child thực sự
-    setTimeout(() => {
-        expandActiveMenu();
-    }, 500);
+    applySidebarCollapsedState();
 }
 
-// Lắng nghe khi Blazor navigation thay đổi
-function setupNavigationListener() {
-    if (window.Blazor && !window._navigationHandlerSetup) {
-        window._navigationHandlerSetup = true;
-        let lastLocation = window.location.href;
-        
-        const handleNavigation = () => {
-            // Đợi lâu hơn để Blazor render và đánh dấu active NavLink
-            setTimeout(() => {
-                if (typeof applyActiveParentMenuStyles === 'function') {
-                    applyActiveParentMenuStyles();
-                }
-                expandActiveMenu();
-            }, 500);
-        };
-        
-        // Lắng nghe popstate (back/forward button)
-        window.addEventListener('popstate', handleNavigation);
-        
-        // Lắng nghe location change bằng cách check định kỳ
-        const locationCheckInterval = setInterval(() => {
-            if (window.location.href !== lastLocation) {
-                lastLocation = window.location.href;
-                handleNavigation();
-            }
-        }, 100);
-        
-        // Lắng nghe khi Blazor location thay đổi qua SignalR
-        if (window.Blazor.navigateTo) {
-            const originalNavigateTo = window.Blazor.navigateTo;
-            window.Blazor.navigateTo = function(...args) {
-                const result = originalNavigateTo.apply(this, args);
-                lastLocation = window.location.href;
-                handleNavigation();
-                return result;
-            };
-        }
-        
-        // Lắng nghe click trên NavLink để detect navigation (chỉ cho menu con, không phải menu cha)
-        document.addEventListener('click', (e) => {
-            const navLink = e.target.closest('a.nav-link[href]');
-            if (navLink && navLink.getAttribute('href') && navLink.getAttribute('href') !== '#' && navLink.getAttribute('href') !== 'javascript:void(0);') {
-                // Chỉ handle navigation cho menu con (không phải menu cha có collapse)
-                const isParentMenu = navLink.hasAttribute('data-bs-toggle') && navLink.getAttribute('data-bs-toggle') === 'collapse';
-                if (!isParentMenu) {
-                    setTimeout(() => {
-                        lastLocation = window.location.href;
-                        handleNavigation();
-                    }, 300);
-                }
-            }
-        }, true);
-    }
+export function restoreSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    sidebar.classList.toggle('collapsed', savedCollapsed);
+    applySidebarCollapsedState();
+    if (!savedCollapsed) getRoots().forEach(root => syncExpandedState(root));
 }
 
-export function init(id) {
-    // Setup observer và navigation listener
-    setupActiveMenuObserver();
-    setupNavigationListener();
-    
-    // Gọi expandActiveMenu ngay sau khi init (chỉ mở nếu có active child)
-    setTimeout(() => {
-        expandActiveMenu();
-    }, 800);
+export function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    const collapsed = !sidebar.classList.contains('collapsed');
+    sidebar.classList.toggle('collapsed', collapsed);
+    localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+    applySidebarCollapsedState();
+    if (!collapsed) getRoots().forEach(root => syncExpandedState(root));
 }
 
-// Function để track khi user manually đóng menu
-export function trackManualMenuClose(collapseId) {
-    if (collapseId) {
-        manuallyClosedMenus.add(collapseId);
-    }
+export function applyActiveParentMenuStyles() {
+    getRoots().forEach(root => syncActiveRoute(root));
 }
 
-// Function để clear manual close state (khi có active child)
-export function clearManualMenuClose(collapseId) {
-    if (collapseId) {
-        manuallyClosedMenus.delete(collapseId);
-    }
+export function setupCollapsedSubmenuHover() {
+    // Kept as a compatibility entry point for older layout lifecycle calls.
+    init();
 }
 
-// Expose functions
-window.trackManualMenuClose = trackManualMenuClose;
-window.clearManualMenuClose = clearManualMenuClose;
+window.seafoodSidebar = {
+    init,
+    handleRouteChange,
+    restoreSidebarState,
+    toggleSidebar,
+    applyActiveParentMenuStyles,
+    dispose: () => getRoots().forEach(unbindRoot)
+};
 
-export function dispose(id) {
-    // Cleanup nếu cần
-    isExpandingMenu = false;
+window.handleRouteChange = handleRouteChange;
+window.expandActiveMenu = handleRouteChange;
+window.restoreSidebarState = restoreSidebarState;
+window.setupCollapsedSubmenuHover = setupCollapsedSubmenuHover;
+window.applyActiveParentMenuStyles = applyActiveParentMenuStyles;
+window.toggleSidebar = toggleSidebar;
+
+window.seafoodAudit = window.seafoodAudit || {
+    getUserAgent: () => navigator.userAgent || ''
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+} else {
+    init();
 }
-

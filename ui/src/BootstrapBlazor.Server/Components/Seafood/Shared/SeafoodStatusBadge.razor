@@ -1,0 +1,12 @@
+<span class="catalog-status @(IsActive ? "is-active" : "is-inactive")"
+      title="@(IsActive ? ActiveText : InactiveText)"
+      aria-label="@(IsActive ? ActiveText : InactiveText)">
+    <i class="fa-solid @(IsActive ? "fa-circle-check" : "fa-circle-xmark")" aria-hidden="true"></i>
+    <span class="visually-hidden">@(IsActive ? ActiveText : InactiveText)</span>
+</span>
+
+@code {
+    [Parameter] public bool IsActive { get; set; }
+    [Parameter] public string ActiveText { get; set; } = "Đang dùng";
+    [Parameter] public string InactiveText { get; set; } = "Đã khóa";
+}

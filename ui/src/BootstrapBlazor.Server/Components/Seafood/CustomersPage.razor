@@ -3,29 +3,118 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Khách hàng</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Code" placeholder="Mã" /></div>
-        <div class="col-md-3"><BootstrapInput @bind-Value="_form.Name" placeholder="Tên khách" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContactName" placeholder="Người liên hệ" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.Purchaser" placeholder="Purchaser" /></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu khách</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Khách hàng</h3><p>Quản lý buyer, thông tin liên hệ, purchaser và trạng thái sử dụng.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info"><i class="fa-solid fa-users me-1" aria-hidden="true"></i>@_total.ToString("N0") khách</span><Button Color="Color.Primary" Icon="fa-solid fa-plus" Text="Thêm khách hàng" OnClick="OpenCreateAsync" /></div>
+    </div>
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm hoặc cập nhật khách hàng" OnSaveAsync="SaveAsync">
+        <SeafoodModalSection Title="Thông tin khách hàng" Icon="fa-solid fa-building">
+            <div class="row g-3">
+                <div class="col-md-3"><BootstrapInput @bind-Value="_form.Code" DisplayText="Mã khách" ShowLabel="true" placeholder="Mã khách hàng" /></div>
+                <div class="col-md-9"><BootstrapInput @bind-Value="_form.Name" DisplayText="Tên khách" ShowLabel="true" placeholder="Tên công ty" /></div>
+                <div class="col-md-4"><Select @bind-Value="_form.Kind" DisplayText="Loại khách" ShowLabel="true"><Options><SelectOption Value="1" Text="Buyer" /><SelectOption Value="2" Text="Supplier" /><SelectOption Value="3" Text="Buyer + Supplier" /></Options></Select></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.ContactName" DisplayText="Người liên hệ" ShowLabel="true" placeholder="Họ tên" /></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Purchaser" DisplayText="Purchaser" ShowLabel="true" placeholder="Người mua" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Thông tin liên hệ & xuất nhập khẩu" Icon="fa-solid fa-address-card">
+            <div class="row g-3">
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Phone" DisplayText="Điện thoại" ShowLabel="true" type="tel" autocomplete="tel" /></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.Email" DisplayText="Email" ShowLabel="true" type="email" autocomplete="email" /></div>
+                <div class="col-md-4"><BootstrapInput @bind-Value="_form.CountryCode" DisplayText="Mã quốc gia" ShowLabel="true" placeholder="ISO 3166-1, ví dụ US" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.TaxCode" DisplayText="Mã số thuế" ShowLabel="true" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.BusinessRegistrationNo" DisplayText="Số đăng ký kinh doanh" ShowLabel="true" /></div>
+                <div class="col-12"><Textarea @bind-Value="_form.Address" DisplayText="Địa chỉ" ShowLabel="true" rows="2" autocomplete="street-address" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Trạng thái & ghi chú" Icon="fa-solid fa-sliders">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_form.IsActive" DisplayText="Trạng thái" ShowLabel="true" OnText="Dùng" OffText="Khóa" OnColor="Color.Success" OffColor="Color.Secondary" /></div></div>
+                <div class="col-md-8"><Textarea @bind-Value="_form.Note" DisplayText="Ghi chú" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm mã, tên, điện thoại, email, MST..." />
+    <div class="sf-table-shell">
+        <Table TItem="CustomerDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="false" IsBordered="false" ShowToolbar="false" ShowDefaultButtons="false" ShowExtendButtons="false" ShowLoading="true" ShowSearch="false" ShowCardView="false" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.Code" Text="Mã" Width="150"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.Name" Text="Tên khách hàng" Width="260" TextWrap="true"><Template Context="value"><strong>@value.Value</strong><div class="small text-muted">@value.Row.Note</div></Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.ContactName" Text="Liên hệ" Width="230" TextWrap="true"><Template Context="value"><span>@(string.IsNullOrWhiteSpace(value.Row.ContactName) ? "—" : value.Row.ContactName)</span>@if (!string.IsNullOrWhiteSpace(value.Row.Phone)) { <div class="small text-muted">@value.Row.Phone</div> }@if (!string.IsNullOrWhiteSpace(value.Row.Email)) { <div class="small text-muted">@value.Row.Email</div> }</Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.Address" Text="Địa chỉ" Width="280" TextWrap="true"><Template Context="value"><span>@(string.IsNullOrWhiteSpace(value.Row.Address) ? "—" : value.Row.Address)</span>@if (!string.IsNullOrWhiteSpace(value.Row.CountryCode)) { <div class="small text-muted">@value.Row.CountryCode</div> }</Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.TaxCode" Text="MST / ĐKKD" Width="190" TextWrap="true"><Template Context="value"><span>@(string.IsNullOrWhiteSpace(value.Row.TaxCode) ? "—" : value.Row.TaxCode)</span>@if (!string.IsNullOrWhiteSpace(value.Row.BusinessRegistrationNo)) { <div class="small text-muted">@value.Row.BusinessRegistrationNo</div> }</Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="string" @bind-Field="@context.Purchaser" Text="Purchaser" Width="160" />
+                <TableColumn TItem="CustomerDto" TType="int" @bind-Field="@context.Kind" Text="Loại" Width="170"><Template Context="value">@KindText(value.Value)</Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="bool" @bind-Field="@context.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center"><Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template></TableColumn>
+                <TableColumn TItem="CustomerDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right" IgnoreWhenExport="true"><Template Context="value"><SeafoodCrudActions IsActive="value.Row.IsActive" OnEdit="() => OpenEditAsync(value.Row)" OnToggle="() => ToggleActiveAsync(value.Row)" /></Template></TableColumn>
+            </TableColumns>
+        </Table>
     </div>
 </div>
-<Table TItem="CustomerDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<CustomerDto> _rows = new();
-    private CustomerDto _form = new() { IsActive = true, Kind = 1 };
-    protected override async Task OnInitializedAsync() => _rows = await Api.CustomersAsync() ?? new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private CustomerDto _form = NewForm();
+    private SeafoodCrudModal? _crudModal;
+    private Table<CustomerDto>? _table;
+    private string _search = "";
+    private int _total;
 
-    private async Task SaveAsync()
+    private static CustomerDto NewForm() => new() { IsActive = true, Kind = 1 };
+
+    private async Task<QueryData<CustomerDto>> OnQueryAsync(QueryPageOptions options)
     {
-        var saved = await Api.SaveCustomerAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu khách"); return; }
-        await Toast.Success("Đã lưu khách hàng");
-        _form = new() { IsActive = true, Kind = 1 };
-        _rows = await Api.CustomersAsync() ?? new();
+        var page = await Api.CustomersPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
     }
+
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+    private async Task OpenCreateAsync() { _form = NewForm(); if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(CustomerDto item) { _form = new() { Id = item.Id, Code = item.Code, Name = item.Name, ContactName = item.ContactName, Phone = item.Phone, Email = item.Email, Address = item.Address, CountryCode = item.CountryCode, TaxCode = item.TaxCode, BusinessRegistrationNo = item.BusinessRegistrationNo, Purchaser = item.Purchaser, Note = item.Note, Kind = item.Kind, IsActive = item.IsActive }; if (_crudModal != null) await _crudModal.ShowAsync(); }
+
+    private async Task<bool> SaveAsync()
+    {
+        try
+        {
+            var saved = await Api.SaveCustomerAsync(_form);
+            if (saved == null)
+            {
+                await Toast.Error("Không thể lưu khách hàng", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
+                return false;
+            }
+
+            await RefreshAsync();
+            await Toast.Success("Đã lưu khách hàng.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể lưu khách hàng", ApiErrorMessage.Describe(ex, "Vui lòng kiểm tra mã khách hàng và thử lại."));
+            return false;
+        }
+    }
+
+    private async Task ToggleActiveAsync(CustomerDto item)
+    {
+        try
+        {
+            var wasActive = item.IsActive;
+            var ok = wasActive ? await Api.DeleteCustomerAsync(item.Id) : await Api.SaveCustomerAsync(new CustomerDto { Id = item.Id, Code = item.Code, Name = item.Name, ContactName = item.ContactName, Phone = item.Phone, Email = item.Email, Address = item.Address, CountryCode = item.CountryCode, TaxCode = item.TaxCode, BusinessRegistrationNo = item.BusinessRegistrationNo, Purchaser = item.Purchaser, Note = item.Note, Kind = item.Kind, IsActive = true }) != null;
+            if (!ok) { await Toast.Error("Không thể cập nhật khách hàng", "Vui lòng thử lại."); return; }
+            await RefreshAsync();
+            await Toast.Success(wasActive ? "Đã khóa khách hàng." : "Đã mở lại khách hàng.");
+        }
+        catch (Exception ex)
+        {
+            await Toast.Error("Không thể cập nhật khách hàng", ApiErrorMessage.Describe(ex, "Vui lòng thử lại."));
+        }
+    }
+
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
+    private static string KindText(int kind) => kind switch { 1 => "Buyer", 2 => "Supplier", 3 => "Buyer + Supplier", _ => $"Loại {kind}" };
 }

@@ -1,0 +1,82 @@
+@page "/inbound/import"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject NavigationManager Navigation
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Import dữ liệu Excel</h3>
+            <p>Đưa dữ liệu cũ vào vùng staging để báo lỗi, kiểm tra trùng và đối chiếu trước khi xác nhận.</p>
+        </div>
+        <Button Color="Color.Secondary" IsOutline="true" Icon="fa-solid fa-arrow-left" Text="Quay lại nhập hàng" OnClick="OpenInboundAsync" />
+    </div>
+
+    <div class="sf-form-section">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-6 col-md-8">
+                <label class="form-label">File dữ liệu (.xlsx)</label>
+                <InputFile OnChange="OnFileSelectedAsync" accept=".xlsx" />
+                <small class="text-muted">Hỗ trợ các sheet nhập hàng, sản xuất, đơn xuất và theo dõi thanh toán/deposit.</small>
+            </div>
+            <div class="col-auto"><Button Color="Color.Primary" OnClick="PreviewAsync" IsDisabled="@(_file == null)"><i class="fa-solid fa-table-list me-1" aria-hidden="true"></i>Kiểm tra staging</Button></div>
+            @if (_preview is not null && _preview.ErrorRows == 0 && _preview.Status == 1)
+            {
+                <div class="col-auto"><Button Color="Color.Success" OnClick="ConfirmAsync"><i class="fa-solid fa-check me-1" aria-hidden="true"></i>Xác nhận batch</Button></div>
+            }
+        </div>
+    </div>
+
+    @if (_preview is not null)
+    {
+        <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Tổng dòng</div><div class="sf-kpi-value">@_preview.TotalRows</div></div></div></div>
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Hợp lệ</div><div class="sf-kpi-value">@_preview.ValidRows</div></div></div></div>
+            <div class="col-md-4"><div class="sf-kpi-card"><div><div class="sf-kpi-label">Lỗi cần xử lý</div><div class="sf-kpi-value">@_preview.ErrorRows</div></div></div></div>
+        </div>
+        <div class="sf-table-shell">
+            <Table TItem="SeafoodImportStagingRowDto" Items="@_preview.Rows" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" />
+        </div>
+    }
+    else
+    {
+        <div class="sf-empty-state"><i class="fa-solid fa-file-import" aria-hidden="true"></i>Chọn file Excel để bắt đầu kiểm tra.</div>
+    }
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40 };
+    private IBrowserFile? _file;
+    private SeafoodImportPreviewDto? _preview;
+
+    private Task OnFileSelectedAsync(InputFileChangeEventArgs args)
+    {
+        _file = args.File;
+        _preview = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task PreviewAsync()
+    {
+        if (_file == null) return;
+        _preview = await Api.PreviewImportAsync(_file);
+        if (_preview == null) await Toast.Error("Không đọc được file Excel.");
+        else await Toast.Success($"Đã staging {_preview.TotalRows} dòng, {_preview.ErrorRows} dòng lỗi.");
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (_preview == null) return;
+        var saved = await Api.ConfirmImportAsync(_preview.Id, "Đã kiểm tra trên màn hình staging");
+        if (saved == null) { await Toast.Error("Không thể xác nhận batch import."); return; }
+        _preview = saved;
+        await Toast.Success("Đã xác nhận batch import.");
+    }
+
+    private Task OpenInboundAsync()
+    {
+        Navigation.NavigateTo("/inbound");
+        return Task.CompletedTask;
+    }
+}

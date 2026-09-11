@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using BootstrapBlazor.Server.Exceptions;
+using BootstrapBlazor.Server.Services;
 
 namespace BootstrapBlazor.Server.Http
 {
@@ -37,6 +38,7 @@ namespace BootstrapBlazor.Server.Http
         private static readonly AsyncLocal<RequestClientUnauthorizedNotifier?> _unauthorizedNotifier = new();
         private static readonly AsyncLocal<RequestClientCircuitGate?> _circuitGate = new();
         private static readonly AsyncLocal<string?> _accessToken = new();
+        private static readonly AsyncLocal<string?> _clientUserAgent = new();
         private static long UploadLimit = 25214400;
         static RequestClient()
         {
@@ -109,6 +111,11 @@ namespace BootstrapBlazor.Server.Http
                 _accessToken.Value = Token;
                 System.Console.WriteLine($"[AuthFlow] RequestClient.AttachToken {DescribeToken(Token)}");
             }
+        }
+
+        public static void SetClientUserAgent(string? userAgent)
+        {
+            _clientUserAgent.Value = string.IsNullOrWhiteSpace(userAgent) ? null : userAgent.Trim();
         }
 
         public static string DescribeToken(string? token)
@@ -223,20 +230,20 @@ namespace BootstrapBlazor.Server.Http
                 System.Console.WriteLine($"[RequestClient] HTTP 401 Unauthorized. Body: {responseBody}");
                 await HandleUnauthorizedAsync(httpResponseMessage);
 
-                throw new UnauthorizedException(string.IsNullOrWhiteSpace(responseBody) ? "Unauthorized" : responseBody);
+                throw new UnauthorizedException(ApiErrorMessage.Describe(responseBody, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.InternalServerError)
             {
                 var responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                 System.Console.WriteLine($"[RequestClient] HTTP 500 InternalServerError. Body: {responseBody}");
-                throw new ServerErrorException(string.IsNullOrWhiteSpace(responseBody) ? "Server-Error" : responseBody);
+                throw new ServerErrorException(ApiErrorMessage.Describe(responseBody, "Máy chủ đang gặp sự cố. Vui lòng thử lại sau."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.BadRequest)
             {
-                string errorMessage = await httpResponseMessage.Content.ReadAsStringAsync();
-                throw new BadRequestException(errorMessage);
+                var responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                throw new BadRequestException(ApiErrorMessage.Describe(responseBody, "Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại thông tin."));
             }
 
             throw new Exception($"API call failed with status code: {httpResponseMessage.StatusCode}");
@@ -355,12 +362,14 @@ namespace BootstrapBlazor.Server.Http
                 System.Console.WriteLine($"[RequestClient] HTTP 401 Unauthorized. Body: {responseBody}");
                 await HandleUnauthorizedAsync(httpResponseMessage);
 
-                throw new UnauthorizedException(string.IsNullOrWhiteSpace(responseBody) ? "Unauthorized" : responseBody);
+                throw new UnauthorizedException(ApiErrorMessage.Describe(responseBody, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.InternalServerError)
             {
-                throw new ServerErrorException("Server-Error");
+                var responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
+                System.Console.WriteLine($"[RequestClient] HTTP 500 InternalServerError. Body: {responseBody}");
+                throw new ServerErrorException(ApiErrorMessage.Describe(responseBody, "Máy chủ đang gặp sự cố. Vui lòng thử lại sau."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.TooManyRequests)
@@ -371,49 +380,21 @@ namespace BootstrapBlazor.Server.Http
             if (httpResponseMessage.StatusCode == HttpStatusCode.Conflict)
             {
                 string? jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync() ?? null;
-
-                // Fall back to the raw body when "message" is absent, the same way the 400 branch
-                // below does. ResponseApi only knows "message", while the API sends "error" — so
-                // deserializing alone yields null, and ConflictException(null) reaches the screen as
-                // .NET's own "Exception of type '...' was thrown". ApiErrorMessage can read either
-                // shape, but only if the body survives this far.
-                string? message = null;
-                try
-                {
-                    message = JsonConvert.DeserializeObject<ResponseApi>(jsonResponse)?.message;
-                }
-                catch (JsonException)
-                {
-                    // Not the shape we expected; the raw body is still better than a class name.
-                }
-
-                throw new ConflictException(
-                    string.IsNullOrWhiteSpace(message) ? (jsonResponse ?? "Conflict") : message);
+                throw new ConflictException(ApiErrorMessage.Describe(jsonResponse, "Dữ liệu đã tồn tại hoặc đang bị xung đột."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.BadGateway)
             {
                 var responseBody = await httpResponseMessage.Content.ReadAsStringAsync();
                 System.Console.WriteLine($"[RequestClient] HTTP 502 BadGateway. Body: {responseBody}");
-                throw new DbConnectionException(string.IsNullOrWhiteSpace(responseBody) ? "connection-error" : responseBody);
+                throw new DbConnectionException(ApiErrorMessage.Describe(responseBody, "Không thể kết nối đến máy chủ dữ liệu. Vui lòng thử lại sau."));
             }
 
             if (httpResponseMessage.StatusCode == HttpStatusCode.BadRequest)
             {
                 string? jsonResponse = await httpResponseMessage.Content.ReadAsStringAsync() ?? null;
                 System.Console.WriteLine($"[RequestClient] HTTP 400 BadRequest. Body: {jsonResponse}");
-                
-                // Try to deserialize as ResponseApi
-                try
-                {
-                    var response = JsonConvert.DeserializeObject<ResponseApi>(jsonResponse);
-                    throw new BadRequestException(response?.message ?? jsonResponse ?? "Bad Request");
-                }
-                catch (Newtonsoft.Json.JsonException)
-                {
-                    // If deserialization fails, throw the raw response
-                    throw new BadRequestException(jsonResponse ?? "Bad Request - No details provided");
-                }
+                throw new BadRequestException(ApiErrorMessage.Describe(jsonResponse, "Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại thông tin."));
             }
 
             var fallbackBody = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -477,6 +458,12 @@ namespace BootstrapBlazor.Server.Http
             else
             {
                 System.Console.WriteLine($"[RequestClient] {method.Method} {url} sent without bearer token");
+            }
+
+            var clientUserAgent = _clientUserAgent.Value;
+            if (!string.IsNullOrWhiteSpace(clientUserAgent))
+            {
+                request.Headers.TryAddWithoutValidation("X-Client-UserAgent", clientUserAgent);
             }
 
             return request;

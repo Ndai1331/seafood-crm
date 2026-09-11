@@ -3,35 +3,91 @@
 @inject SeafoodApiService Api
 @inject ToastService Toast
 
-<h3 class="mb-3">Báo giá / Hợp đồng</h3>
-<div class="sf-panel">
-    <div class="row g-2">
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_form.CustomerId" placeholder="Customer Id" /></div>
-        <div class="col-md-2"><BootstrapInput @bind-Value="_form.ContractNo" placeholder="Số HĐ (để trống = tự sinh)" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.SkuId" placeholder="SKU Id" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyKg" placeholder="KL kg" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.QtyLbs" placeholder="KL lbs" /></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_line.UnitPriceUsd" placeholder="Giá USD/kg" /></div>
-        <div class="col-md-2"><Button Color="Color.Secondary" OnClick="SuggestAsync">Gợi ý giá</Button></div>
-        <div class="col-md-2"><Button Color="Color.Primary" OnClick="SaveAsync">Lưu HĐ</Button></div>
-        <div class="col-md-2"><BootstrapInputNumber @bind-Value="_approveId" placeholder="Id HĐ cần duyệt" /></div>
-        <div class="col-md-2"><Button Color="Color.Success" OnClick="ApproveAsync">Duyệt HĐ</Button></div>
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Báo giá / Hợp đồng</h3>
+            <p>Tạo hợp đồng xuất khẩu, kiểm tra giá tham chiếu và theo dõi trạng thái duyệt.</p>
+        </div>
+        <div class="sf-page-actions">
+            <span class="sf-status sf-status-info"><i class="fa-solid fa-file-signature me-1" aria-hidden="true"></i>Export sales</span>
+            <Button Color="Color.Primary" OnClick="OpenCreateAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Thêm hợp đồng</Button>
+        </div>
     </div>
-    @if (_hint != null)
-    {
-        <p class="mt-2 mb-0">Giá gần nhất cùng khách+SKU: <b>@_hint.LastPriceForCustomer</b> (@_hint.LastContractNo). Trung bình khách khác 2 tháng: @_hint.PeerAvgLastTwoMonths</p>
-    }
+
+    <SeafoodCrudModal @ref="_crudModal" Title="Thêm báo giá / hợp đồng" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
+        <SeafoodModalSection Title="Thông tin hợp đồng" Icon="fa-solid fa-file-signature">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Khách hàng</label>
+                    <SeafoodSelect2 Value="@(_form.CustomerId > 0 ? (int?)_form.CustomerId : null)" ValueChanged="OnCustomerChanged"
+                                   Search="SearchCustomersAsync" Placeholder="Tìm mã hoặc tên khách" />
+                </div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.ContractNo" DisplayText="Số hợp đồng" ShowLabel="true" placeholder="Để trống để tự sinh" /></div>
+            </div>
+        </SeafoodModalSection>
+
+        <SeafoodModalSection Title="Dòng hàng" Icon="fa-solid fa-boxes-stacked">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">SKU</label>
+                    <SeafoodSelect2 Value="@(_line.SkuId > 0 ? (int?)_line.SkuId : null)" ValueChanged="OnSkuChanged"
+                                   Search="SearchSkusAsync" Placeholder="Tìm mã hoặc tên SKU" />
+                </div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKg" ValueChanged="@(value => _line.QtyKg = value ?? 0)" DisplayText="Khối lượng (kg)" ShowLabel="true" Placeholder="Kg" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyLbs" ValueChanged="@(value => _line.QtyLbs = value ?? 0)" DisplayText="Khối lượng (lb)" ShowLabel="true" Placeholder="Lb" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_line.UnitPriceUsd" ValueChanged="@(value => _line.UnitPriceUsd = value ?? 0)" DisplayText="Đơn giá (USD/kg)" ShowLabel="true" Placeholder="Đơn giá" /></div>
+                <div class="col-md-4 d-flex align-items-end"><Button Color="Color.Secondary" OnClick="SuggestAsync"><i class="fa-solid fa-wand-magic-sparkles me-1" aria-hidden="true"></i>Gợi ý giá</Button></div>
+            </div>
+        </SeafoodModalSection>
+
+        @if (_hint != null)
+        {
+            <div class="alert alert-info mt-4 mb-0" role="status">
+                Giá gần nhất cùng khách + SKU: <strong>@_hint.LastPriceForCustomer</strong> (@_hint.LastContractNo). Trung bình khách khác 2 tháng: @_hint.PeerAvgLastTwoMonths
+            </div>
+        }
+    </SeafoodCrudModal>
+
+    <div class="sf-panel">
+        <div class="sf-form-section-title">Duyệt hợp đồng</div>
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6"><VnIntInput Value="@_approveId" ValueChanged="@(value => _approveId = value ?? 0)" DisplayText="Hợp đồng cần duyệt" ShowLabel="true" Placeholder="Contract Id" /></div>
+            <div class="col-lg-3 col-md-6"><Button Color="Color.Success" OnClick="ApproveAsync"><i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>Duyệt hợp đồng</Button></div>
+        </div>
+    </div>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm số HĐ, khách hàng, SKU, trạng thái..." />
+    <div class="sf-table-shell"><Table TItem="SalesContractDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
-<Table TItem="SalesContractDto" Items="_rows" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" />
 
 @code {
-    private List<SalesContractDto> _rows = new();
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<SalesContractDto>? _table;
     private SalesContractDto _form = new();
     private SalesContractLineDto _line = new();
+    private SeafoodCrudModal? _crudModal;
     private PriceSuggestionDto? _hint;
     private int _approveId;
+    private string _search = "";
 
-    protected override async Task OnInitializedAsync() => _rows = await Api.QuotesAsync() ?? new();
+    private int _total;
+    private async Task<QueryData<SalesContractDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.QuotesPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+
+    private async Task OpenCreateAsync()
+    {
+        _form = new();
+        _line = new();
+        _hint = null;
+        if (_crudModal != null) await _crudModal.ShowAsync();
+    }
 
     private async Task SuggestAsync()
     {
@@ -40,15 +96,34 @@
         if (_hint?.LastPriceForCustomer is decimal price) _line.UnitPriceUsd = price;
     }
 
-    private async Task SaveAsync()
+    private Task OnCustomerChanged(int? value)
+    {
+        _form.CustomerId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSkuChanged(int? value)
+    {
+        _line.SkuId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize)
+        => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
+
+    private async Task<SeafoodSelect2SearchResponseDto> SearchSkusAsync(string term, int page, int pageSize)
+        => await Api.SearchSkusAsync(term, page, pageSize) ?? new();
+
+    private async Task<bool> SaveAsync()
     {
         _form.Lines = new List<SalesContractLineDto> { _line };
         var saved = await Api.SaveQuoteAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return; }
+        if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return false; }
         await Toast.Success($"Đã lưu {saved.ContractNo}. Lệch vs HĐ cũ {saved.VarianceVsLastPct}% / khách khác {saved.VarianceVsPeersPct}%");
         _form = new();
         _line = new();
-        _rows = await Api.QuotesAsync() ?? new();
+        await RefreshAsync();
+        return true;
     }
 
     private async Task ApproveAsync()
@@ -56,6 +131,8 @@
         var saved = await Api.ApproveAsync(_approveId);
         if (saved == null) { await Toast.Error("Không duyệt được"); return; }
         await Toast.Success($"Đã duyệt {saved.ContractNo}");
-        _rows = await Api.QuotesAsync() ?? new();
+        await RefreshAsync();
     }
+
+    private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }
