@@ -19,6 +19,19 @@ namespace Domain.AppHistories
         public string IpAddress { get; set; }
         public string Functions { get; set; }
         public string Operation { get; set; }
+        [MaxLength(512)]
+        public string? UserAgent { get; set; }
+        [MaxLength(32)]
+        public string? DeviceType { get; set; }
+        [MaxLength(128)]
+        public string? Browser { get; set; }
+        [MaxLength(128)]
+        public string? OperatingSystem { get; set; }
+        [MaxLength(64)]
+        public string? RequestId { get; set; }
+        public int StatusCode { get; set; }
+        public long DurationMs { get; set; }
+        public bool Succeeded { get; set; }
         public User User { get; set; }
     }
 }

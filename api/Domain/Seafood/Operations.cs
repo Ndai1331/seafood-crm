@@ -7,6 +7,10 @@ namespace Domain.Seafood
         public int Id { get; set; }
         public int? CustomerId { get; set; }
         public Customer? Customer { get; set; }
+        public int? SupplierPartnerId { get; set; }
+        public BusinessPartner? SupplierPartner { get; set; }
+        public int? VesselId { get; set; }
+        public Vessel? Vessel { get; set; }
         [MaxLength(64)] public string? CustomerCode { get; set; }
         [MaxLength(128)] public string? ContractNo { get; set; }
         [MaxLength(128)] public string? Purchaser { get; set; }
@@ -18,11 +22,20 @@ namespace Domain.Seafood
         public int? PaymentTermId { get; set; }
         public DateTime? EstimatePaymentDate { get; set; }
         [MaxLength(128)] public string? BlNumber { get; set; }
+        [MaxLength(128)] public string? PurchaseInvoiceNo { get; set; }
+        public decimal? ActualWeightKg { get; set; }
+        public decimal? ReceivedWeightKg { get; set; }
+        public decimal ReleaseOrderFeeUsd { get; set; }
+        public decimal ColdStorageFeeUsd { get; set; }
+        public decimal HandlingFeeUsd { get; set; }
+        public decimal CustomsFeeUsd { get; set; }
+        public decimal InfrastructureFeeUsd { get; set; }
         [MaxLength(64)] public string? ContainerNo { get; set; }
         [MaxLength(32)] public string? ContainerType { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public List<InboundLine> Lines { get; set; } = new();
+        public List<DocumentAttachment> Documents { get; set; } = new();
     }
 
     public class InboundLine
@@ -31,6 +44,15 @@ namespace Domain.Seafood
         public int PurchaseId { get; set; }
         public InboundPurchase? Purchase { get; set; }
         [MaxLength(256)] public string Commodity { get; set; } = string.Empty;
+        [MaxLength(64)] public string? FishSpeciesCode { get; set; }
+        [MaxLength(64)] public string? FishFormCode { get; set; }
+        [MaxLength(64)] public string? SizeCode { get; set; }
+        [MaxLength(64)] public string? SensoryCode { get; set; }
+        [MaxLength(64)] public string? CatchMethodCode { get; set; }
+        [MaxLength(64)] public string? FreezeMethodCode { get; set; }
+        [MaxLength(64)] public string? OriginCode { get; set; }
+        public decimal QtyKg { get; set; }
+        public decimal ActualWeightKg { get; set; }
         public decimal QtyKgLongLine { get; set; }
         public decimal QtyKgHandline { get; set; }
         public decimal QtyKgPs { get; set; }
@@ -40,6 +62,7 @@ namespace Domain.Seafood
         public decimal PriceUsd { get; set; }
         public decimal InvoiceAmountUsd { get; set; }
         [MaxLength(32)] public string? ContainerQty { get; set; }
+        public RawMaterialLot? RawMaterialLot { get; set; }
     }
 
     public class ProductionLot
@@ -54,6 +77,8 @@ namespace Domain.Seafood
         [MaxLength(512)] public string? Note { get; set; }
         public List<ProductionOutput> Outputs { get; set; } = new();
         public List<LotCertificate> Certificates { get; set; } = new();
+        public List<ProductionInput> Inputs { get; set; } = new();
+        public List<DocumentAttachment> Documents { get; set; } = new();
     }
 
     public class ProductionOutput
@@ -67,6 +92,7 @@ namespace Domain.Seafood
         public decimal RawUsedKg { get; set; }
         public decimal YieldRatio { get; set; }
         [MaxLength(64)] public string? ExportMarket { get; set; }
+        public decimal? CostUsd { get; set; }
     }
 
     public class LotCertificate
@@ -86,7 +112,10 @@ namespace Domain.Seafood
         public ProductSku? Sku { get; set; }
         public decimal OnHandKg { get; set; }
         public decimal AllocatedKg { get; set; }
+        public int? WarehouseId { get; set; }
         public decimal AvailableKg => OnHandKg - AllocatedKg;
+        public List<InventoryMovement> Movements { get; set; } = new();
+        public List<StockReservation> Reservations { get; set; } = new();
     }
 
     public class SalesContract
@@ -106,6 +135,7 @@ namespace Domain.Seafood
         public DateTime? ApprovedAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public List<SalesContractLine> Lines { get; set; } = new();
+        public List<SalesInvoice> Invoices { get; set; } = new();
     }
 
     public class SalesContractLine
@@ -119,6 +149,7 @@ namespace Domain.Seafood
         public decimal QtyLbs { get; set; }
         public decimal UnitPriceUsd { get; set; }
         public decimal AmountUsd { get; set; }
+        public decimal AllocatedKg { get; set; }
     }
 
     public class ExportShipment
@@ -144,6 +175,12 @@ namespace Domain.Seafood
         public int? CarrierId { get; set; }
         [MaxLength(256)] public string? Route { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
+        public ShipmentStatus Status { get; set; } = ShipmentStatus.Draft;
+        public List<ShipmentContainer> Containers { get; set; } = new();
+        public List<StockReservation> Reservations { get; set; } = new();
+        public List<SalesAllocation> Allocations { get; set; } = new();
+        public List<ShipmentDocument> Documents { get; set; } = new();
+        public List<SalesInvoice> Invoices { get; set; } = new();
     }
 
     public class PaymentInstallment
@@ -157,6 +194,8 @@ namespace Domain.Seafood
         public DateTime? DueDate { get; set; }
         public DateTime? ReceivedDate { get; set; }
         public decimal ReceivedAmountUsd { get; set; }
+        public int? SalesInvoiceId { get; set; }
+        public SalesInvoice? SalesInvoice { get; set; }
     }
 
     public class CustomerDeposit

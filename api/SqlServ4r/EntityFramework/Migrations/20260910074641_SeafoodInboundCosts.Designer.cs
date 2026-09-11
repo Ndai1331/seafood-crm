@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SqlServ4r.EntityFramework;
@@ -11,9 +12,11 @@ using SqlServ4r.EntityFramework;
 namespace SqlServ4r.EntityFramework.Migrations
 {
     [DbContext(typeof(DreamContext))]
-    partial class DreamContextModelSnapshot : ModelSnapshot
+    [Migration("20260910074641_SeafoodInboundCosts")]
+    partial class SeafoodInboundCosts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,19 +81,8 @@ namespace SqlServ4r.EntityFramework.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Browser")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceType")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<long>("DurationMs")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Functions")
                         .IsRequired()
@@ -101,27 +93,9 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("OperatingSystem")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<string>("Operation")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("RequestId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("Succeeded")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -818,28 +792,12 @@ namespace SqlServ4r.EntityFramework.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
-                    b.Property<string>("BusinessRegistrationNo")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("ContactName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("CountryCode")
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
-
-                    b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
@@ -858,17 +816,9 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
-                    b.Property<string>("Phone")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
                     b.Property<string>("Purchaser")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
-
-                    b.Property<string>("TaxCode")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
@@ -1617,9 +1567,6 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<string>("AddonCertificateCode")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("MarketCode")
                         .IsRequired()

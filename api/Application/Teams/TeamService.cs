@@ -34,6 +34,18 @@ namespace Application.Teams
                     query = query.Where(x => x.Name != null && x.Name.Contains(filter.Name));
                 }
 
+                // The table search box sends FilterText. Search the two fields users
+                // can see in the grid so a term such as "order" matches either code
+                // or name instead of returning the unfiltered list.
+                if (!string.IsNullOrWhiteSpace(filter.FilterText))
+                {
+                    var term = filter.FilterText.Trim();
+                    var normalizedTerm = term.ToLower();
+                    query = query.Where(x =>
+                        x.Code.ToLower().Contains(normalizedTerm) ||
+                        (x.Name != null && x.Name.ToLower().Contains(normalizedTerm)));
+                }
+
                 // Get total count
                 response.Total = await query.CountAsync();
 
@@ -206,4 +218,3 @@ namespace Application.Teams
         }
     }
 }
-

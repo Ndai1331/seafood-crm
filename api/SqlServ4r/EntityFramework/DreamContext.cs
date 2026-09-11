@@ -50,18 +50,39 @@ namespace SqlServ4r.EntityFramework
         public DbSet<ProductSku> ProductSkus { get; set; } = null!;
         public DbSet<PaymentTerm> PaymentTerms { get; set; } = null!;
         public DbSet<Customer> Customers { get; set; } = null!;
+        public DbSet<BusinessPartner> BusinessPartners { get; set; } = null!;
+        public DbSet<BusinessPartnerRoleLink> BusinessPartnerRoles { get; set; } = null!;
+        public DbSet<Vessel> Vessels { get; set; } = null!;
+        public DbSet<DocumentType> DocumentTypes { get; set; } = null!;
+        public DbSet<DocumentRequirement> DocumentRequirements { get; set; } = null!;
+        public DbSet<DocumentAttachment> DocumentAttachments { get; set; } = null!;
         public DbSet<InboundPurchase> InboundPurchases { get; set; } = null!;
         public DbSet<InboundLine> InboundLines { get; set; } = null!;
+        public DbSet<RawMaterialLot> RawMaterialLots { get; set; } = null!;
         public DbSet<ProductionLot> ProductionLots { get; set; } = null!;
+        public DbSet<ProductionInput> ProductionInputs { get; set; } = null!;
         public DbSet<ProductionOutput> ProductionOutputs { get; set; } = null!;
         public DbSet<LotCertificate> LotCertificates { get; set; } = null!;
         public DbSet<InventoryBalance> InventoryBalances { get; set; } = null!;
+        public DbSet<InventoryMovement> InventoryMovements { get; set; } = null!;
+        public DbSet<StockReservation> StockReservations { get; set; } = null!;
+        public DbSet<SalesAllocation> SalesAllocations { get; set; } = null!;
+        public DbSet<TraceabilityLink> TraceabilityLinks { get; set; } = null!;
         public DbSet<SalesContract> SalesContracts { get; set; } = null!;
         public DbSet<SalesContractLine> SalesContractLines { get; set; } = null!;
         public DbSet<ExportShipment> ExportShipments { get; set; } = null!;
+        public DbSet<ShipmentContainer> ShipmentContainers { get; set; } = null!;
+        public DbSet<ShipmentDocument> ShipmentDocuments { get; set; } = null!;
+        public DbSet<SalesInvoice> SalesInvoices { get; set; } = null!;
         public DbSet<PaymentInstallment> PaymentInstallments { get; set; } = null!;
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; } = null!;
+        public DbSet<PaymentAllocation> PaymentAllocations { get; set; } = null!;
         public DbSet<CustomerDeposit> CustomerDeposits { get; set; } = null!;
         public DbSet<DepositAllocation> DepositAllocations { get; set; } = null!;
+        public DbSet<ExchangeRateSnapshot> ExchangeRateSnapshots { get; set; } = null!;
+        public DbSet<DomainAuditLog> DomainAuditLogs { get; set; } = null!;
+        public DbSet<ImportBatch> ImportBatches { get; set; } = null!;
+        public DbSet<ImportStagingRow> ImportStagingRows { get; set; } = null!;
 
         public DreamContext(DbContextOptions<DreamContext> options) : base(options) { }
 
@@ -172,15 +193,70 @@ namespace SqlServ4r.EntityFramework
                 entity.HasIndex(p => p.Code).IsUnique();
             });
 
+            builder.Entity<BusinessPartner>(entity =>
+            {
+                entity.ToTable("business_partners");
+                entity.HasIndex(p => p.Code).IsUnique();
+                entity.HasMany(p => p.Roles).WithOne(r => r.BusinessPartner).HasForeignKey(r => r.BusinessPartnerId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<BusinessPartnerRoleLink>(entity =>
+            {
+                entity.ToTable("business_partner_roles");
+                entity.HasIndex(p => new { p.BusinessPartnerId, p.Role }).IsUnique();
+            });
+
+            builder.Entity<Vessel>(entity =>
+            {
+                entity.ToTable("vessels");
+                entity.HasIndex(p => p.Code).IsUnique();
+                entity.HasOne(p => p.OwnerPartner).WithMany().HasForeignKey(p => p.OwnerPartnerId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<DocumentType>(entity =>
+            {
+                entity.ToTable("document_types");
+                entity.HasIndex(p => p.Code).IsUnique();
+            });
+
+            builder.Entity<DocumentRequirement>(entity =>
+            {
+                entity.ToTable("document_requirements");
+                entity.HasIndex(p => new { p.MarketCode, p.DocumentTypeId }).IsUnique();
+                entity.HasOne(p => p.DocumentType).WithMany().HasForeignKey(p => p.DocumentTypeId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<DocumentAttachment>(entity =>
+            {
+                entity.ToTable("document_attachments");
+                entity.HasIndex(p => new { p.OwnerType, p.OwnerId });
+                entity.HasOne(p => p.DocumentType).WithMany().HasForeignKey(p => p.DocumentTypeId).OnDelete(DeleteBehavior.SetNull);
+            });
+
             builder.Entity<InboundPurchase>(entity =>
             {
                 entity.ToTable("inbound_purchases");
                 entity.HasMany(p => p.Lines).WithOne(l => l.Purchase).HasForeignKey(l => l.PurchaseId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(p => p.SupplierPartner).WithMany().HasForeignKey(p => p.SupplierPartnerId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(p => p.Vessel).WithMany().HasForeignKey(p => p.VesselId).OnDelete(DeleteBehavior.SetNull);
+                entity.Ignore(p => p.Documents);
             });
 
             builder.Entity<InboundLine>(entity =>
             {
                 entity.ToTable("inbound_lines");
+            });
+
+            builder.Entity<RawMaterialLot>(entity =>
+            {
+                entity.ToTable("raw_material_lots");
+                entity.HasIndex(p => p.LotNumber).IsUnique();
+                entity.HasIndex(p => p.InboundLineId).IsUnique();
+                entity.HasOne(p => p.InboundPurchase).WithMany().HasForeignKey(p => p.InboundPurchaseId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.InboundLine).WithOne(l => l.RawMaterialLot).HasForeignKey<RawMaterialLot>(p => p.InboundLineId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.SupplierPartner).WithMany().HasForeignKey(p => p.SupplierPartnerId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(p => p.Vessel).WithMany().HasForeignKey(p => p.VesselId).OnDelete(DeleteBehavior.SetNull);
+                entity.Ignore(p => p.Documents);
             });
 
             builder.Entity<ProductionLot>(entity =>
@@ -189,6 +265,15 @@ namespace SqlServ4r.EntityFramework
                 entity.HasIndex(p => p.LotNumber).IsUnique();
                 entity.HasMany(p => p.Outputs).WithOne(o => o.Lot).HasForeignKey(o => o.LotId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasMany(p => p.Certificates).WithOne(c => c.Lot).HasForeignKey(c => c.LotId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(p => p.Inputs).WithOne(i => i.ProductionLot).HasForeignKey(i => i.ProductionLotId).OnDelete(DeleteBehavior.Cascade);
+                entity.Ignore(p => p.Documents);
+            });
+
+            builder.Entity<ProductionInput>(entity =>
+            {
+                entity.ToTable("production_inputs");
+                entity.HasIndex(p => new { p.ProductionLotId, p.RawMaterialLotId }).IsUnique();
+                entity.HasOne(p => p.RawMaterialLot).WithMany(l => l.ProductionInputs).HasForeignKey(p => p.RawMaterialLotId).OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<ProductionOutput>(entity =>
@@ -205,6 +290,37 @@ namespace SqlServ4r.EntityFramework
             {
                 entity.ToTable("inventory_balances");
                 entity.HasIndex(p => new { p.LotId, p.SkuId }).IsUnique();
+                entity.HasMany(p => p.Movements).WithOne(m => m.InventoryBalance).HasForeignKey(m => m.InventoryBalanceId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(p => p.Reservations).WithOne(r => r.InventoryBalance).HasForeignKey(r => r.InventoryBalanceId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<InventoryMovement>(entity =>
+            {
+                entity.ToTable("inventory_movements");
+                entity.HasIndex(p => new { p.ReferenceType, p.ReferenceId });
+            });
+
+            builder.Entity<StockReservation>(entity =>
+            {
+                entity.ToTable("stock_reservations");
+                entity.HasIndex(p => new { p.SalesContractLineId, p.InventoryBalanceId, p.Status });
+                entity.HasOne(p => p.SalesContractLine).WithMany().HasForeignKey(p => p.SalesContractLineId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Shipment).WithMany(s => s.Reservations).HasForeignKey(p => p.ShipmentId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<SalesAllocation>(entity =>
+            {
+                entity.ToTable("sales_allocations");
+                entity.HasIndex(p => new { p.SalesContractLineId, p.InventoryBalanceId, p.ShipmentId }).IsUnique();
+                entity.HasOne(p => p.SalesContractLine).WithMany().HasForeignKey(p => p.SalesContractLineId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Shipment).WithMany(s => s.Allocations).HasForeignKey(p => p.ShipmentId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<TraceabilityLink>(entity =>
+            {
+                entity.ToTable("traceability_links");
+                entity.HasIndex(p => new { p.FromType, p.FromId });
+                entity.HasIndex(p => new { p.ToType, p.ToId });
             });
 
             builder.Entity<SalesContract>(entity =>
@@ -222,11 +338,51 @@ namespace SqlServ4r.EntityFramework
             builder.Entity<ExportShipment>(entity =>
             {
                 entity.ToTable("export_shipments");
+                entity.HasMany(p => p.Containers).WithOne(c => c.Shipment).HasForeignKey(c => c.ShipmentId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(p => p.Documents).WithOne(d => d.Shipment).HasForeignKey(d => d.ShipmentId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(p => p.Invoices).WithOne(i => i.Shipment).HasForeignKey(i => i.ShipmentId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<ShipmentContainer>(entity =>
+            {
+                entity.ToTable("shipment_containers");
+                entity.HasIndex(p => p.ContainerNo).IsUnique();
+            });
+
+            builder.Entity<ShipmentDocument>(entity =>
+            {
+                entity.ToTable("shipment_documents");
+                entity.HasIndex(p => new { p.ShipmentId, p.DocumentAttachmentId }).IsUnique();
+                entity.HasOne(p => p.DocumentAttachment).WithMany().HasForeignKey(p => p.DocumentAttachmentId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<SalesInvoice>(entity =>
+            {
+                entity.ToTable("sales_invoices");
+                entity.HasIndex(p => p.InvoiceNo).IsUnique();
+                entity.HasOne(p => p.SalesContract).WithMany(c => c.Invoices).HasForeignKey(p => p.SalesContractId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(p => p.Customer).WithMany().HasForeignKey(p => p.CustomerId).OnDelete(DeleteBehavior.SetNull);
             });
 
             builder.Entity<PaymentInstallment>(entity =>
             {
                 entity.ToTable("payment_installments");
+                entity.HasOne(p => p.SalesInvoice).WithMany().HasForeignKey(p => p.SalesInvoiceId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            builder.Entity<PaymentTransaction>(entity =>
+            {
+                entity.ToTable("payment_transactions");
+                entity.HasOne(p => p.Customer).WithMany().HasForeignKey(p => p.CustomerId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(p => p.Invoice).WithMany().HasForeignKey(p => p.InvoiceId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasMany(p => p.Allocations).WithOne(a => a.PaymentTransaction).HasForeignKey(a => a.PaymentTransactionId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<PaymentAllocation>(entity =>
+            {
+                entity.ToTable("payment_allocations");
+                entity.HasOne(p => p.PaymentInstallment).WithMany().HasForeignKey(p => p.PaymentInstallmentId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(p => p.Invoice).WithMany().HasForeignKey(p => p.InvoiceId).OnDelete(DeleteBehavior.SetNull);
             });
 
             builder.Entity<CustomerDeposit>(entity =>
@@ -238,6 +394,30 @@ namespace SqlServ4r.EntityFramework
             builder.Entity<DepositAllocation>(entity =>
             {
                 entity.ToTable("deposit_allocations");
+            });
+
+            builder.Entity<ExchangeRateSnapshot>(entity =>
+            {
+                entity.ToTable("exchange_rate_snapshots");
+                entity.HasIndex(p => new { p.FromCurrency, p.ToCurrency, p.EffectiveDate }).IsUnique();
+            });
+
+            builder.Entity<DomainAuditLog>(entity =>
+            {
+                entity.ToTable("domain_audit_logs");
+                entity.HasIndex(p => new { p.EntityType, p.EntityId, p.CreatedAt });
+            });
+
+            builder.Entity<ImportBatch>(entity =>
+            {
+                entity.ToTable("import_batches");
+                entity.HasMany(p => p.Rows).WithOne(r => r.ImportBatch).HasForeignKey(r => r.ImportBatchId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<ImportStagingRow>(entity =>
+            {
+                entity.ToTable("import_staging_rows");
+                entity.HasIndex(p => new { p.ImportBatchId, p.SheetName, p.RowNumber }).IsUnique();
             });
         }
 

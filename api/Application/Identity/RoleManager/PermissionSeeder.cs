@@ -92,22 +92,22 @@ namespace Application.Identity.RoleManager
 
         public async Task SeedIfEmptyAsync()
         {
-            var hasAny = await _roleClaimRepository.GetQueryable()
-                .AnyAsync(x => x.ClaimType == PermissionClaimType.Permission);
-            if (hasAny) return;
-
             var roles = await _roleManager.Roles.ToListAsync();
             var seeded = 0;
             foreach (var role in roles)
             {
-                foreach (var code in GetPermissionsForRole(role.Name ?? ""))
+                var existing = await _roleClaimRepository.GetQueryable()
+                    .Where(x => x.RoleId == role.Id && x.ClaimType == PermissionClaimType.Permission)
+                    .Select(x => x.ClaimValue)
+                    .ToHashSetAsync();
+                foreach (var code in GetPermissionsForRole(role.Name ?? "").Where(x => !existing.Contains(x)))
                 {
                     var result = await _roleManager.AddClaimAsync(role,
                         new Claim(PermissionClaimType.Permission, code));
                     if (result.Succeeded) seeded++;
                 }
             }
-            _logger.LogInformation("Seeded {Count} permission claims", seeded);
+            _logger.LogInformation("Ensured {Count} missing permission claims", seeded);
         }
 
         private static IEnumerable<string> GetPermissionsForRole(string role)
@@ -119,11 +119,11 @@ namespace Application.Identity.RoleManager
             var codes = new HashSet<string> { Permissions.Dashboard };
             if (name == RoleNames.Purchasing)
             {
-                codes.UnionWith(new[] { Permissions.Inbound, Permissions.MasterCatalog, Permissions.MasterCustomers, Permissions.Inventory });
+                codes.UnionWith(new[] { Permissions.Inbound, Permissions.MasterCatalog, Permissions.MasterCustomers, Permissions.MasterDocumentTypes, Permissions.MasterDocumentRules, Permissions.Inventory });
             }
             else if (name == RoleNames.Production)
             {
-                codes.UnionWith(new[] { Permissions.Production, Permissions.Inventory, Permissions.MasterProducts });
+                codes.UnionWith(new[] { Permissions.Production, Permissions.Inventory, Permissions.MasterProducts, Permissions.MasterDocumentTypes });
             }
             else if (name == RoleNames.Warehouse)
             {

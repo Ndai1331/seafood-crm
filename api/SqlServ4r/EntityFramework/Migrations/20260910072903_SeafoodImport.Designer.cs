@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SqlServ4r.EntityFramework;
@@ -11,9 +12,11 @@ using SqlServ4r.EntityFramework;
 namespace SqlServ4r.EntityFramework.Migrations
 {
     [DbContext(typeof(DreamContext))]
-    partial class DreamContextModelSnapshot : ModelSnapshot
+    [Migration("20260910072903_SeafoodImport")]
+    partial class SeafoodImport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,19 +81,8 @@ namespace SqlServ4r.EntityFramework.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Browser")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DeviceType")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<long>("DurationMs")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Functions")
                         .IsRequired()
@@ -101,27 +93,9 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("OperatingSystem")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<string>("Operation")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("RequestId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("Succeeded")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -818,28 +792,12 @@ namespace SqlServ4r.EntityFramework.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
-                    b.Property<string>("BusinessRegistrationNo")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("ContactName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("CountryCode")
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
-
-                    b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
@@ -858,17 +816,9 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
-                    b.Property<string>("Phone")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
                     b.Property<string>("Purchaser")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
-
-                    b.Property<string>("TaxCode")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
@@ -968,6 +918,9 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("InboundPurchaseId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("IssueDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -988,6 +941,12 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<int?>("ProductionLotId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("RawMaterialLotId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -1006,6 +965,12 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentTypeId");
+
+                    b.HasIndex("InboundPurchaseId");
+
+                    b.HasIndex("ProductionLotId");
+
+                    b.HasIndex("RawMaterialLotId");
 
                     b.HasIndex("OwnerType", "OwnerId");
 
@@ -1415,9 +1380,6 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<decimal>("ColdStorageFeeUsd")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("ContainerNo")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -1440,20 +1402,11 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("CustomsFeeUsd")
-                        .HasColumnType("numeric");
-
                     b.Property<DateTime?>("EstimatePaymentDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("Eta")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("HandlingFeeUsd")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("InfrastructureFeeUsd")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("MissingDocuments")
                         .HasMaxLength(256)
@@ -1475,9 +1428,6 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasColumnType("character varying(128)");
 
                     b.Property<decimal?>("ReceivedWeightKg")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("ReleaseOrderFeeUsd")
                         .HasColumnType("numeric");
 
                     b.Property<int?>("SupplierPartnerId")
@@ -1617,9 +1567,6 @@ namespace SqlServ4r.EntityFramework.Migrations
                     b.Property<string>("AddonCertificateCode")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("MarketCode")
                         .IsRequired()
@@ -2077,17 +2024,11 @@ namespace SqlServ4r.EntityFramework.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InventoryBalanceId")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
 
                     b.Property<decimal>("QuantityKg")
                         .HasColumnType("numeric");
@@ -2777,6 +2718,18 @@ namespace SqlServ4r.EntityFramework.Migrations
                         .HasForeignKey("DocumentTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Domain.Seafood.InboundPurchase", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("InboundPurchaseId");
+
+                    b.HasOne("Domain.Seafood.ProductionLot", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("ProductionLotId");
+
+                    b.HasOne("Domain.Seafood.RawMaterialLot", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("RawMaterialLotId");
+
                     b.Navigation("DocumentType");
                 });
 
@@ -3266,6 +3219,8 @@ namespace SqlServ4r.EntityFramework.Migrations
 
             modelBuilder.Entity("Domain.Seafood.InboundPurchase", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("Lines");
                 });
 
@@ -3290,6 +3245,8 @@ namespace SqlServ4r.EntityFramework.Migrations
                 {
                     b.Navigation("Certificates");
 
+                    b.Navigation("Documents");
+
                     b.Navigation("Inputs");
 
                     b.Navigation("Outputs");
@@ -3297,6 +3254,8 @@ namespace SqlServ4r.EntityFramework.Migrations
 
             modelBuilder.Entity("Domain.Seafood.RawMaterialLot", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("ProductionInputs");
                 });
 

@@ -34,6 +34,7 @@ namespace Domain.Seafood
         ReadyDocs = 4,
         Shipped = 5,
         Paid = 6,
+        PartiallyPaid = 7,
         Cancelled = 9
     }
 
@@ -55,6 +56,7 @@ namespace Domain.Seafood
         [MaxLength(64)] public string? MustHaveCertificateCode { get; set; }
         [MaxLength(64)] public string? AddonCertificateCode { get; set; }
         [MaxLength(256)] public string? Note { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 
     public class ProductGroup
@@ -99,6 +101,12 @@ namespace Domain.Seafood
         [MaxLength(64)] public string Code { get; set; } = string.Empty;
         [MaxLength(256)] public string Name { get; set; } = string.Empty;
         [MaxLength(256)] public string? ContactName { get; set; }
+        [MaxLength(32)] public string? Phone { get; set; }
+        [MaxLength(256)] public string? Email { get; set; }
+        [MaxLength(512)] public string? Address { get; set; }
+        [MaxLength(3)] public string? CountryCode { get; set; }
+        [MaxLength(64)] public string? TaxCode { get; set; }
+        [MaxLength(128)] public string? BusinessRegistrationNo { get; set; }
         public CustomerKind Kind { get; set; } = CustomerKind.Buyer;
         [MaxLength(128)] public string? Purchaser { get; set; }
         [MaxLength(512)] public string? Note { get; set; }

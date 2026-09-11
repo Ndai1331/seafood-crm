@@ -202,16 +202,29 @@ namespace Application.AppHistorys
                     .Include(x => x.User)
                     .AsQueryable()
                     .Where(x => (filter.Date != null ? x.Date.Date == filter.Date : true)
+                    && (string.IsNullOrEmpty(filter.Search)
+                        || x.Functions.Contains(filter.Search.Trim())
+                        || x.Operation.Contains(filter.Search.Trim())
+                        || x.IpAddress.Contains(filter.Search.Trim())
+                        || (x.UserAgent ?? string.Empty).Contains(filter.Search.Trim())
+                        || (x.DeviceType ?? string.Empty).Contains(filter.Search.Trim())
+                        || (x.Browser ?? string.Empty).Contains(filter.Search.Trim())
+                        || (x.OperatingSystem ?? string.Empty).Contains(filter.Search.Trim())
+                        || (x.User != null && (x.User.FirstName + " " + x.User.LastName).Contains(filter.Search.Trim())))
                     && (!string.IsNullOrEmpty(filter.Functions) ? x.Functions.Contains(filter.Functions.Trim()) : true)
                     && (!string.IsNullOrEmpty(filter.IpAddress) ? x.IpAddress.Contains(filter.IpAddress.Trim()) : true)
                     && (!string.IsNullOrEmpty(filter.Operation) ? x.Operation.Contains(filter.Operation.Trim()) : true)
                     && (!string.IsNullOrEmpty(filter.FullName) ? (x.User.FirstName + " " + x.User.LastName).Contains(filter.FullName.Trim()) : true)
-                    && (filter.UserId == null || x.UserId == filter.UserId));
+                    && (filter.UserId == null || x.UserId == filter.UserId)
+                    && (string.IsNullOrEmpty(filter.DeviceType) || x.DeviceType == filter.DeviceType)
+                    && (string.IsNullOrEmpty(filter.Browser) || x.Browser == filter.Browser)
+                    && (string.IsNullOrEmpty(filter.OperatingSystem) || x.OperatingSystem == filter.OperatingSystem)
+                    && (filter.Succeeded == null || x.Succeeded == filter.Succeeded));
 
                 result.Data.TotalItem = appHistorys.Count();
 
                 if (filter.Take > 0)
-                    appHistorys = appHistorys.OrderByDescending(x => x.Date).Skip(filter.Skip).Take(filter.Take);
+                    appHistorys = appHistorys.OrderByDescending(x => x.Date).Skip(Math.Max(0, filter.Skip)).Take(Math.Min(filter.Take, 500));
 
                 result.Data.Result = ObjectMapper.Map<List<AppHistory>, List<AppHistoryDto>>(await appHistorys.ToListAsync());
             }

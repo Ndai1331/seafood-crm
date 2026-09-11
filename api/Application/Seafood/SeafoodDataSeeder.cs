@@ -15,7 +15,8 @@ namespace Application.Seafood
 
         public async Task SeedAsync()
         {
-            if (await _db.CatalogLookups.AnyAsync()) return;
+            if (!await _db.CatalogLookups.AnyAsync())
+            {
 
             var lookups = new List<CatalogLookup>();
             void Add(LookupCategory cat, string code, string name, string? desc = null, int order = 0)
@@ -120,6 +121,55 @@ namespace Application.Seafood
                 _db.Customers.Add(new Customer { Code = code, Name = name, Kind = CustomerKind.Both, IsActive = true });
             }
 
+            await _db.SaveChangesAsync();
+            }
+
+            var documentTypes = new (string Code, string Name, string Description)[]
+            {
+                ("BL", "Bill of Lading", "Vận đơn"),
+                ("PURCHASE_INVOICE", "Purchase invoice", "Invoice mua nguyên liệu"),
+                ("CUSTOMS_DECLARATION", "Customs declaration", "Tờ khai hải quan"),
+                ("ORIGIN", "Certificate of origin", "Chứng từ xuất xứ"),
+                ("COA", "COA", "Certificate of Analysis"),
+                ("EUCC", "EU Catch Certificate", "Giấy khai thác dùng cho EU"),
+                ("MSC", "MSC", "Chứng nhận bổ sung"),
+                ("CATCH_FREEZE", "Catch and freeze information", "Thông tin đánh bắt/cấp đông"),
+                ("QC", "QC record", "Hồ sơ kiểm tra chất lượng"),
+                ("SALES_CONTRACT", "Sales contract", "Hợp đồng bán hàng"),
+                ("COMMERCIAL_INVOICE", "Commercial invoice", "Hóa đơn thương mại"),
+                ("PACKING_LIST", "Packing list", "Bảng kê đóng gói"),
+                ("HEALTH_CERT", "Health certificate", "Giấy chứng nhận y tế"),
+                ("FDA", "FDA", "Hồ sơ FDA"),
+                ("PAYMENT_PROOF", "Payment proof", "Giấy báo có/xác nhận thanh toán"),
+                ("DEPOSIT", "Deposit proof", "Chứng từ deposit")
+            };
+            foreach (var item in documentTypes)
+            {
+                if (!await _db.DocumentTypes.AnyAsync(x => x.Code == item.Code))
+                    _db.DocumentTypes.Add(new DocumentType { Code = item.Code, Name = item.Name, Description = item.Description });
+            }
+            await _db.SaveChangesAsync();
+
+            var typeIds = await _db.DocumentTypes.ToDictionaryAsync(x => x.Code, x => x.Id);
+            var requirements = new[]
+            {
+                (Market: "USA", Code: "COA", Required: true, Order: 1),
+                (Market: "USA", Code: "MSC", Required: false, Order: 2),
+                (Market: "EU", Code: "EUCC", Required: true, Order: 1),
+                (Market: "EU", Code: "MSC", Required: false, Order: 2)
+            };
+            foreach (var item in requirements)
+            {
+                if (typeIds.TryGetValue(item.Code, out var typeId)
+                    && !await _db.DocumentRequirements.AnyAsync(x => x.MarketCode == item.Market && x.DocumentTypeId == typeId))
+                {
+                    _db.DocumentRequirements.Add(new DocumentRequirement
+                    {
+                        MarketCode = item.Market, DocumentTypeId = typeId, IsRequired = item.Required, SortOrder = item.Order,
+                        Note = item.Required ? "Bắt buộc theo dữ liệu mẫu." : "Chứng từ bổ sung, không loại lô nếu thiếu."
+                    });
+                }
+            }
             await _db.SaveChangesAsync();
         }
     }

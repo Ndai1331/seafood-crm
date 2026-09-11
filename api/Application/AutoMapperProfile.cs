@@ -25,7 +25,9 @@ namespace Application
             CreateMap<AppHistoryDto, AppHistory>();
             CreateMap<AppHistory, AppHistoryDto>()
                 .ForMember(dest => dest.FullName,
-                    opt => opt.MapFrom(src => (src.User.FirstName + " " + src.User.LastName).Trim()));
+                    opt => opt.MapFrom(src => src.User == null
+                        ? $"User #{src.UserId}"
+                        : (src.User.FirstName + " " + src.User.LastName).Trim()));
             CreateMap<CreateUpdateAppHistoryDto, AppHistory>().ReverseMap();
 
             CreateMap<UserWithNavigationProperties, UserWithNavigationPropertiesDto>().ReverseMap();

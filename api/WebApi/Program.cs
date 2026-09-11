@@ -100,6 +100,12 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<ExportService>();
 builder.Services.AddScoped<FinanceService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<SeafoodDocumentService>();
+builder.Services.AddScoped<SeafoodAllocationService>();
+builder.Services.AddScoped<SeafoodPartnerService>();
+builder.Services.AddScoped<SeafoodImportService>();
+builder.Services.AddScoped<SeafoodRawLotService>();
+builder.Services.AddScoped<SeafoodTraceabilityService>();
 
 builder.Services.AddFido2(options =>
 {
@@ -232,9 +238,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/StaticFiles"
 });
 
+// Keep audit middleware outside the error handler so failed requests are persisted
+// with the final HTTP status code instead of the default 200.
+app.UseMiddleware<AppHistoryMiddleware>();
 app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<AppHistoryMiddleware>();
 app.MapControllers();
 app.Run();
