@@ -695,7 +695,9 @@ namespace Application.Seafood
                 .Include(x => x.Containers).Include(x => x.Documents).ThenInclude(x => x.DocumentAttachment)
                 .OrderByDescending(x => x.Id).ToListAsync();
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "Shipment").ToListAsync();
-            return rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            var items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            await AttachShipmentNamesAsync(items);
+            return items;
         }
 
         public async Task<SeafoodPagedResult<ExportShipmentDto>> PageShipmentsAsync(string? search, int skip, int take)
@@ -714,7 +716,9 @@ namespace Application.Seafood
                 .OrderByDescending(x => x.Id).Skip(Math.Max(0, skip)).Take(Math.Clamp(take, 1, 100)).ToListAsync();
             var ids = rows.Select(x => x.Id).ToList();
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "Shipment" && ids.Contains(x.OwnerId)).ToListAsync();
-            return new SeafoodPagedResult<ExportShipmentDto> { Items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList(), TotalCount = total };
+            var items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            await AttachShipmentNamesAsync(items);
+            return new SeafoodPagedResult<ExportShipmentDto> { Items = items, TotalCount = total };
         }
 
         public async Task<ExportShipmentDto> SaveShipmentAsync(ExportShipmentDto dto)
@@ -824,7 +828,9 @@ namespace Application.Seafood
                 }
             }
             await _db.SaveChangesAsync();
-            return MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            var savedShip = MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            await AttachShipmentNamesAsync(new[] { savedShip });
+            return savedShip;
         }
 
         public async Task<ExportShipmentDto> ConfirmShipmentAsync(int id, int? userId, ShipmentConfirmDto? request = null)
@@ -937,12 +943,19 @@ namespace Application.Seafood
             if (entity.SalesContractId is int contractId)
             {
                 var contract = await _db.SalesContracts.Include(x => x.Lines).FirstAsync(x => x.Id == contractId);
-                var shipped = await _db.SalesAllocations.Where(x => x.SalesContractLine!.ContractId == contractId && x.ShipmentId != null).SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
-                contract.Status = shipped + 0.0001m >= contract.Lines.Sum(x => x.QtyKg) ? ContractStatus.Shipped : ContractStatus.ReadyDocs;
+                var shippedThis = selected.Sum(x => x.QuantityKg);
+                var previouslyShipped = await _db.SalesAllocations
+                    .Where(x => x.SalesContractLine!.ContractId == contractId && x.ShipmentId != null && x.ShipmentId != entity.Id)
+                    .SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
+                contract.Status = previouslyShipped + shippedThis + 0.0001m >= contract.Lines.Sum(x => x.QtyKg)
+                    ? ContractStatus.Shipped
+                    : ContractStatus.ReadyDocs;
             }
             _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "ExportShipment", EntityId = entity.Id, Action = "Confirmed", UserId = userId });
             await _db.SaveChangesAsync();
-            return MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            var confirmed = MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            await AttachShipmentNamesAsync(new[] { confirmed });
+            return confirmed;
             });
         }
 
@@ -955,6 +968,21 @@ namespace Application.Seafood
                 .ToDictionaryAsync(x => x.Id, x => x.Name);
             foreach (var item in items)
                 if (item.MarketId is int id) item.MarketName = names.GetValueOrDefault(id);
+        }
+
+        private async Task AttachShipmentNamesAsync(IEnumerable<ExportShipmentDto> items)
+        {
+            var list = items as IList<ExportShipmentDto> ?? items.ToList();
+            var ids = list.SelectMany(x => new[] { x.CarrierId, x.PortOfLoadingId, x.PortOfDischargeId })
+                .Where(x => x.HasValue).Select(x => x!.Value).Distinct().ToList();
+            if (ids.Count == 0) return;
+            var names = await _db.CatalogLookups.AsNoTracking().Where(x => ids.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Name);
+            foreach (var item in list)
+            {
+                if (item.CarrierId is int c) item.CarrierName = names.GetValueOrDefault(c);
+                if (item.PortOfLoadingId is int p) item.PortOfLoadingName = names.GetValueOrDefault(p);
+                if (item.PortOfDischargeId is int d) item.PortOfDischargeName = names.GetValueOrDefault(d);
+            }
         }
 
         private static SalesContractDto MapContract(SalesContract x)

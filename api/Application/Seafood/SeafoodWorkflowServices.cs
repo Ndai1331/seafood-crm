@@ -421,10 +421,12 @@ public class SeafoodAllocationService : ITransientDependency
             resultItems.Add(item);
         }
 
-        var totalAllocated = await _db.StockReservations.Where(x => x.Status == ReservationStatus.Active && x.SalesContractLine!.ContractId == contract.Id)
-            .SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
+        var totalAllocated = contract.Lines.Sum(x => x.AllocatedKg);
         var totalRequired = contract.Lines.Sum(x => x.QtyKg);
-        contract.Status = totalAllocated + 0.0001m >= totalRequired ? ContractStatus.ReadyDocs : ContractStatus.ReadyStock;
+        var fullyAllocated = totalAllocated + 0.0001m >= totalRequired;
+        contract.Status = fullyAllocated
+            ? (request.OverrideDocumentCheck ? ContractStatus.ReadyStock : ContractStatus.ReadyDocs)
+            : ContractStatus.ReadyStock;
         _db.DomainAuditLogs.Add(new DomainAuditLog
         {
             EntityType = "SalesContract",
