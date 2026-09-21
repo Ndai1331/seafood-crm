@@ -8,54 +8,144 @@
     <div class="sf-page-header">
         <div>
             <h3>Tồn kho &amp; chứng từ</h3>
-            <p>So khớp tồn SKU với hợp đồng mở và chứng từ đủ điều kiện xuất khẩu.</p>
+            <p>Tồn hợp nhất nguyên liệu, BTP, thành phẩm và phụ phẩm theo kho. Điều chỉnh và chuyển kho từ dòng lưới.</p>
         </div>
         <span class="sf-status sf-status-warning"><i class="fa-solid fa-warehouse me-1" aria-hidden="true"></i>Ledger + kiểm soát</span>
     </div>
 
-    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm lot, SKU, chứng từ hoặc cảnh báo..." />
-    <div class="mb-3"><Button Color="Color.Primary" IsOutline="true" Icon="fa-solid fa-route" Text="Mở truy xuất hai chiều" OnClick="OpenTraceabilityAsync" /></div>
-    <div class="sf-form-section mb-3">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3"><VnIntInput Value="@_adjustment.InventoryBalanceId" ValueChanged="@(value => _adjustment.InventoryBalanceId = value ?? 0)" DisplayText="ID dòng tồn" ShowLabel="true" /></div>
-            <div class="col-md-3"><VnNumberInput Value="@_adjustment.QuantityKg" ValueChanged="@(value => _adjustment.QuantityKg = value ?? 0)" DisplayText="Điều chỉnh kg (+/-)" ShowLabel="true" /></div>
-            <div class="col-md-4"><Textarea @bind-Value="_adjustment.Reason" DisplayText="Lý do" ShowLabel="true" placeholder="Biên bản kiểm kê..." rows="2" /></div>
-            <div class="col-auto"><Button Color="Color.Warning" OnClick="AdjustAsync"><i class="fa-solid fa-scale-balanced me-1" aria-hidden="true"></i>Ghi điều chỉnh</Button></div>
+    <div class="catalog-category-panel mb-3">
+        <div class="catalog-category-tabs" role="tablist">
+            @foreach (var tab in Tabs)
+            {
+                <Button Color="Color.None" class="@($"catalog-category-tab {(_kind == tab.Kind ? "is-active" : "")}")" OnClick="() => SelectKindAsync(tab.Kind)">
+                    <i class="@tab.Icon" aria-hidden="true"></i><span>@tab.Label</span>
+                </Button>
+            }
         </div>
     </div>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm lot, SKU, kho...">
+        <ChildContent>
+            <div style="min-width:220px"><label class="form-label">Lọc kho</label><SeafoodSelect2 Value="@_warehouseId" ValueChanged="OnWarehouseFilterChanged" Search="SearchWarehousesAsync" Placeholder="Tất cả kho" /></div>
+        </ChildContent>
+    </SeafoodFilterBar>
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <Button Color="Color.Primary" IsOutline="true" Icon="fa-solid fa-route" Text="Mở truy xuất hai chiều" OnClick="OpenTraceabilityAsync" />
+        <Button Color="Color.Warning" Icon="fa-solid fa-scale-balanced" Text="Điều chỉnh dòng chọn" OnClick="OpenAdjustAsync" IsDisabled="@(_selected == null || _selected.Kind == 1)" />
+        <Button Color="Color.Secondary" Icon="fa-solid fa-right-left" Text="Chuyển kho dòng chọn" OnClick="OpenTransferAsync" IsDisabled="@(_selected == null)" />
+    </div>
+
+    <SeafoodCrudModal @ref="_adjustModal" Title="Điều chỉnh tồn kho" OnSaveAsync="AdjustAsync">
+        <SeafoodModalSection Title="Dòng tồn" Icon="fa-solid fa-scale-balanced">
+            <div class="row g-3">
+                <div class="col-12"><strong>@_selected?.LotNumber</strong> · @_selected?.SkuName · kho @_selected?.WarehouseName</div>
+                <div class="col-md-6"><VnNumberInput Value="@_adjustment.QuantityKg" ValueChanged="@(value => _adjustment.QuantityKg = value ?? 0)" DisplayText="Điều chỉnh kg (+/-)" ShowLabel="true" /></div>
+                <div class="col-md-6"><Textarea @bind-Value="_adjustment.Reason" DisplayText="Lý do" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodCrudModal @ref="_transferModal" Title="Chuyển kho" OnSaveAsync="TransferAsync">
+        <SeafoodModalSection Title="Dịch chuyển" Icon="fa-solid fa-right-left">
+            <div class="row g-3">
+                <div class="col-12"><strong>@_selected?.LotNumber</strong> · khả dụng @_selected?.AvailableKg.ToString("N2") kg</div>
+                <div class="col-md-6"><label class="form-label">Kho đích</label><SeafoodSelect2 Value="@_transfer.ToWarehouseId == 0 ? null : _transfer.ToWarehouseId" ValueChanged="OnToWarehouseChanged" Search="SearchWarehousesAsync" Placeholder="Kho nhận" /></div>
+                <div class="col-md-6"><VnNumberInput Value="@_transfer.QuantityKg" ValueChanged="@(value => _transfer.QuantityKg = value ?? 0)" DisplayText="Số kg chuyển" ShowLabel="true" /></div>
+                <div class="col-12"><Textarea @bind-Value="_transfer.Reason" DisplayText="Lý do" ShowLabel="true" rows="2" /></div>
+            </div>
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
     <div class="sf-table-shell">
-        <Table TItem="InventoryRowDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" />
+        <Table TItem="InventoryRowDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.LotNumber" Text="Lô" Width="160"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.SkuName" Text="SKU / dạng" Width="200" />
+                <TableColumn TItem="InventoryRowDto" TType="string" @bind-Field="@context.WarehouseName" Text="Kho" Width="140" />
+                <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.ReceivedKg" Text="Đã nhập" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.UsedKg" Text="Đã dùng" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.ShippedKg" Text="Đã xuất" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.OnHandKg" Text="Còn lại" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="InventoryRowDto" TType="decimal" @bind-Field="@context.AllocatedKg" Text="Đã giữ" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="InventoryRowDto" TType="int" @bind-Field="@context.Id" Text="Chọn" Width="120" Align="Alignment.Right" IgnoreWhenExport="true">
+                    <Template Context="value"><Button Color="Color.Primary" IsOutline="true" Size="Size.ExtraSmall" Text="@(_selected?.Id == value.Row.Id ? "Đang chọn" : "Chọn")" OnClick="() => SelectRow(value.Row)" /></Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
     </div>
 </div>
 
 @code {
     private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private static readonly (int Kind, string Label, string Icon)[] Tabs =
+    {
+        (1, "Nguyên liệu", "fa-solid fa-fish"),
+        (4, "Bán thành phẩm", "fa-solid fa-gears"),
+        (2, "Thành phẩm", "fa-solid fa-box"),
+        (3, "Phụ phẩm", "fa-solid fa-recycle")
+    };
     private Table<InventoryRowDto>? _table;
+    private SeafoodCrudModal? _adjustModal, _transferModal;
     private string _search = "";
     private int _total;
+    private int _kind = 1;
+    private int? _warehouseId;
+    private InventoryRowDto? _selected;
     private InventoryAdjustmentDto _adjustment = new();
+    private InventoryTransferDto _transfer = new();
 
+    private async Task SelectKindAsync(int kind)
+    {
+        _kind = kind;
+        _selected = null;
+        if (_table != null) await _table.QueryAsync(1);
+    }
     private async Task<QueryData<InventoryRowDto>> OnQueryAsync(QueryPageOptions options)
     {
-        var page = await Api.InventoryPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        var page = await Api.InventoryPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems, _kind, _warehouseId);
         _total = page?.TotalCount ?? 0;
         await InvokeAsync(StateHasChanged);
         return SeafoodTableQuery.ToQueryData(page, options);
     }
     private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
-
-    private async Task AdjustAsync()
+    private async Task OnWarehouseFilterChanged(int? value) { _warehouseId = value; if (_table != null) await _table.QueryAsync(1); }
+    private void SelectRow(InventoryRowDto row) { _selected = row; }
+    private async Task OpenAdjustAsync()
     {
-        var saved = await Api.AdjustInventoryAsync(_adjustment);
-        if (saved == null) { await Toast.Error("Không ghi được điều chỉnh tồn kho."); return; }
-        await Toast.Success("Đã ghi điều chỉnh vào inventory ledger.");
-        _adjustment = new();
-        if (_table != null) await _table.QueryAsync(1);
+        if (_selected == null) return;
+        _adjustment = new() { InventoryBalanceId = _selected.Id };
+        if (_adjustModal != null) await _adjustModal.ShowAsync();
     }
-
-    private Task OpenTraceabilityAsync()
+    private async Task OpenTransferAsync()
     {
-        Navigation.NavigateTo("/inventory/traceability");
-        return Task.CompletedTask;
+        if (_selected == null) return;
+        _transfer = new() { Kind = _selected.Kind, SourceId = _selected.Id, QuantityKg = _selected.AvailableKg };
+        if (_transferModal != null) await _transferModal.ShowAsync();
     }
+    private Task OnToWarehouseChanged(int? value) { _transfer.ToWarehouseId = value ?? 0; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchWarehousesAsync(string term, int page, int pageSize) => await Api.SearchLookupOptionsAsync(10, term, page, pageSize) ?? new();
+    private async Task<bool> AdjustAsync()
+    {
+        try
+        {
+            if (await Api.AdjustInventoryAsync(_adjustment) == null) { await Toast.Error("Không ghi được điều chỉnh."); return false; }
+            await Toast.Success("Đã ghi điều chỉnh tồn kho.");
+            if (_table != null) await _table.QueryAsync(1);
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không điều chỉnh được", ApiErrorMessage.Describe(ex, "Chọn dòng trên lưới và nhập lý do.")); return false; }
+    }
+    private async Task<bool> TransferAsync()
+    {
+        try
+        {
+            if (!await Api.TransferInventoryAsync(_transfer)) { await Toast.Error("Không chuyển được kho."); return false; }
+            await Toast.Success("Đã chuyển kho.");
+            _selected = null;
+            if (_table != null) await _table.QueryAsync(1);
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không chuyển được kho", ApiErrorMessage.Describe(ex, "Kiểm tra kho đích và số kg.")); return false; }
+    }
+    private Task OpenTraceabilityAsync() { Navigation.NavigateTo("/inventory/traceability"); return Task.CompletedTask; }
 }

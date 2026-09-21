@@ -1,0 +1,28 @@
+@page "/system/help"
+@layout PageLayout
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Hướng dẫn &amp; bàn giao</h3>
+            <p>12 nghiệp vụ lõi của Seafood CRM — dùng khi onboarding user mới.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-book me-1" aria-hidden="true"></i>Handover</span>
+    </div>
+    <div class="sf-panel">
+        <ol class="mb-0">
+            <li class="mb-3"><strong>Danh mục nền.</strong> Vào <em>Danh mục chung</em> khai loài, dạng NL, size, kho, cảng, ĐVT, hãng tàu. SKU ghi loại TP/BTP/phụ phẩm. Đối tác &amp; tàu tách permission riêng.</li>
+            <li class="mb-3"><strong>Nhập lô nguyên liệu.</strong> Tạo phiếu nhập: NCC, tàu, kho, loài/size/cảm quan, kg, giá, giấy tờ. Hệ thống tự sinh mã lô <code>RM-...-...</code>. Sửa được khi lô chưa vào sản xuất.</li>
+            <li class="mb-3"><strong>Hồ sơ lô NL.</strong> Màn <em>Hồ sơ lô nguyên liệu</em> xem đã nhập / đã đưa SX / còn lại và file chứng từ từ phiếu nhập.</li>
+            <li class="mb-3"><strong>Import Excel.</strong> Staging file “Theo dõi hàng nhập hằng ngày”, sửa lỗi rồi xác nhận — hệ thống ghi thật phiếu nhập + lô.</li>
+            <li class="mb-3"><strong>Kho.</strong> Tab NL / BTP / TP / phụ phẩm. Chọn dòng để điều chỉnh (TP) hoặc chuyển kho. Cột đã nhập / đã dùng / đã xuất / còn / đã giữ.</li>
+            <li class="mb-3"><strong>Sản xuất.</strong> Chọn nhiều lô NL và nhiều đầu ra. Hao hụt = NL − thu hồi. Sửa mẻ khi chưa có reservation.</li>
+            <li class="mb-3"><strong>Hợp đồng.</strong> Tạo/sửa/duyệt trên dòng, gắn thị trường và điều khoản TT. Cột thực hiện: chờ hàng / đủ hàng / đủ giấy / đã xuất / còn thiếu.</li>
+            <li class="mb-3"><strong>Xếp lô &amp; trừ lùi.</strong> Preview FIFO, tick ghép nhiều lô, cảnh báo đủ hàng thiếu giấy. Trừ lùi NL = Q × RawUsed / Recovered. Cột “NL còn đi” theo bộ giấy.</li>
+            <li class="mb-3"><strong>Xuất container.</strong> Nhiều container, cảng đi/đến, hãng tàu. Mở checklist, verify giấy. Xác nhận xuất bị chặn nếu thiếu giấy bắt buộc (trừ override có lý do).</li>
+            <li class="mb-3"><strong>Hóa đơn &amp; công nợ.</strong> Hóa đơn sinh khi lưu shipment. Thu một khoản phân bổ nhiều đợt/hóa đơn. Deposit phân bổ nhiều HĐ và hóa đơn. List cảnh báo đến hạn/quá hạn.</li>
+            <li class="mb-3"><strong>Truy xuất &amp; báo cáo.</strong> Tra mã lô / số HĐ / container / hóa đơn. Báo cáo 6 loại, xuất Excel. Dashboard có KPI công nợ quá hạn.</li>
+            <li class="mb-3"><strong>Phân quyền, nhật ký, sao lưu, user.</strong> Role + permission matrix. Nhật ký hệ thống (HTTP) và nhật ký nghiệp vụ (DomainAuditLog). Sao lưu ZIP Excel. Quản lý user/team trước khi bàn giao ca.</li>
+        </ol>
+    </div>
+</div>

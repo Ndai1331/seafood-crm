@@ -7,29 +7,71 @@
     <div class="sf-page-header">
         <div>
             <h3>Theo dõi thanh toán</h3>
-            <p>Ghi nhận khoản thu theo từng đợt và theo dõi số tiền còn phải thu.</p>
+            <p>Ghi nhận một khoản tiền và phân bổ nhiều đợt / hóa đơn. Cảnh báo đến hạn và quá hạn.</p>
         </div>
         <div class="sf-page-actions">
             <span class="sf-status sf-status-warning"><i class="fa-solid fa-money-check-dollar me-1" aria-hidden="true"></i>Finance</span>
-            <Button Color="Color.Primary" OnClick="OpenReceiveAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Ghi nhận thanh toán</Button>
+            <Button Color="Color.Secondary" OnClick="OpenReceiveAsync">Thu 1 đợt</Button>
+            <Button Color="Color.Primary" OnClick="OpenAllocateAsync"><i class="fa-solid fa-plus me-1" aria-hidden="true"></i>Phân bổ nhiều HĐ</Button>
         </div>
     </div>
 
-    <SeafoodCrudModal @ref="_crudModal" Title="Ghi nhận thanh toán" OnSaveAsync="ReceiveAsync">
-        <SeafoodModalSection Title="Khoản phải thu" Icon="fa-solid fa-file-invoice-dollar">
+    <SeafoodCrudModal @ref="_receiveModal" Title="Ghi nhận thanh toán một đợt" OnSaveAsync="ReceiveAsync">
+        <SeafoodModalSection Title="Đợt thanh toán" Icon="fa-solid fa-file-invoice-dollar">
             <div class="row g-3">
-                <div class="col-md-6"><VnIntInput Value="@_id" ValueChanged="@(value => _id = value ?? 0)" DisplayText="Đợt thanh toán" ShowLabel="true" Placeholder="Payment installment Id" /></div>
-            </div>
-        </SeafoodModalSection>
-        <SeafoodModalSection Title="Số tiền nhận" Icon="fa-solid fa-money-bill-wave">
-            <div class="row g-3">
-                <div class="col-md-6"><VnNumberInput Value="@_amount" ValueChanged="@(value => _amount = value ?? 0)" DisplayText="Số tiền nhận (USD)" ShowLabel="true" Placeholder="USD" /></div>
+                <div class="col-md-6"><VnIntInput Value="@_id" ValueChanged="@(value => _id = value ?? 0)" DisplayText="ID đợt" ShowLabel="true" /></div>
+                <div class="col-md-6"><VnNumberInput Value="@_amount" ValueChanged="@(value => _amount = value ?? 0)" DisplayText="Số tiền (USD)" ShowLabel="true" /></div>
             </div>
         </SeafoodModalSection>
     </SeafoodCrudModal>
 
-    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm invoice, khách hàng hoặc trạng thái..." />
-    <div class="sf-table-shell"><Table TItem="PaymentInstallmentDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
+    <SeafoodCrudModal @ref="_allocModal" Title="Phân bổ một khoản tiền" OnSaveAsync="AllocateAsync" Size="Size.ExtraExtraLarge">
+        <SeafoodModalSection Title="Khoản nhận" Icon="fa-solid fa-wallet">
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Khách hàng</label><SeafoodSelect2 Value="@(_allocate.CustomerId > 0 ? _allocate.CustomerId : null)" ValueChanged="OnCustomerChanged" Search="SearchCustomersAsync" Placeholder="Tìm khách" /></div>
+                <div class="col-md-6"><VnNumberInput Value="@_allocate.AmountUsd" ValueChanged="v => _allocate.AmountUsd = v ?? 0" DisplayText="Tổng nhận (USD)" ShowLabel="true" /></div>
+                <div class="col-12"><BootstrapInput @bind-Value="_allocate.ReferenceNo" DisplayText="Số tham chiếu" ShowLabel="true" /></div>
+            </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Dòng phân bổ" Icon="fa-solid fa-list">
+            @foreach (var item in _allocate.Items)
+            {
+                var current = item;
+                <div class="row g-3 mb-2">
+                    <div class="col-md-4"><VnIntInput Value="@current.PaymentInstallmentId" ValueChanged="v => current.PaymentInstallmentId = v" DisplayText="ID đợt" ShowLabel="true" /></div>
+                    <div class="col-md-4"><label class="form-label">Hóa đơn</label><SeafoodSelect2 Value="@current.InvoiceId" ValueChanged="v => current.InvoiceId = v" Search="SearchInvoicesAsync" Placeholder="Tìm hóa đơn" /></div>
+                    <div class="col-md-3"><VnNumberInput Value="@current.AmountUsd" ValueChanged="v => current.AmountUsd = v ?? 0" DisplayText="USD" ShowLabel="true" /></div>
+                    <div class="col-md-1 d-flex align-items-end"><Button Color="Color.Danger" IsOutline="true" Icon="fa-solid fa-xmark" OnClick="() => _allocate.Items.Remove(current)" /></div>
+                </div>
+            }
+            <Button Color="Color.Secondary" IsOutline="true" Icon="fa-solid fa-plus" Text="Thêm dòng" OnClick="() => _allocate.Items.Add(new())" />
+        </SeafoodModalSection>
+    </SeafoodCrudModal>
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm invoice, khách..." />
+    <div class="sf-table-shell">
+        <Table TItem="PaymentInstallmentDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="PaymentInstallmentDto" TType="string" @bind-Field="@context.InvoiceNo" Text="Invoice" Width="140" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="string" @bind-Field="@context.CustomerName" Text="Khách" Width="180" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="int" @bind-Field="@context.Sequence" Text="Đợt" Width="80" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.AmountUsd" Text="Phải thu" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.ReceivedAmountUsd" Text="Đã thu" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="decimal" @bind-Field="@context.OutstandingUsd" Text="Còn" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="PaymentInstallmentDto" TType="DateTime?" @bind-Field="@context.DueDate" Text="Hạn" Width="120"><Template Context="value">@(value.Value?.ToLocalTime().ToString("dd/MM/yyyy") ?? "—")</Template></TableColumn>
+                <TableColumn TItem="PaymentInstallmentDto" TType="bool" @bind-Field="@context.IsOverdue" Text="Cảnh báo" Width="140">
+                    <Template Context="value">
+                        @if (value.Row.IsOverdue) { <span class="sf-status sf-status-warning">Quá hạn</span> }
+                        else if (value.Row.IsDueSoon) { <span class="sf-status sf-status-info">Sắp đến hạn</span> }
+                        else { <span>—</span> }
+                    </Template>
+                </TableColumn>
+                <TableColumn TItem="PaymentInstallmentDto" TType="int" @bind-Field="@context.Id" Text="" Width="120" Align="Alignment.Right">
+                    <Template Context="value"><Button Color="Color.Primary" IsOutline="true" Size="Size.ExtraSmall" Text="Thu" OnClick="() => OpenReceiveRowAsync(value.Row)" /></Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
 </div>
 
 @code {
@@ -37,9 +79,12 @@
     private Table<PaymentInstallmentDto>? _table;
     private int _id;
     private decimal _amount;
-    private SeafoodCrudModal? _crudModal;
+    private SeafoodCrudModal? _receiveModal, _allocModal;
+    private PaymentAllocateRequestDto _allocate = NewAllocate();
     private string _search = "";
     private int _total;
+    private static PaymentAllocateRequestDto NewAllocate() => new() { Items = new() { new() }, ReceivedDate = DateTime.UtcNow };
+
     private async Task<QueryData<PaymentInstallmentDto>> OnQueryAsync(QueryPageOptions options)
     {
         var page = await Api.PaymentsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
@@ -48,20 +93,34 @@
         return SeafoodTableQuery.ToQueryData(page, options);
     }
     private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
-
-    private async Task OpenReceiveAsync()
-    {
-        _id = 0;
-        _amount = 0;
-        if (_crudModal != null) await _crudModal.ShowAsync();
-    }
-
+    private async Task OpenReceiveAsync() { _id = 0; _amount = 0; if (_receiveModal != null) await _receiveModal.ShowAsync(); }
+    private async Task OpenReceiveRowAsync(PaymentInstallmentDto row) { _id = row.Id; _amount = Math.Max(0, row.OutstandingUsd > 0 ? row.OutstandingUsd : row.AmountUsd - row.ReceivedAmountUsd); if (_receiveModal != null) await _receiveModal.ShowAsync(); }
+    private async Task OpenAllocateAsync() { _allocate = NewAllocate(); if (_allocModal != null) await _allocModal.ShowAsync(); }
+    private Task OnCustomerChanged(int? value) { _allocate.CustomerId = value ?? 0; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize) => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchInvoicesAsync(string term, int page, int pageSize) => await Api.SearchInvoiceOptionsAsync(term, page, pageSize) ?? new();
     private async Task<bool> ReceiveAsync()
     {
-        var saved = await Api.ReceivePaymentAsync(_id, _amount);
-        if (saved == null) { await Toast.Error("Không ghi nhận được"); return false; }
-        await Toast.Success("Đã ghi nhận thanh toán");
-        if (_table != null) await _table.QueryAsync(1);
-        return true;
+        try
+        {
+            var saved = await Api.ReceivePaymentAsync(_id, _amount);
+            if (saved == null) { await Toast.Error("Không ghi nhận được"); return false; }
+            await Toast.Success("Đã ghi nhận thanh toán");
+            if (_table != null) await _table.QueryAsync(1);
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không ghi nhận được", ApiErrorMessage.Describe(ex, "Chọn đợt trên lưới.")); return false; }
+    }
+    private async Task<bool> AllocateAsync()
+    {
+        _allocate.Items = _allocate.Items.Where(x => x.AmountUsd > 0).ToList();
+        try
+        {
+            if (!await Api.AllocatePaymentAsync(_allocate)) { await Toast.Error("Không phân bổ được"); return false; }
+            await Toast.Success("Đã phân bổ khoản tiền vào nhiều đợt/hóa đơn.");
+            if (_table != null) await _table.QueryAsync(1);
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không phân bổ được", ApiErrorMessage.Describe(ex, "Tổng dòng phải bằng số tiền nhận.")); return false; }
     }
 }

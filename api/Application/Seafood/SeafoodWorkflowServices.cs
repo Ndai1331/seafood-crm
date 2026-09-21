@@ -265,6 +265,8 @@ public class SeafoodAllocationService : ITransientDependency
         var effectiveDate = request.Etd ?? DateTime.UtcNow;
         var balances = await _db.InventoryBalances
             .Include(x => x.Lot)!.ThenInclude(x => x!.Certificates)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Outputs)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Inputs)
             .Include(x => x.Sku)
             .OrderBy(x => x.Lot!.ReceivedDate).ThenBy(x => x.LotId).ToListAsync();
         var activeReservations = await _db.StockReservations
@@ -272,7 +274,6 @@ public class SeafoodAllocationService : ITransientDependency
             .GroupBy(x => x.InventoryBalanceId)
             .Select(x => new { x.Key, Quantity = x.Sum(y => y.QuantityKg) })
             .ToDictionaryAsync(x => x.Key, x => x.Quantity);
-
         var candidates = new List<AllocationCandidateDto>();
         var previewUsedByBalance = new Dictionary<int, decimal>();
         decimal required = 0;
@@ -295,6 +296,10 @@ public class SeafoodAllocationService : ITransientDependency
                     remaining -= suggested;
                     previewUsedByBalance[balance.Id] = previewUsedByBalance.GetValueOrDefault(balance.Id) + suggested;
                 }
+                var output = balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId);
+                var (rawEq, yield) = SeafoodYield.ReverseFromOutput(output, suggested);
+                var remainingFg = Math.Max(0, available - (documentStatus.Missing.Count == 0 ? suggested : 0));
+                var remainingRaw = SeafoodYield.ReverseFromOutput(output, remainingFg).RawEquivalentKg;
                 candidates.Add(new AllocationCandidateDto
                 {
                     ContractLineId = line.Id,
@@ -305,6 +310,11 @@ public class SeafoodAllocationService : ITransientDependency
                     SkuName = balance.Sku?.Name ?? string.Empty,
                     AvailableKg = available,
                     SuggestedKg = documentStatus.Missing.Count == 0 ? suggested : 0,
+                    RawEquivalentKg = rawEq,
+                    YieldRatioUsed = yield,
+                    RemainingFgKg = remainingFg,
+                    RemainingRawKg = Math.Max(0, remainingRaw),
+                    Selected = documentStatus.Missing.Count == 0 && suggested > 0,
                     IsDocumentReady = documentStatus.Missing.Count == 0,
                     RequiredDocuments = documentStatus.Required,
                     SupplementalDocuments = documentStatus.Optional,
@@ -336,7 +346,8 @@ public class SeafoodAllocationService : ITransientDependency
             ?? throw new GlobalException("Không tìm thấy hợp đồng.", HttpStatusCode.NotFound);
         var marketCode = await GetMarketCodeAsync(contract.MarketId);
         var etd = request.Etd ?? DateTime.UtcNow;
-        var balances = await _db.InventoryBalances.Include(x => x.Lot)!.ThenInclude(x => x!.Inputs).ToListAsync();
+        var balances = await _db.InventoryBalances.Include(x => x.Lot)!.ThenInclude(x => x!.Inputs)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Outputs).ToListAsync();
         var lineById = contract.Lines.ToDictionary(x => x.Id);
         var requestedByLine = request.Items.GroupBy(x => x.SalesContractLineId).ToDictionary(x => x.Key, x => x.Sum(y => y.QuantityKg));
         var existingByLine = await _db.StockReservations
@@ -394,7 +405,9 @@ public class SeafoodAllocationService : ITransientDependency
             {
                 SalesContractLineId = item.SalesContractLineId,
                 InventoryBalanceId = item.InventoryBalanceId,
-                QuantityKg = item.QuantityKg
+                QuantityKg = item.QuantityKg,
+                RawEquivalentKg = SeafoodYield.ReverseFromOutput(balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId), item.QuantityKg).RawEquivalentKg,
+                YieldRatioUsed = SeafoodYield.ReverseFromOutput(balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId), item.QuantityKg).YieldRatio
             });
             _db.TraceabilityLinks.Add(new TraceabilityLink
             {

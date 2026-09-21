@@ -37,7 +37,15 @@
             <div class="row g-3 align-items-center">
                 <div class="col-md-4"><BootstrapInput @bind-Value="_sku.ExportMarket" DisplayText="Thị trường xuất khẩu" ShowLabel="true" placeholder="USA / EU" /></div>
                 <div class="col-md-4"><VnNumberInput Value="@_sku.DefaultUnitPriceUsd" ValueChanged="@(value => _sku.DefaultUnitPriceUsd = value ?? 0)" DisplayText="Giá mặc định (USD/kg)" ShowLabel="true" /></div>
-                <div class="col-md-4"><div class="sf-modal-status"><Switch @bind-Value="_sku.IsByproduct" DisplayText="Phụ phẩm" ShowLabel="true" OnText="Có" OffText="Không" OnColor="Color.Warning" OffColor="Color.Secondary" /></div></div>
+                <div class="col-md-4">
+                    <Select TValue="int" @bind-Value="_sku.Kind" DisplayText="Loại SKU" ShowLabel="true">
+                        <Options>
+                            <SelectOption Value="1" Text="Thành phẩm" />
+                            <SelectOption Value="2" Text="Bán thành phẩm" />
+                            <SelectOption Value="3" Text="Phụ phẩm" />
+                        </Options>
+                    </Select>
+                </div>
             </div>
         </SeafoodModalSection>
         <SeafoodModalSection Title="Trạng thái" Icon="fa-solid fa-toggle-on">
@@ -111,8 +119,8 @@
                                     <TableColumn TItem="ProductSkuDto" TType="decimal" @bind-Field="@skuColumn.DefaultUnitPriceUsd" Text="Giá USD/kg" Width="150" Align="Alignment.Right">
                                         <Template Context="value">@value.Value.ToString("N2")</Template>
                                     </TableColumn>
-                                    <TableColumn TItem="ProductSkuDto" TType="bool" @bind-Field="@skuColumn.IsByproduct" Text="Loại" Width="130" Align="Alignment.Center">
-                                        <Template Context="value">@(value.Value ? "Phụ phẩm" : "Thành phẩm")</Template>
+                                    <TableColumn TItem="ProductSkuDto" TType="int" @bind-Field="@skuColumn.Kind" Text="Loại" Width="150" Align="Alignment.Center">
+                                        <Template Context="value">@SeafoodLabels.ProductKind(value.Value)</Template>
                                     </TableColumn>
                                     <TableColumn TItem="ProductSkuDto" TType="bool" @bind-Field="@skuColumn.IsActive" Text="Trạng thái" Width="140" Align="Alignment.Center">
                                         <Template Context="value"><SeafoodStatusBadge IsActive="value.Value" /></Template>
@@ -141,7 +149,7 @@
     private int _totalGroups;
 
     private static ProductGroupDto NewGroup() => new() { IsActive = true };
-    private static ProductSkuDto NewSku() => new() { IsActive = true };
+    private static ProductSkuDto NewSku() => new() { IsActive = true, Kind = 1 };
     private async Task<QueryData<ProductGroupDto>> OnGroupsQueryAsync(QueryPageOptions options)
     {
         var page = await Api.ProductsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
@@ -195,11 +203,12 @@
     }
     private async Task OpenCreateSkuAsync() => await OpenCreateSkuAsync(null);
     private async Task OpenCreateSkuAsync(ProductGroupDto? group) { _sku = NewSku(); if (group != null) { _sku.GroupId = group.Id; _sku.GroupName = group.Name; } if (_skuModal != null) await _skuModal.ShowAsync(); }
-    private async Task OpenEditSkuAsync(ProductSkuDto item, ProductGroupDto group) { _sku = new() { Id = item.Id, GroupId = group.Id, GroupName = group.Name, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, IsActive = item.IsActive }; if (_skuModal != null) await _skuModal.ShowAsync(); }
+    private async Task OpenEditSkuAsync(ProductSkuDto item, ProductGroupDto group) { _sku = new() { Id = item.Id, GroupId = group.Id, GroupName = group.Name, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, Kind = item.Kind == 0 ? (item.IsByproduct ? 3 : 1) : item.Kind, IsActive = item.IsActive }; if (_skuModal != null) await _skuModal.ShowAsync(); }
     private async Task<bool> SaveSkuAsync()
     {
         try
         {
+            _sku.IsByproduct = _sku.Kind == 3;
             if (await Api.SaveSkuAsync(_sku) == null)
             {
                 await Toast.Error("Không thể lưu SKU", "Máy chủ không trả về dữ liệu. Vui lòng thử lại.");
@@ -222,7 +231,7 @@
         try
         {
             var wasActive = item.IsActive;
-            var ok = wasActive ? await Api.DeleteSkuAsync(item.Id) : await Api.SaveSkuAsync(new ProductSkuDto { Id = item.Id, GroupId = item.GroupId, GroupName = item.GroupName, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, IsActive = true }) != null;
+            var ok = wasActive ? await Api.DeleteSkuAsync(item.Id) : await Api.SaveSkuAsync(new ProductSkuDto { Id = item.Id, GroupId = item.GroupId, GroupName = item.GroupName, Code = item.Code, Name = item.Name, ExportMarket = item.ExportMarket, DefaultUnitPriceUsd = item.DefaultUnitPriceUsd, IsByproduct = item.IsByproduct, Kind = item.Kind, IsActive = true }) != null;
             if (!ok) { await Toast.Error("Không thể cập nhật SKU", "Vui lòng thử lại."); return; }
             await RefreshAsync();
             await Toast.Success(wasActive ? "Đã khóa SKU." : "Đã mở lại SKU.");

@@ -19,15 +19,60 @@ public class SeafoodRawLotService : ITransientDependency
             var term = search.Trim();
             query = query.Where(x => x.LotNumber.Contains(term) || (x.FishFormCode ?? "").Contains(term) || (x.SizeCode ?? "").Contains(term));
         }
-        return (await query.OrderBy(x => x.ReceivedDate).Take(500).ToListAsync()).Select(x => new RawMaterialLotDto
-        {
-            Id = x.Id, LotNumber = x.LotNumber, InboundPurchaseId = x.InboundPurchaseId, InboundLineId = x.InboundLineId,
-            SupplierName = x.SupplierPartner?.Name, VesselName = x.Vessel?.Name, ReceivedDate = x.ReceivedDate,
-            DeclaredKg = x.DeclaredKg, ActualKg = x.ActualKg, ConsumedKg = x.ProductionInputs.Sum(i => i.QuantityKg),
-            AvailableKg = Math.Max(0, x.ActualKg - x.ProductionInputs.Sum(i => i.QuantityKg)), FishFormCode = x.FishFormCode,
-            SizeCode = x.SizeCode, CatchMethodCode = x.CatchMethodCode, FreezeMethodCode = x.FreezeMethodCode, OriginCode = x.OriginCode
-        }).ToList();
+        return (await query.OrderBy(x => x.ReceivedDate).Take(500).ToListAsync()).Select(Map).ToList();
     }
+
+    public async Task<SeafoodPagedResult<RawMaterialLotDto>> PageAsync(string? search, int skip, int take)
+    {
+        var query = _db.RawMaterialLots.AsNoTracking();
+        var term = search?.Trim();
+        if (!string.IsNullOrWhiteSpace(term))
+            query = query.Where(x => x.LotNumber.Contains(term) || (x.FishFormCode ?? "").Contains(term) || (x.SizeCode ?? "").Contains(term)
+                || (x.FishSpeciesCode ?? "").Contains(term));
+        var total = await query.CountAsync();
+        var rows = await _db.RawMaterialLots.Include(x => x.ProductionInputs).Include(x => x.SupplierPartner).Include(x => x.Vessel)
+            .Where(x => string.IsNullOrWhiteSpace(term) || x.LotNumber.Contains(term) || (x.FishFormCode ?? "").Contains(term)
+                || (x.SizeCode ?? "").Contains(term) || (x.FishSpeciesCode ?? "").Contains(term))
+            .OrderByDescending(x => x.ReceivedDate).Skip(Math.Max(0, skip)).Take(Math.Clamp(take, 1, 100)).ToListAsync();
+        var ids = rows.Select(x => x.Id).ToList();
+        var docs = await _db.DocumentAttachments.Include(x => x.DocumentType)
+            .Where(x => x.OwnerType == "RawMaterialLot" && ids.Contains(x.OwnerId)).ToListAsync();
+        var inboundIds = rows.Select(x => x.InboundPurchaseId).Distinct().ToList();
+        var inboundDocs = await _db.DocumentAttachments.Include(x => x.DocumentType)
+            .Where(x => x.OwnerType == "InboundPurchase" && inboundIds.Contains(x.OwnerId)).ToListAsync();
+        var warehouses = await _db.CatalogLookups.AsNoTracking()
+            .Where(x => x.Category == LookupCategory.Warehouse)
+            .ToDictionaryAsync(x => x.Id, x => x.Name);
+        return new SeafoodPagedResult<RawMaterialLotDto>
+        {
+            TotalCount = total,
+            Items = rows.Select(x =>
+            {
+                var dto = Map(x);
+                dto.WarehouseName = warehouses.GetValueOrDefault(x.WarehouseId ?? 0);
+                dto.Documents = docs.Where(d => d.OwnerId == x.Id)
+                    .Concat(inboundDocs.Where(d => d.OwnerId == x.InboundPurchaseId))
+                    .Select(d => new DocumentAttachmentDto
+                    {
+                        Id = d.Id, OwnerType = d.OwnerType, OwnerId = d.OwnerId, DocumentTypeId = d.DocumentTypeId,
+                        DocumentTypeCode = d.DocumentType?.Code, DocumentTypeName = d.DocumentType?.Name, FileName = d.FileName,
+                        Status = d.Status, UploadedAt = d.UploadedAt
+                    }).ToList();
+                return dto;
+            }).ToList()
+        };
+    }
+
+    private static RawMaterialLotDto Map(RawMaterialLot x) => new()
+    {
+        Id = x.Id, LotNumber = x.LotNumber, InboundPurchaseId = x.InboundPurchaseId, InboundLineId = x.InboundLineId,
+        SupplierName = x.SupplierPartner?.Name, VesselName = x.Vessel?.Name, ReceivedDate = x.ReceivedDate,
+        DeclaredKg = x.DeclaredKg, ActualKg = x.ActualKg, ConsumedKg = x.ProductionInputs.Sum(i => i.QuantityKg),
+        AvailableKg = Math.Max(0, x.ActualKg - x.ProductionInputs.Sum(i => i.QuantityKg)),
+        FishSpeciesCode = x.FishSpeciesCode, SensoryCode = x.SensoryCode, WarehouseId = x.WarehouseId,
+        FishFormCode = x.FishFormCode,
+        SizeCode = x.SizeCode, CatchMethodCode = x.CatchMethodCode, FreezeMethodCode = x.FreezeMethodCode, OriginCode = x.OriginCode
+    };
 
     public async Task<SeafoodSelect2SearchResponseDto> SearchOptionsAsync(string? search, int page = 1, int pageSize = 20)
     {

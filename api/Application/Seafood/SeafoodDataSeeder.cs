@@ -52,6 +52,14 @@ namespace Application.Seafood
             Add(LookupCategory.Carrier, "MSK", "MSK");
             Add(LookupCategory.ContainerType, "20RF", "20RF'");
             Add(LookupCategory.ContainerType, "40RF", "40RF'");
+            Add(LookupCategory.Port, "HPH", "Hải Phòng");
+            Add(LookupCategory.Port, "SGN", "TP. Hồ Chí Minh");
+            Add(LookupCategory.Port, "DAD", "Đà Nẵng");
+            Add(LookupCategory.Port, "LAX", "Los Angeles");
+            Add(LookupCategory.Port, "RTM", "Rotterdam");
+            Add(LookupCategory.UnitOfMeasure, "KG", "Kilogram");
+            Add(LookupCategory.UnitOfMeasure, "LB", "Pound");
+            Add(LookupCategory.UnitOfMeasure, "CTN", "Carton");
             _db.CatalogLookups.AddRange(lookups);
 
             _db.MarketCertificateRules.AddRange(
@@ -85,7 +93,8 @@ namespace Application.Seafood
                     Name = name.Trim(),
                     ExportMarket = market ?? g.DefaultMarket,
                     DefaultUnitPriceUsd = price,
-                    IsByproduct = byproduct
+                    IsByproduct = byproduct,
+                    Kind = byproduct ? ProductKind.Byproduct : ProductKind.FinishedGoods
                 });
             }
 
@@ -171,6 +180,27 @@ namespace Application.Seafood
                 }
             }
             await _db.SaveChangesAsync();
+
+            await EnsureLookupAsync(LookupCategory.Port, "HPH", "Hải Phòng");
+            await EnsureLookupAsync(LookupCategory.Port, "SGN", "TP. Hồ Chí Minh");
+            await EnsureLookupAsync(LookupCategory.Port, "DAD", "Đà Nẵng");
+            await EnsureLookupAsync(LookupCategory.Port, "LAX", "Los Angeles");
+            await EnsureLookupAsync(LookupCategory.Port, "RTM", "Rotterdam");
+            await EnsureLookupAsync(LookupCategory.UnitOfMeasure, "KG", "Kilogram");
+            await EnsureLookupAsync(LookupCategory.UnitOfMeasure, "LB", "Pound");
+            await EnsureLookupAsync(LookupCategory.UnitOfMeasure, "CTN", "Carton");
+            await EnsureLookupAsync(LookupCategory.Warehouse, "COLD", "Kho lạnh");
+            foreach (var sku in await _db.ProductSkus.Where(x => x.Kind == 0).ToListAsync())
+            {
+                sku.Kind = sku.IsByproduct ? ProductKind.Byproduct : ProductKind.FinishedGoods;
+            }
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task EnsureLookupAsync(LookupCategory category, string code, string name)
+        {
+            if (!await _db.CatalogLookups.AnyAsync(x => x.Category == category && x.Code == code))
+                _db.CatalogLookups.Add(new CatalogLookup { Category = category, Code = code, Name = name, IsActive = true });
         }
     }
 }

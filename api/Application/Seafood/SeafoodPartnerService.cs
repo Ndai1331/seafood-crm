@@ -67,6 +67,21 @@ public class SeafoodPartnerService : ITransientDependency
         return Map(await _db.BusinessPartners.Include(x => x.Roles).FirstAsync(x => x.Id == entity.Id));
     }
 
+    public async Task<SeafoodSelect2SearchResponseDto> SearchVesselsAsync(string? search, int page = 1, int pageSize = 20)
+    {
+        var query = _db.Vessels.AsNoTracking().Where(x => x.IsActive);
+        var term = search?.Trim();
+        if (!string.IsNullOrWhiteSpace(term))
+            query = query.Where(x => x.Code.Contains(term) || x.Name.Contains(term) || (x.Flag ?? "").Contains(term));
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        var total = await query.CountAsync();
+        var results = await query.OrderBy(x => x.Code).Skip((page - 1) * pageSize).Take(pageSize)
+            .Select(x => new SeafoodSelectOptionDto { Id = x.Id, Text = x.Code + " — " + x.Name, Description = x.Flag, Code = x.Code })
+            .ToListAsync();
+        return new SeafoodSelect2SearchResponseDto { Results = results, More = page * pageSize < total };
+    }
+
     public async Task<List<VesselDto>> ListVesselsAsync()
         => (await _db.Vessels.Include(x => x.OwnerPartner).OrderBy(x => x.Code).ToListAsync()).Select(Map).ToList();
 

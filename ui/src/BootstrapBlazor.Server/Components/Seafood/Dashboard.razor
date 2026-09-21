@@ -24,6 +24,7 @@
             <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-amber"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Tồn kho</div><div class="sf-kpi-value">@_data.OnHandKg.ToString("N0") <small>kg</small></div></div></div>
             <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-slate"><i class="fa-solid fa-file-signature" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Hợp đồng mở</div><div class="sf-kpi-value">@_data.OpenContractUsd.ToString("N0") <small>USD</small></div></div></div>
             <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-red"><i class="fa-solid fa-coins" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Công nợ</div><div class="sf-kpi-value">@_data.OutstandingPaymentUsd.ToString("N0") <small>USD</small></div></div></div>
+            <div class="sf-kpi-card"><span class="sf-kpi-icon sf-kpi-icon-red"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span><div><div class="sf-kpi-label">Quá hạn</div><div class="sf-kpi-value">@_data.OverduePaymentUsd.ToString("N0") <small>USD</small></div></div></div>
         </div>
         <div class="row g-4 mt-1">
             <div class="col-lg-6">

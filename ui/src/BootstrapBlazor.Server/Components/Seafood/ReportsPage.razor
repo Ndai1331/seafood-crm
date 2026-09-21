@@ -1,0 +1,82 @@
+@page "/reports"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject DownloadFileService Download
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Báo cáo quản lý</h3>
+            <p>Lọc theo khoảng thời gian: nhập NL, tồn, sản xuất + thu hồi, đơn hàng, xuất, công nợ. Xuất Excel.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-file-excel me-1" aria-hidden="true"></i>Reports</span>
+    </div>
+    <div class="sf-form-section">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <Select @bind-Value="_kind" DisplayText="Loại báo cáo" ShowLabel="true">
+                    <Options>
+                        <SelectOption Value="inbound" Text="Nhập nguyên liệu" />
+                        <SelectOption Value="inventory" Text="Tồn kho" />
+                        <SelectOption Value="production" Text="Sản xuất & thu hồi" />
+                        <SelectOption Value="orders" Text="Đơn hàng" />
+                        <SelectOption Value="shipments" Text="Xuất hàng" />
+                        <SelectOption Value="ar" Text="Công nợ" />
+                    </Options>
+                </Select>
+            </div>
+            <div class="col-md-3"><DateTimePicker @bind-Value="_from" DisplayText="Từ ngày" ShowLabel="true" /></div>
+            <div class="col-md-3"><DateTimePicker @bind-Value="_to" DisplayText="Đến ngày" ShowLabel="true" /></div>
+            <div class="col-auto"><Button Color="Color.Primary" OnClick="LoadAsync">Xem</Button></div>
+            <div class="col-auto"><Button Color="Color.Success" Icon="fa-solid fa-file-excel" Text="Xuất Excel" OnClick="ExportAsync" /></div>
+        </div>
+    </div>
+    @if (_table == null)
+    {
+        <div class="sf-empty-state"><i class="fa-solid fa-chart-column" aria-hidden="true"></i>Chọn loại báo cáo và khoảng thời gian.</div>
+    }
+    else
+    {
+        <h5 class="mb-3">@_table.Title · @_table.Rows.Count dòng</h5>
+        <div class="table-responsive sf-table-shell">
+            <table class="table table-striped">
+                <thead><tr>@foreach (var col in _table.Columns) { <th>@col</th> }</tr></thead>
+                <tbody>
+                    @foreach (var row in _table.Rows)
+                    {
+                        <tr>@foreach (var cell in row) { <td>@cell</td> }</tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private string _kind = "inbound";
+    private DateTime _from = DateTime.Today.AddMonths(-1);
+    private DateTime _to = DateTime.Today;
+    private ReportTableDto? _table;
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            _table = await Api.ReportAsync(_kind, _from, _to.AddDays(1));
+            if (_table == null) await Toast.Error("Không tải được báo cáo.");
+        }
+        catch (Exception ex) { await Toast.Error("Không tải được báo cáo", ApiErrorMessage.Describe(ex, "Thử lại khoảng thời gian khác.")); }
+    }
+    private async Task ExportAsync()
+    {
+        try
+        {
+            var bytes = await Api.ReportExcelAsync(_kind, _from, _to.AddDays(1));
+            if (bytes.Length == 0) { await Toast.Error("File Excel trống."); return; }
+            await Download.DownloadFileAsync(bytes, "xlsx", $"bao-cao-{_kind}");
+            await Toast.Success("Đã tải Excel.");
+        }
+        catch (Exception ex) { await Toast.Error("Không xuất được Excel", ApiErrorMessage.Describe(ex, "Kiểm tra quyền báo cáo.")); }
+    }
+}

@@ -22,6 +22,7 @@ namespace Core.Const
         public const string MasterCatalog = "master-data.catalog";
         public const string MasterProducts = "master-data.products";
         public const string MasterCustomers = "master-data.customers";
+        public const string MasterPartners = "master-data.partners";
         public const string MasterPaymentTerms = "master-data.payment-terms";
         public const string MasterDocumentTypes = "master-data.document-types";
         public const string MasterDocumentRules = "master-data.document-rules";
@@ -33,12 +34,17 @@ namespace Core.Const
         public const string ExportAllocations = "export.allocations";
         public const string FinancePayments = "finance.payments";
         public const string FinanceDeposits = "finance.deposits";
+        public const string FinanceInvoices = "finance.invoices";
+        public const string ReportsView = "reports.view";
+        public const string ModReports = "reports";
         public const string UserManager = "system.user-manager";
         public const string TeamManager = "system.team";
         public const string SsoSettings = "system.sso-settings";
         public const string PermissionMatrix = "system.permission-matrix";
         public const string MenuArrangement = "system.menu-arrangement";
         public const string SystemAudit = "system.audit-log";
+        public const string SystemBackup = "system.backup";
+        public const string SystemHelp = "system.help";
 
         public static readonly IReadOnlyList<PermissionDefinition> All = new List<PermissionDefinition>
         {
@@ -46,10 +52,12 @@ namespace Core.Const
             new(MasterCatalog, ModMaster, "Danh mục", "Danh mục chung", "master-data/catalog"),
             new(MasterProducts, ModMaster, "Danh mục", "Mặt hàng / SKU", "master-data/products"),
             new(MasterCustomers, ModMaster, "Danh mục", "Khách hàng", "master-data/customers"),
+            new(MasterPartners, ModMaster, "Danh mục", "Đối tác & tàu", "master-data/partners"),
             new(MasterPaymentTerms, ModMaster, "Danh mục", "Điều khoản thanh toán", "master-data/payment-terms"),
             new(MasterDocumentTypes, ModMaster, "Danh mục", "Loại chứng từ", "master-data/document-types"),
             new(MasterDocumentRules, ModMaster, "Danh mục", "Quy tắc chứng từ theo thị trường", "master-data/document-rules"),
             new(Inbound, ModInbound, "Nhập hàng", "Nhập nguyên liệu", "inbound"),
+            new(Inbound, ModInbound, "Nhập hàng", "Hồ sơ lô nguyên liệu", "inbound/lots"),
             new(Production, ModProduction, "Sản xuất", "Đưa vào sản xuất", "production"),
             new(Inventory, ModInventory, "Kho", "Tồn kho & chứng từ", "inventory"),
             new(ExportQuotes, ModExport, "Xuất khẩu", "Báo giá / Hợp đồng", "export/quotes"),
@@ -57,12 +65,16 @@ namespace Core.Const
             new(ExportAllocations, ModExport, "Xuất khẩu", "Xếp lô & chứng từ", "export/allocations"),
             new(FinancePayments, ModFinance, "Tài chính", "Theo dõi thanh toán", "finance/payments"),
             new(FinanceDeposits, ModFinance, "Tài chính", "Deposit", "finance/deposits"),
+            new(FinanceInvoices, ModFinance, "Tài chính", "Hóa đơn & công nợ", "finance/invoices"),
+            new(ReportsView, ModReports, "Báo cáo", "Báo cáo quản lý", "reports"),
             new(UserManager, ModSystem, "Quản trị hệ thống", "Quản lý người dùng", "user-manager"),
             new(TeamManager, ModSystem, "Quản trị hệ thống", "Quản lý team", "team"),
             new(SsoSettings, ModSystem, "Quản trị hệ thống", "Cài đặt đăng nhập", "sso-settings"),
             new(PermissionMatrix, ModSystem, "Quản trị hệ thống", "Phân quyền", "permission-matrix"),
             new(MenuArrangement, ModSystem, "Quản trị hệ thống", "Sắp xếp menu", "menu-arrangement"),
             new(SystemAudit, ModSystem, "Quản trị hệ thống", "Nhật ký hệ thống", "system/audit-log"),
+            new(SystemBackup, ModSystem, "Quản trị hệ thống", "Sao lưu dữ liệu", "system/backup"),
+            new(SystemHelp, ModSystem, "Quản trị hệ thống", "Hướng dẫn & bàn giao", "system/help"),
         };
     }
 }

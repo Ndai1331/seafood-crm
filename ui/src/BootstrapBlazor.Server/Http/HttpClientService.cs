@@ -249,6 +249,15 @@ namespace BootstrapBlazor.Server.Http
             throw new Exception($"API call failed with status code: {httpResponseMessage.StatusCode}");
         }
 
+        public static async Task<byte[]> GetAPIBytesAsync([Required] string URL)
+        {
+            using var request = await CreateRequestMessageAsync(HttpMethod.Get, URL);
+            var httpResponseMessage = await _client.SendAsync(request, _tokenSource.Token);
+            if (httpResponseMessage.IsSuccessStatusCode)
+                return await httpResponseMessage.Content.ReadAsByteArrayAsync();
+            throw new Exception($"API call failed with status code: {httpResponseMessage.StatusCode}");
+        }
+
         public static async Task<T> PatchAPIAsync<T>([Required] string URL, dynamic input, bool notifyOk = true)
         {
             HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
