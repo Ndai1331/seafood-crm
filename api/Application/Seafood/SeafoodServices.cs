@@ -326,6 +326,8 @@ namespace Application.Seafood
                 inputDtos = legacyLots.Take(1).Select(x => new ProductionInputDto { RawMaterialLotId = x.Id, QuantityKg = dto.RawMaterialKg }).ToList();
             }
             var inputIds = inputDtos.GroupBy(x => x.RawMaterialLotId).ToDictionary(x => x.Key, x => x.Sum(y => y.QuantityKg));
+            if (inputIds.Count == 0)
+                throw new GlobalException("Mẻ sản xuất phải chọn ít nhất một lô nguyên liệu.", HttpStatusCode.BadRequest);
             if (inputIds.Any(x => x.Value <= 0))
                 throw new GlobalException("Nguyên liệu đầu vào phải lớn hơn 0.", HttpStatusCode.BadRequest);
             var totalInputKg = inputIds.Values.Sum();
@@ -593,7 +595,9 @@ namespace Application.Seafood
         {
             var rows = await _db.SalesContracts.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Lines).ThenInclude(l => l.Sku)
                 .OrderByDescending(x => x.Id).ToListAsync();
-            return rows.Select(MapContract).ToList();
+            var items = rows.Select(MapContract).ToList();
+            await AttachMarketNamesAsync(items);
+            return items;
         }
 
         public async Task<SeafoodPagedResult<SalesContractDto>> PageContractsAsync(string? search, int skip, int take)
@@ -605,7 +609,9 @@ namespace Application.Seafood
                     || x.Lines.Any(l => l.Sku != null && l.Sku.Name.Contains(term)));
             var total = await query.CountAsync();
             var rows = await query.OrderByDescending(x => x.Id).Skip(Math.Max(0, skip)).Take(Math.Clamp(take, 1, 100)).ToListAsync();
-            return new SeafoodPagedResult<SalesContractDto> { Items = rows.Select(MapContract).ToList(), TotalCount = total };
+            var items = rows.Select(MapContract).ToList();
+            await AttachMarketNamesAsync(items);
+            return new SeafoodPagedResult<SalesContractDto> { Items = items, TotalCount = total };
         }
 
         public async Task<SalesContractDto> SaveContractAsync(SalesContractDto dto)
@@ -935,6 +941,17 @@ namespace Application.Seafood
             await _db.SaveChangesAsync();
             await transaction.CommitAsync();
             return MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+        }
+
+        private async Task AttachMarketNamesAsync(List<SalesContractDto> items)
+        {
+            var ids = items.Where(x => x.MarketId.HasValue).Select(x => x.MarketId!.Value).Distinct().ToList();
+            if (ids.Count == 0) return;
+            var names = await _db.CatalogLookups.AsNoTracking()
+                .Where(x => x.Category == LookupCategory.Market && ids.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, x => x.Name);
+            foreach (var item in items)
+                if (item.MarketId is int id) item.MarketName = names.GetValueOrDefault(id);
         }
 
         private static SalesContractDto MapContract(SalesContract x)

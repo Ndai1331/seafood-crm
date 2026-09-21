@@ -18,4 +18,13 @@ internal static class SeafoodYield
         : sku.Kind == ProductKind.Wip ? StockLotKind.Wip
         : sku.Kind == ProductKind.Byproduct || sku.IsByproduct ? StockLotKind.Byproduct
         : StockLotKind.FinishedGoods;
+
+    // Filter in SQL (KindOf cannot be translated by EF).
+    public static IQueryable<InventoryBalance> WhereKind(IQueryable<InventoryBalance> query, StockLotKind kind) => kind switch
+    {
+        StockLotKind.Wip => query.Where(x => x.Sku != null && x.Sku.Kind == ProductKind.Wip),
+        StockLotKind.Byproduct => query.Where(x => x.Sku != null && (x.Sku.Kind == ProductKind.Byproduct || x.Sku.IsByproduct)),
+        StockLotKind.FinishedGoods => query.Where(x => x.Sku != null && x.Sku.Kind != ProductKind.Wip && x.Sku.Kind != ProductKind.Byproduct && !x.Sku.IsByproduct),
+        _ => query
+    };
 }

@@ -116,8 +116,12 @@ namespace Core.Helper
 
 
 
-        public static void WriteLog(Exception e, string basePath)
+        public static void WriteLog(Exception e, string? basePath)
         {
+            if (string.IsNullOrWhiteSpace(basePath))
+            {
+                return;
+            }
             if (!Directory.Exists(basePath))
             {
                 Directory.CreateDirectory(basePath);

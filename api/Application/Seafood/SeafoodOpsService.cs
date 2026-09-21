@@ -54,7 +54,7 @@ public class SeafoodOpsService : ITransientDependency
             fg = fg.Where(x => (x.Lot!.LotNumber ?? "").Contains(termFg) || (x.Sku!.Name ?? "").Contains(termFg));
         if (warehouseId is int warehouse) fg = fg.Where(x => x.WarehouseId == warehouse);
         if (kind is StockLotKind filterKind)
-            fg = fg.Where(x => SeafoodYield.KindOf(x.Sku) == filterKind);
+            fg = SeafoodYield.WhereKind(fg, filterKind);
         var totalFg = await fg.CountAsync();
         var items = await fg.OrderBy(x => x.Lot!.ReceivedDate).Skip(skip).Take(take).ToListAsync();
         var namesFg = await WarehouseNamesAsync();
