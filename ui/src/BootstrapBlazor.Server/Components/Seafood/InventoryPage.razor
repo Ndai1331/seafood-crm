@@ -49,7 +49,7 @@
         <SeafoodModalSection Title="Dịch chuyển" Icon="fa-solid fa-right-left">
             <div class="row g-3">
                 <div class="col-12"><strong>@_selected?.LotNumber</strong> · khả dụng @_selected?.AvailableKg.ToString("N2") kg</div>
-                <div class="col-md-6"><label class="form-label">Kho đích</label><SeafoodSelect2 Value="@_transfer.ToWarehouseId == 0 ? null : _transfer.ToWarehouseId" ValueChanged="OnToWarehouseChanged" Search="SearchWarehousesAsync" Placeholder="Kho nhận" /></div>
+                <div class="col-md-6"><label class="form-label">Kho đích</label><SeafoodSelect2 Value="@ToWarehouseValue" ValueChanged="OnToWarehouseChanged" Search="SearchWarehousesAsync" Placeholder="Kho nhận" /></div>
                 <div class="col-md-6"><VnNumberInput Value="@_transfer.QuantityKg" ValueChanged="@(value => _transfer.QuantityKg = value ?? 0)" DisplayText="Số kg chuyển" ShowLabel="true" /></div>
                 <div class="col-12"><Textarea @bind-Value="_transfer.Reason" DisplayText="Lý do" ShowLabel="true" rows="2" /></div>
             </div>
@@ -93,6 +93,7 @@
     private InventoryRowDto? _selected;
     private InventoryAdjustmentDto _adjustment = new();
     private InventoryTransferDto _transfer = new();
+    private int? ToWarehouseValue => _transfer.ToWarehouseId > 0 ? _transfer.ToWarehouseId : null;
 
     private async Task SelectKindAsync(int kind)
     {
