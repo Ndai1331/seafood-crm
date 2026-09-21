@@ -289,7 +289,7 @@ namespace SqlServ4r.EntityFramework
             builder.Entity<InventoryBalance>(entity =>
             {
                 entity.ToTable("inventory_balances");
-                entity.HasIndex(p => new { p.LotId, p.SkuId }).IsUnique();
+                entity.HasIndex(p => new { p.LotId, p.SkuId, p.WarehouseId }).IsUnique();
                 entity.HasMany(p => p.Movements).WithOne(m => m.InventoryBalance).HasForeignKey(m => m.InventoryBalanceId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasMany(p => p.Reservations).WithOne(r => r.InventoryBalance).HasForeignKey(r => r.InventoryBalanceId).OnDelete(DeleteBehavior.Restrict);
             });
@@ -328,6 +328,7 @@ namespace SqlServ4r.EntityFramework
                 entity.ToTable("sales_contracts");
                 entity.HasIndex(p => p.ContractNo).IsUnique();
                 entity.HasMany(p => p.Lines).WithOne(l => l.Contract).HasForeignKey(l => l.ContractId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(p => p.PaymentTerm).WithMany().HasForeignKey(p => p.PaymentTermId).OnDelete(DeleteBehavior.SetNull);
             });
 
             builder.Entity<SalesContractLine>(entity =>
@@ -394,6 +395,7 @@ namespace SqlServ4r.EntityFramework
             builder.Entity<DepositAllocation>(entity =>
             {
                 entity.ToTable("deposit_allocations");
+                entity.HasOne(p => p.SalesInvoice).WithMany().HasForeignKey(p => p.SalesInvoiceId).OnDelete(DeleteBehavior.SetNull);
             });
 
             builder.Entity<ExchangeRateSnapshot>(entity =>

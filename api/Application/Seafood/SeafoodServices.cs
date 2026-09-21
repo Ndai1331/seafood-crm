@@ -174,6 +174,12 @@ namespace Application.Seafood
             var saved = await _db.InboundPurchases.Include(x => x.Customer).Include(x => x.SupplierPartner).Include(x => x.Vessel)
                 .Include(x => x.Lines).ThenInclude(x => x.RawMaterialLot).FirstAsync(x => x.Id == entity.Id);
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "InboundPurchase" && x.OwnerId == entity.Id).ToListAsync();
+            _db.DomainAuditLogs.Add(new DomainAuditLog
+            {
+                EntityType = "InboundPurchase", EntityId = entity.Id, Action = dto.Id == 0 ? "Created" : "Updated",
+                ChangesJson = JsonConvert.SerializeObject(new { entity.BlNumber, entity.ContainerNo, entity.SupplierPartnerId, Lines = entity.Lines.Count })
+            });
+            await _db.SaveChangesAsync();
             return Map(saved, docs);
         }
 
@@ -275,7 +281,8 @@ namespace Application.Seafood
             if (await _db.ProductionLots.AnyAsync(x => x.Id != dto.Id && x.LotNumber == dto.LotNumber))
                 throw new GlobalException("Số lot sản xuất đã tồn tại.", HttpStatusCode.Conflict);
 
-            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+            {
             ProductionLot entity;
             var previousOutputBySku = new Dictionary<int, decimal>();
             if (dto.Id == 0)
@@ -320,12 +327,15 @@ namespace Application.Seafood
                 inputDtos = legacyLots.Take(1).Select(x => new ProductionInputDto { RawMaterialLotId = x.Id, QuantityKg = dto.RawMaterialKg }).ToList();
             }
             var inputIds = inputDtos.GroupBy(x => x.RawMaterialLotId).ToDictionary(x => x.Key, x => x.Sum(y => y.QuantityKg));
+            if (inputIds.Count == 0)
+                throw new GlobalException("Mẻ sản xuất phải chọn ít nhất một lô nguyên liệu.", HttpStatusCode.BadRequest);
             if (inputIds.Any(x => x.Value <= 0))
                 throw new GlobalException("Nguyên liệu đầu vào phải lớn hơn 0.", HttpStatusCode.BadRequest);
             var totalInputKg = inputIds.Values.Sum();
             if (entity.RawMaterialKg <= 0) entity.RawMaterialKg = totalInputKg;
             if (totalInputKg > entity.RawMaterialKg + 0.0001m)
                 throw new GlobalException("Tổng nguyên liệu các lô đầu vào vượt khối lượng nguyên liệu của mẻ.", HttpStatusCode.BadRequest);
+            int? warehouseId = null;
             foreach (var input in inputIds)
             {
                 var raw = await _db.RawMaterialLots.Include(x => x.ProductionInputs).FirstOrDefaultAsync(x => x.Id == input.Key)
@@ -333,6 +343,7 @@ namespace Application.Seafood
                 var alreadyConsumed = raw.ProductionInputs.Where(x => x.ProductionLotId != entity.Id).Sum(x => x.QuantityKg);
                 if (alreadyConsumed + input.Value > raw.ActualKg + 0.0001m)
                     throw new GlobalException($"Lô nguyên liệu {raw.LotNumber} không đủ khả dụng (còn {raw.ActualKg - alreadyConsumed:N2} kg).", HttpStatusCode.Conflict);
+                warehouseId ??= raw.WarehouseId;
                 entity.Inputs.Add(new ProductionInput { RawMaterialLotId = raw.Id, QuantityKg = input.Value, Reason = inputDtos.First(x => x.RawMaterialLotId == raw.Id).Reason });
             }
             await _db.SaveChangesAsync();
@@ -341,14 +352,15 @@ namespace Application.Seafood
             var allSkuIds = previousOutputBySku.Keys.Union(newOutputBySku.Keys).ToList();
             foreach (var skuId in allSkuIds)
             {
-                var bal = await _db.InventoryBalances.FirstOrDefaultAsync(b => b.LotId == entity.Id && b.SkuId == skuId);
+                var bal = await _db.InventoryBalances.FirstOrDefaultAsync(b => b.LotId == entity.Id && b.SkuId == skuId && b.WarehouseId == warehouseId);
                 var oldOutput = previousOutputBySku.GetValueOrDefault(skuId);
                 var newOutput = newOutputBySku.GetValueOrDefault(skuId);
                 if (bal == null)
                 {
                     bal = new InventoryBalance
                     {
-                        LotId = entity.Id, SkuId = skuId, OnHandKg = newOutput, AllocatedKg = 0, WarehouseId = null
+                        LotId = entity.Id, SkuId = skuId, OnHandKg = newOutput, AllocatedKg = 0,
+                        WarehouseId = warehouseId
                     };
                     _db.InventoryBalances.Add(bal);
                     await _db.SaveChangesAsync();
@@ -373,14 +385,26 @@ namespace Application.Seafood
                     });
             }
             foreach (var input in entity.Inputs)
+            {
                 _db.TraceabilityLinks.Add(new TraceabilityLink { FromType = "RawMaterialLot", FromId = input.RawMaterialLotId, ToType = "ProductionLot", ToId = entity.Id, QuantityKg = input.QuantityKg });
-            _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "ProductionLot", EntityId = entity.Id, Action = dto.Id == 0 ? "Created" : "Adjusted", Reason = dto.Note });
+                _db.DomainAuditLogs.Add(new DomainAuditLog
+                {
+                    EntityType = "RawMaterialLot", EntityId = input.RawMaterialLotId, Action = "ProductionConsumption",
+                    Reason = $"Lot {entity.LotNumber}", ChangesJson = JsonConvert.SerializeObject(new { input.QuantityKg, ProductionLotId = entity.Id })
+                });
+            }
+            var recoveredKg = entity.Outputs.Sum(o => o.RecoveredKg);
+            _db.DomainAuditLogs.Add(new DomainAuditLog
+            {
+                EntityType = "ProductionLot", EntityId = entity.Id, Action = dto.Id == 0 ? "Created" : "Adjusted",
+                Reason = dto.Note, ChangesJson = JsonConvert.SerializeObject(new { entity.RawMaterialKg, RecoveredKg = recoveredKg, WasteKg = Math.Max(0, entity.RawMaterialKg - recoveredKg) })
+            });
             await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
             var saved = await _db.ProductionLots.Include(x => x.Outputs).ThenInclude(o => o.Sku)
                 .Include(x => x.Certificates).Include(x => x.Inputs).ThenInclude(i => i.RawMaterialLot).FirstAsync(x => x.Id == entity.Id);
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "ProductionLot" && x.OwnerId == entity.Id).ToListAsync();
             return Map(saved, docs);
+            });
         }
 
         private static ProductionLotDto Map(ProductionLot x, IEnumerable<DocumentAttachment>? docs = null)
@@ -391,6 +415,7 @@ namespace Application.Seafood
                 Id = x.Id, LotNumber = x.LotNumber, InboundPurchaseId = x.InboundPurchaseId,
                 ReceivedDate = x.ReceivedDate, RawMaterialKg = x.RawMaterialKg, TargetMarketId = x.TargetMarketId,
                 RecoveryRatio = x.RawMaterialKg == 0 ? 0 : decimal.Round(recovered / x.RawMaterialKg, 4),
+                WasteKg = Math.Max(0, x.RawMaterialKg - recovered),
                 Note = x.Note,
                 CertificateCodes = x.Certificates.Select(c => c.CertificateCode).ToList(),
                 Documents = docs?.Select(MapDocument).ToList() ?? new(),
@@ -492,22 +517,18 @@ namespace Application.Seafood
             return result;
         }
 
-        public async Task<SeafoodPagedResult<InventoryRowDto>> PageAsync(string? search, int skip, int take)
+        public async Task<SeafoodPagedResult<InventoryRowDto>> PageAsync(string? search, int skip, int take, StockLotKind? kind = null, int? warehouseId = null)
         {
-            var query = _db.InventoryBalances.AsNoTracking().Include(x => x.Lot).Include(x => x.Sku).AsQueryable();
-            var term = search?.Trim();
-            if (!string.IsNullOrWhiteSpace(term))
-                query = query.Where(x => (x.Lot!.LotNumber ?? "").Contains(term) || (x.Sku!.Name ?? "").Contains(term));
-            var total = await query.CountAsync();
-            var items = await ListAsync(search, skip, take);
-            return new SeafoodPagedResult<InventoryRowDto> { Items = items, TotalCount = total };
+            var ops = new SeafoodOpsService(_db);
+            return await ops.UnifiedInventoryAsync(search, skip, take, kind, warehouseId);
         }
 
         public async Task<InventoryRowDto> AdjustAsync(InventoryAdjustmentDto dto, int? userId)
         {
             if (dto.InventoryBalanceId <= 0 || dto.QuantityKg == 0 || string.IsNullOrWhiteSpace(dto.Reason))
                 throw new GlobalException("Điều chỉnh kho phải có dòng tồn, số lượng khác 0 và lý do.", HttpStatusCode.BadRequest);
-            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+            {
             var balance = await _db.InventoryBalances.Include(x => x.Lot).Include(x => x.Sku).Include(x => x.Movements)
                 .FirstOrDefaultAsync(x => x.Id == dto.InventoryBalanceId)
                 ?? throw new GlobalException("Không tìm thấy dòng tồn kho.", HttpStatusCode.NotFound);
@@ -526,7 +547,6 @@ namespace Application.Seafood
             });
             _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "InventoryBalance", EntityId = balance.Id, Action = "Adjusted", UserId = userId, Reason = dto.Reason.Trim() });
             await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
             return new InventoryRowDto
             {
                 Id = balance.Id, LotId = balance.LotId, LotNumber = balance.Lot?.LotNumber ?? "", SkuId = balance.SkuId,
@@ -538,6 +558,7 @@ namespace Application.Seafood
                     ReferenceId = x.ReferenceId, OccurredAt = x.OccurredAt, Reason = x.Reason
                 }).ToList()
             };
+            });
         }
     }
 
@@ -574,21 +595,25 @@ namespace Application.Seafood
 
         public async Task<List<SalesContractDto>> ListContractsAsync()
         {
-            var rows = await _db.SalesContracts.Include(x => x.Customer).Include(x => x.Lines).ThenInclude(l => l.Sku)
+            var rows = await _db.SalesContracts.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Lines).ThenInclude(l => l.Sku)
                 .OrderByDescending(x => x.Id).ToListAsync();
-            return rows.Select(MapContract).ToList();
+            var items = rows.Select(MapContract).ToList();
+            await AttachMarketNamesAsync(items);
+            return items;
         }
 
         public async Task<SeafoodPagedResult<SalesContractDto>> PageContractsAsync(string? search, int skip, int take)
         {
-            var query = _db.SalesContracts.AsNoTracking().Include(x => x.Customer).Include(x => x.Lines).ThenInclude(l => l.Sku).AsQueryable();
+            var query = _db.SalesContracts.AsNoTracking().Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Lines).ThenInclude(l => l.Sku).AsQueryable();
             var term = search?.Trim();
             if (!string.IsNullOrWhiteSpace(term))
                 query = query.Where(x => x.ContractNo.Contains(term) || (x.Customer != null && x.Customer.Name.Contains(term))
                     || x.Lines.Any(l => l.Sku != null && l.Sku.Name.Contains(term)));
             var total = await query.CountAsync();
             var rows = await query.OrderByDescending(x => x.Id).Skip(Math.Max(0, skip)).Take(Math.Clamp(take, 1, 100)).ToListAsync();
-            return new SeafoodPagedResult<SalesContractDto> { Items = rows.Select(MapContract).ToList(), TotalCount = total };
+            var items = rows.Select(MapContract).ToList();
+            await AttachMarketNamesAsync(items);
+            return new SeafoodPagedResult<SalesContractDto> { Items = items, TotalCount = total };
         }
 
         public async Task<SalesContractDto> SaveContractAsync(SalesContractDto dto)
@@ -621,6 +646,7 @@ namespace Application.Seafood
             entity.CustomerContractNo = dto.CustomerContractNo;
             entity.CustomerId = dto.CustomerId;
             entity.MarketId = dto.MarketId;
+            entity.PaymentTermId = dto.PaymentTermId;
             entity.Lines = dto.Lines.Select(l =>
             {
                 var kg = l.QtyKg > 0 ? l.QtyKg : WeightUnits.LbsToKg(l.QtyLbs);
@@ -669,7 +695,9 @@ namespace Application.Seafood
                 .Include(x => x.Containers).Include(x => x.Documents).ThenInclude(x => x.DocumentAttachment)
                 .OrderByDescending(x => x.Id).ToListAsync();
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "Shipment").ToListAsync();
-            return rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            var items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            await AttachShipmentNamesAsync(items);
+            return items;
         }
 
         public async Task<SeafoodPagedResult<ExportShipmentDto>> PageShipmentsAsync(string? search, int skip, int take)
@@ -688,7 +716,9 @@ namespace Application.Seafood
                 .OrderByDescending(x => x.Id).Skip(Math.Max(0, skip)).Take(Math.Clamp(take, 1, 100)).ToListAsync();
             var ids = rows.Select(x => x.Id).ToList();
             var docs = await _db.DocumentAttachments.Include(x => x.DocumentType).Where(x => x.OwnerType == "Shipment" && ids.Contains(x.OwnerId)).ToListAsync();
-            return new SeafoodPagedResult<ExportShipmentDto> { Items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList(), TotalCount = total };
+            var items = rows.Select(x => MapShip(x, docs.Where(d => d.OwnerId == x.Id))).ToList();
+            await AttachShipmentNamesAsync(items);
+            return new SeafoodPagedResult<ExportShipmentDto> { Items = items, TotalCount = total };
         }
 
         public async Task<ExportShipmentDto> SaveShipmentAsync(ExportShipmentDto dto)
@@ -738,6 +768,9 @@ namespace Application.Seafood
             entity.AmountUsd = dto.AmountUsd;
             entity.ContainerNo = dto.ContainerNo;
             entity.ContainerType = dto.ContainerType;
+            entity.CarrierId = dto.CarrierId;
+            entity.PortOfLoadingId = dto.PortOfLoadingId;
+            entity.PortOfDischargeId = dto.PortOfDischargeId;
             entity.Route = dto.Route;
             entity.Status = dto.Status == ShipmentStatus.Shipped ? ShipmentStatus.Draft : dto.Status;
             await _db.SaveChangesAsync();
@@ -795,12 +828,15 @@ namespace Application.Seafood
                 }
             }
             await _db.SaveChangesAsync();
-            return MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            var savedShip = MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            await AttachShipmentNamesAsync(new[] { savedShip });
+            return savedShip;
         }
 
-        public async Task<ExportShipmentDto> ConfirmShipmentAsync(int id, int? userId)
+        public async Task<ExportShipmentDto> ConfirmShipmentAsync(int id, int? userId, ShipmentConfirmDto? request = null)
         {
-            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+            {
             var entity = await _db.ExportShipments.Include(x => x.SalesContract).ThenInclude(x => x!.Lines)
                 .Include(x => x.Containers).FirstOrDefaultAsync(x => x.Id == id)
                 ?? throw new GlobalException("Không tìm thấy shipment.", HttpStatusCode.NotFound);
@@ -836,8 +872,10 @@ namespace Application.Seafood
                 var owners = new List<(string OwnerType, int OwnerId)> { ("ProductionLot", allocation.InventoryBalance!.LotId) };
                 owners.AddRange(allocation.InventoryBalance.Lot!.Inputs.Select(x => ("RawMaterialLot", x.RawMaterialLotId)));
                 var status = await _documents.GetRequiredDocumentStatusAsync(owners, marketCode, effectiveDate);
-                if (status.Missing.Count > 0)
+                if (status.Missing.Count > 0 && request?.OverrideDocumentCheck != true)
                     throw new GlobalException($"Lô {allocation.InventoryBalance.Lot.LotNumber} thiếu giấy: {string.Join(", ", status.Missing)}.", HttpStatusCode.BadRequest);
+                if (status.Missing.Count > 0 && request?.OverrideDocumentCheck == true && string.IsNullOrWhiteSpace(request.OverrideReason))
+                    throw new GlobalException("Override thiếu giấy tờ phải có lý do.", HttpStatusCode.BadRequest);
                 var quantity = Math.Min(allocation.QuantityKg, remaining);
                 if (quantity <= 0.0001m) continue;
                 selected.Add((allocation, quantity));
@@ -905,29 +943,82 @@ namespace Application.Seafood
             if (entity.SalesContractId is int contractId)
             {
                 var contract = await _db.SalesContracts.Include(x => x.Lines).FirstAsync(x => x.Id == contractId);
-                var shipped = await _db.SalesAllocations.Where(x => x.SalesContractLine!.ContractId == contractId && x.ShipmentId != null).SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
-                contract.Status = shipped + 0.0001m >= contract.Lines.Sum(x => x.QtyKg) ? ContractStatus.Shipped : ContractStatus.ReadyDocs;
+                var shippedThis = selected.Sum(x => x.QuantityKg);
+                var previouslyShipped = await _db.SalesAllocations
+                    .Where(x => x.SalesContractLine!.ContractId == contractId && x.ShipmentId != null && x.ShipmentId != entity.Id)
+                    .SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
+                contract.Status = previouslyShipped + shippedThis + 0.0001m >= contract.Lines.Sum(x => x.QtyKg)
+                    ? ContractStatus.Shipped
+                    : ContractStatus.ReadyDocs;
             }
             _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "ExportShipment", EntityId = entity.Id, Action = "Confirmed", UserId = userId });
             await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            var confirmed = MapShip(await _db.ExportShipments.Include(x => x.Customer).Include(x => x.PaymentTerm).Include(x => x.Containers).FirstAsync(x => x.Id == entity.Id));
+            await AttachShipmentNamesAsync(new[] { confirmed });
+            return confirmed;
+            });
         }
 
-        private static SalesContractDto MapContract(SalesContract x) => new()
+        private async Task AttachMarketNamesAsync(List<SalesContractDto> items)
         {
-            Id = x.Id, ContractNo = x.ContractNo, CustomerContractNo = x.CustomerContractNo,
-            CustomerId = x.CustomerId, CustomerName = x.Customer?.Name, MarketId = x.MarketId,
-            Status = x.Status, SuggestedUnitPriceUsd = x.SuggestedUnitPriceUsd,
-            VarianceVsLastPct = x.VarianceVsLastPct, VarianceVsPeersPct = x.VarianceVsPeersPct,
-            ApprovalNote = x.ApprovalNote,
-            AllocatedKg = x.Lines.Sum(l => l.AllocatedKg),
-            Lines = x.Lines.Select(l => new SalesContractLineDto
+            var ids = items.Where(x => x.MarketId.HasValue).Select(x => x.MarketId!.Value).Distinct().ToList();
+            if (ids.Count == 0) return;
+            var names = await _db.CatalogLookups.AsNoTracking()
+                .Where(x => x.Category == LookupCategory.Market && ids.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id, x => x.Name);
+            foreach (var item in items)
+                if (item.MarketId is int id) item.MarketName = names.GetValueOrDefault(id);
+        }
+
+        private async Task AttachShipmentNamesAsync(IEnumerable<ExportShipmentDto> items)
+        {
+            var list = items as IList<ExportShipmentDto> ?? items.ToList();
+            var ids = list.SelectMany(x => new[] { x.CarrierId, x.PortOfLoadingId, x.PortOfDischargeId })
+                .Where(x => x.HasValue).Select(x => x!.Value).Distinct().ToList();
+            if (ids.Count == 0) return;
+            var names = await _db.CatalogLookups.AsNoTracking().Where(x => ids.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.Name);
+            foreach (var item in list)
             {
-                SkuId = l.SkuId, SkuName = l.Sku?.Name, QtyKg = l.QtyKg, QtyLbs = l.QtyLbs,
-                UnitPriceUsd = l.UnitPriceUsd, AmountUsd = l.AmountUsd, AllocatedKg = l.AllocatedKg
-            }).ToList()
-        };
+                if (item.CarrierId is int c) item.CarrierName = names.GetValueOrDefault(c);
+                if (item.PortOfLoadingId is int p) item.PortOfLoadingName = names.GetValueOrDefault(p);
+                if (item.PortOfDischargeId is int d) item.PortOfDischargeName = names.GetValueOrDefault(d);
+            }
+        }
+
+        private static SalesContractDto MapContract(SalesContract x)
+        {
+            var required = x.Lines.Sum(l => l.QtyKg);
+            var allocated = x.Lines.Sum(l => l.AllocatedKg);
+            var shipped = x.Invoices?.Count > 0 ? allocated : 0;
+            if (x.Status == ContractStatus.Shipped || x.Status == ContractStatus.Paid || x.Status == ContractStatus.PartiallyPaid)
+                shipped = allocated;
+            var missing = Math.Max(0, required - allocated);
+            var label = x.Status switch
+            {
+                ContractStatus.Shipped or ContractStatus.Paid or ContractStatus.PartiallyPaid => "Đã xuất",
+                ContractStatus.ReadyDocs => "Đủ hàng + đủ giấy",
+                ContractStatus.ReadyStock => missing > 0.001m ? "Còn thiếu hàng" : "Đủ hàng",
+                ContractStatus.Signed => allocated > 0 ? "Còn thiếu hàng" : "Chờ hàng",
+                _ => x.Status.ToString()
+            };
+            return new SalesContractDto
+            {
+                Id = x.Id, ContractNo = x.ContractNo, CustomerContractNo = x.CustomerContractNo,
+                CustomerId = x.CustomerId, CustomerName = x.Customer?.Name, MarketId = x.MarketId,
+                PaymentTermId = x.PaymentTermId, PaymentTermName = x.PaymentTerm?.Name,
+                Status = x.Status, FulfillmentLabel = label, RequiredKg = required, AllocatedKg = allocated,
+                ShippedKg = x.Status >= ContractStatus.Shipped ? allocated : 0, MissingKg = missing,
+                SuggestedUnitPriceUsd = x.SuggestedUnitPriceUsd,
+                VarianceVsLastPct = x.VarianceVsLastPct, VarianceVsPeersPct = x.VarianceVsPeersPct,
+                ApprovalNote = x.ApprovalNote,
+                Lines = x.Lines.Select(l => new SalesContractLineDto
+                {
+                    Id = l.Id, SkuId = l.SkuId, SkuName = l.Sku?.Name, QtyKg = l.QtyKg, QtyLbs = l.QtyLbs,
+                    UnitPriceUsd = l.UnitPriceUsd, AmountUsd = l.AmountUsd, AllocatedKg = l.AllocatedKg,
+                    MissingKg = Math.Max(0, l.QtyKg - l.AllocatedKg)
+                }).ToList()
+            };
+        }
 
         private static ExportShipmentDto MapShip(ExportShipment x, IEnumerable<DocumentAttachment>? docs = null) => new()
         {
@@ -936,7 +1027,9 @@ namespace Application.Seafood
             PackingDate = x.PackingDate, Etd = x.Etd, Eta = x.Eta, InvoiceNo = x.InvoiceNo,
             PaymentTermId = x.PaymentTermId, PaymentTermName = x.PaymentTerm?.Name,
             Cartons = x.Cartons, QtyLbs = x.QtyLbs, QtyKg = x.QtyKg, AmountUsd = x.AmountUsd,
-            ContainerNo = x.ContainerNo, ContainerType = x.ContainerType, Route = x.Route, Status = x.Status,
+            ContainerNo = x.ContainerNo, ContainerType = x.ContainerType, CarrierId = x.CarrierId,
+            PortOfLoadingId = x.PortOfLoadingId, PortOfDischargeId = x.PortOfDischargeId,
+            Route = x.Route, Status = x.Status,
             Containers = x.Containers.Select(c => new ShipmentContainerDto { Id = c.Id, ContainerNo = c.ContainerNo, ContainerType = c.ContainerType, SealNo = c.SealNo, Cartons = c.Cartons, QtyKg = c.QtyKg, QtyLbs = c.QtyLbs, LoadingDate = c.LoadingDate, IsConfirmed = c.IsConfirmed }).ToList(),
             Documents = docs?.Select(InboundDocumentMap).ToList() ?? new()
         };
@@ -959,13 +1052,7 @@ namespace Application.Seafood
         {
             var rows = await _db.PaymentInstallments.Include(x => x.ExportShipment)!.ThenInclude(s => s!.Customer)
                 .OrderByDescending(x => x.Id).ToListAsync();
-            return rows.Select(x => new PaymentInstallmentDto
-            {
-                Id = x.Id, ExportShipmentId = x.ExportShipmentId, InvoiceNo = x.ExportShipment?.InvoiceNo,
-                CustomerName = x.ExportShipment?.Customer?.Name, Sequence = x.Sequence, Ratio = x.Ratio,
-                AmountUsd = x.AmountUsd, DueDate = x.DueDate, ReceivedDate = x.ReceivedDate,
-                ReceivedAmountUsd = x.ReceivedAmountUsd
-            }).ToList();
+            return rows.Select(x => MapPayment(x)).ToList();
         }
 
         public async Task<SeafoodPagedResult<PaymentInstallmentDto>> PagePaymentsAsync(string? search, int skip, int take)
@@ -979,12 +1066,7 @@ namespace Application.Seafood
             return new SeafoodPagedResult<PaymentInstallmentDto>
             {
                 TotalCount = total,
-                Items = rows.Select(x => new PaymentInstallmentDto
-                {
-                    Id = x.Id, ExportShipmentId = x.ExportShipmentId, InvoiceNo = x.ExportShipment?.InvoiceNo,
-                    CustomerName = x.ExportShipment?.Customer?.Name, Sequence = x.Sequence, Ratio = x.Ratio,
-                    AmountUsd = x.AmountUsd, DueDate = x.DueDate, ReceivedDate = x.ReceivedDate, ReceivedAmountUsd = x.ReceivedAmountUsd
-                }).ToList()
+                Items = rows.Select(MapPayment).ToList()
             };
         }
 
@@ -992,7 +1074,8 @@ namespace Application.Seafood
         {
             if (amount <= 0)
                 throw new GlobalException("Số tiền nhận phải lớn hơn 0.", HttpStatusCode.BadRequest);
-            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+            {
             var row = await _db.PaymentInstallments.Include(x => x.ExportShipment)!.ThenInclude(s => s!.Customer)
                 .Include(x => x.SalesInvoice)
                 .FirstOrDefaultAsync(x => x.Id == id)
@@ -1032,19 +1115,15 @@ namespace Application.Seafood
                 }
                 await _db.SaveChangesAsync();
             }
-            await transaction.CommitAsync();
-            return new PaymentInstallmentDto
-            {
-                Id = row.Id, ExportShipmentId = row.ExportShipmentId, InvoiceNo = row.ExportShipment?.InvoiceNo,
-                CustomerName = row.ExportShipment?.Customer?.Name, Sequence = row.Sequence, Ratio = row.Ratio,
-                AmountUsd = row.AmountUsd, DueDate = row.DueDate, ReceivedDate = row.ReceivedDate,
-                ReceivedAmountUsd = row.ReceivedAmountUsd
-            };
+            await _db.SaveChangesAsync();
+            return MapPayment(row);
+            });
         }
 
         public async Task<List<CustomerDepositDto>> ListDepositsAsync()
         {
             var rows = await _db.CustomerDeposits.Include(x => x.Customer).Include(x => x.Allocations).ThenInclude(a => a.SalesContract)
+                .Include(x => x.Allocations).ThenInclude(a => a.SalesInvoice)
                 .OrderByDescending(x => x.Id).ToListAsync();
             return rows.Select(MapDeposit).ToList();
         }
@@ -1079,28 +1158,55 @@ namespace Application.Seafood
             entity.Note = dto.Note;
             await _db.SaveChangesAsync();
             return MapDeposit(await _db.CustomerDeposits.Include(x => x.Customer).Include(x => x.Allocations).ThenInclude(a => a.SalesContract)
+                .Include(x => x.Allocations).ThenInclude(a => a.SalesInvoice)
                 .FirstAsync(x => x.Id == entity.Id));
         }
 
-        public async Task AllocateAsync(int depositId, int contractId, decimal amount)
+        public async Task AllocateAsync(int depositId, int? contractId, decimal amount, int? invoiceId = null)
         {
             if (amount <= 0)
                 throw new GlobalException("Số tiền phân bổ phải lớn hơn 0.", HttpStatusCode.BadRequest);
+            if (contractId is null && invoiceId is null)
+                throw new GlobalException("Cần hợp đồng hoặc hóa đơn để phân bổ deposit.", HttpStatusCode.BadRequest);
             var deposit = await _db.CustomerDeposits.Include(x => x.Allocations).FirstOrDefaultAsync(x => x.Id == depositId)
                 ?? throw new GlobalException("Không tìm thấy deposit.", HttpStatusCode.NotFound);
-            var contract = await _db.SalesContracts.FirstOrDefaultAsync(x => x.Id == contractId)
-                ?? throw new GlobalException("Không tìm thấy hợp đồng.", HttpStatusCode.NotFound);
-            if (deposit.CustomerId != contract.CustomerId)
-                throw new GlobalException("Không thể phân bổ deposit cho khách hàng khác.", HttpStatusCode.BadRequest);
-            if (deposit.Allocations.Any(x => x.SalesContractId == contractId))
-                throw new GlobalException("Deposit đã được phân bổ cho hợp đồng này.", HttpStatusCode.Conflict);
+            SalesContract? contract = null;
+            if (contractId is int cid)
+            {
+                contract = await _db.SalesContracts.FirstOrDefaultAsync(x => x.Id == cid)
+                    ?? throw new GlobalException("Không tìm thấy hợp đồng.", HttpStatusCode.NotFound);
+                if (deposit.CustomerId != contract.CustomerId)
+                    throw new GlobalException("Không thể phân bổ deposit cho khách hàng khác.", HttpStatusCode.BadRequest);
+            }
+            if (invoiceId is int iid)
+            {
+                var invoice = await _db.SalesInvoices.FirstOrDefaultAsync(x => x.Id == iid)
+                    ?? throw new GlobalException("Không tìm thấy hóa đơn.", HttpStatusCode.NotFound);
+                if (invoice.CustomerId != deposit.CustomerId)
+                    throw new GlobalException("Không thể phân bổ deposit cho khách hàng khác.", HttpStatusCode.BadRequest);
+                contractId ??= invoice.SalesContractId;
+            }
             if (deposit.Allocations.Sum(x => x.AmountUsd) + amount > deposit.AmountUsd + 0.01m)
                 throw new GlobalException("Phân bổ vượt số dư deposit.", HttpStatusCode.Conflict);
             _db.DepositAllocations.Add(new DepositAllocation
             {
-                DepositId = depositId, SalesContractId = contractId, AmountUsd = amount
+                DepositId = depositId, SalesContractId = contractId, SalesInvoiceId = invoiceId, AmountUsd = amount
             });
             await _db.SaveChangesAsync();
+        }
+
+        private static PaymentInstallmentDto MapPayment(PaymentInstallment x)
+        {
+            var outstanding = Math.Max(0, x.AmountUsd - x.ReceivedAmountUsd);
+            return new PaymentInstallmentDto
+            {
+                Id = x.Id, ExportShipmentId = x.ExportShipmentId, InvoiceNo = x.ExportShipment?.InvoiceNo,
+                CustomerName = x.ExportShipment?.Customer?.Name, Sequence = x.Sequence, Ratio = x.Ratio,
+                AmountUsd = x.AmountUsd, DueDate = x.DueDate, ReceivedDate = x.ReceivedDate,
+                ReceivedAmountUsd = x.ReceivedAmountUsd, OutstandingUsd = outstanding,
+                IsOverdue = outstanding > 0.01m && x.DueDate is DateTime d && d.Date < DateTime.UtcNow.Date,
+                IsDueSoon = outstanding > 0.01m && x.DueDate is DateTime due && due.Date >= DateTime.UtcNow.Date && due.Date <= DateTime.UtcNow.Date.AddDays(7)
+            };
         }
 
         private static CustomerDepositDto MapDeposit(CustomerDeposit x) => new()
@@ -1111,6 +1217,7 @@ namespace Application.Seafood
             Allocations = x.Allocations.Select(a => new DepositAllocationDto
             {
                 Id = a.Id, SalesContractId = a.SalesContractId, ContractNo = a.SalesContract?.ContractNo,
+                SalesInvoiceId = a.SalesInvoiceId, InvoiceNo = a.SalesInvoice?.InvoiceNo,
                 AmountUsd = a.AmountUsd, IsExported = a.IsExported
             }).ToList()
         };
@@ -1137,6 +1244,9 @@ namespace Application.Seafood
                 .SumAsync(x => (decimal?)x.AmountUsd) ?? 0;
             var outstanding = await _db.PaymentInstallments
                 .SumAsync(x => (decimal?)(x.AmountUsd - x.ReceivedAmountUsd)) ?? 0;
+            var overdue = await _db.PaymentInstallments
+                .Where(x => x.DueDate != null && x.DueDate < DateTime.UtcNow && x.ReceivedAmountUsd < x.AmountUsd)
+                .SumAsync(x => (decimal?)(x.AmountUsd - x.ReceivedAmountUsd)) ?? 0;
 
             var stock = await _db.InventoryBalances.Include(x => x.Sku)
                 .GroupBy(x => x.Sku!.Name)
@@ -1156,6 +1266,7 @@ namespace Application.Seafood
                 OnHandKg = onHand,
                 OpenContractUsd = openUsd,
                 OutstandingPaymentUsd = outstanding,
+                OverduePaymentUsd = overdue,
                 StockBySku = stock,
                 ExportByMarket = markets
             };

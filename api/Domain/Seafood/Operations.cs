@@ -126,6 +126,8 @@ namespace Domain.Seafood
         public int CustomerId { get; set; }
         public Customer? Customer { get; set; }
         public int? MarketId { get; set; }
+        public int? PaymentTermId { get; set; }
+        public PaymentTerm? PaymentTerm { get; set; }
         public ContractStatus Status { get; set; } = ContractStatus.Draft;
         public decimal SuggestedUnitPriceUsd { get; set; }
         public decimal VarianceVsLastPct { get; set; }
@@ -173,6 +175,8 @@ namespace Domain.Seafood
         [MaxLength(64)] public string? ContainerNo { get; set; }
         [MaxLength(32)] public string? ContainerType { get; set; }
         public int? CarrierId { get; set; }
+        public int? PortOfLoadingId { get; set; }
+        public int? PortOfDischargeId { get; set; }
         [MaxLength(256)] public string? Route { get; set; }
         [MaxLength(512)] public string? Note { get; set; }
         public ShipmentStatus Status { get; set; } = ShipmentStatus.Draft;
@@ -216,6 +220,8 @@ namespace Domain.Seafood
         public CustomerDeposit? Deposit { get; set; }
         public int? SalesContractId { get; set; }
         public SalesContract? SalesContract { get; set; }
+        public int? SalesInvoiceId { get; set; }
+        public SalesInvoice? SalesInvoice { get; set; }
         public decimal AmountUsd { get; set; }
         public bool IsExported { get; set; }
         public DateTime? ExportedAt { get; set; }

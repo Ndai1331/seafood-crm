@@ -17,7 +17,8 @@ public enum StockLotKind
 {
     RawMaterial = 1,
     FinishedGoods = 2,
-    Byproduct = 3
+    Byproduct = 3,
+    Wip = 4
 }
 
 public enum InventoryMovementType
@@ -187,6 +188,8 @@ public class SalesAllocation
     public int? ShipmentId { get; set; }
     public ExportShipment? Shipment { get; set; }
     public decimal QuantityKg { get; set; }
+    public decimal RawEquivalentKg { get; set; }
+    public decimal YieldRatioUsed { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime? CancelledAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

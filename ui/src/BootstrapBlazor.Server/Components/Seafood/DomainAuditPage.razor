@@ -1,0 +1,40 @@
+@page "/system/domain-audit"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div><h3>Nhật ký nghiệp vụ</h3><p>Snapshot khi lưu nhập hàng, sản xuất, hợp đồng, xếp lô, xuất và thanh toán.</p></div>
+        <div class="sf-page-actions"><span class="sf-status sf-status-info">@_total.ToString("N0") sự kiện</span></div>
+    </div>
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm loại đối tượng, hành động, lý do..." />
+    <div class="sf-table-shell">
+        <Table TItem="DomainAuditLogDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsPagination="true" IsStriped="true" IsBordered="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="DomainAuditLogDto" TType="DateTime" @bind-Field="@context.CreatedAt" Text="Thời gian" Width="180"><Template Context="value">@value.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</Template></TableColumn>
+                <TableColumn TItem="DomainAuditLogDto" TType="string" @bind-Field="@context.EntityType" Text="Đối tượng" Width="180" />
+                <TableColumn TItem="DomainAuditLogDto" TType="int" @bind-Field="@context.EntityId" Text="ID" Width="80" />
+                <TableColumn TItem="DomainAuditLogDto" TType="string" @bind-Field="@context.Action" Text="Hành động" Width="160" />
+                <TableColumn TItem="DomainAuditLogDto" TType="int?" @bind-Field="@context.UserId" Text="User" Width="90" />
+                <TableColumn TItem="DomainAuditLogDto" TType="string" @bind-Field="@context.Reason" Text="Lý do" Width="200" />
+                <TableColumn TItem="DomainAuditLogDto" TType="string" @bind-Field="@context.ChangesJson" Text="Snapshot" Width="360" TextWrap="true"><Template Context="value"><span class="small">@(string.IsNullOrWhiteSpace(value.Value) ? "—" : value.Value)</span></Template></TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 20, 50, 100 };
+    private Table<DomainAuditLogDto>? _table;
+    private string _search = "";
+    private int _total;
+    private async Task<QueryData<DomainAuditLogDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.DomainAuditPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+}

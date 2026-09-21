@@ -265,6 +265,8 @@ public class SeafoodAllocationService : ITransientDependency
         var effectiveDate = request.Etd ?? DateTime.UtcNow;
         var balances = await _db.InventoryBalances
             .Include(x => x.Lot)!.ThenInclude(x => x!.Certificates)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Outputs)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Inputs)
             .Include(x => x.Sku)
             .OrderBy(x => x.Lot!.ReceivedDate).ThenBy(x => x.LotId).ToListAsync();
         var activeReservations = await _db.StockReservations
@@ -272,7 +274,6 @@ public class SeafoodAllocationService : ITransientDependency
             .GroupBy(x => x.InventoryBalanceId)
             .Select(x => new { x.Key, Quantity = x.Sum(y => y.QuantityKg) })
             .ToDictionaryAsync(x => x.Key, x => x.Quantity);
-
         var candidates = new List<AllocationCandidateDto>();
         var previewUsedByBalance = new Dictionary<int, decimal>();
         decimal required = 0;
@@ -295,6 +296,10 @@ public class SeafoodAllocationService : ITransientDependency
                     remaining -= suggested;
                     previewUsedByBalance[balance.Id] = previewUsedByBalance.GetValueOrDefault(balance.Id) + suggested;
                 }
+                var output = balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId);
+                var (rawEq, yield) = SeafoodYield.ReverseFromOutput(output, suggested);
+                var remainingFg = Math.Max(0, available - (documentStatus.Missing.Count == 0 ? suggested : 0));
+                var remainingRaw = SeafoodYield.ReverseFromOutput(output, remainingFg).RawEquivalentKg;
                 candidates.Add(new AllocationCandidateDto
                 {
                     ContractLineId = line.Id,
@@ -305,6 +310,11 @@ public class SeafoodAllocationService : ITransientDependency
                     SkuName = balance.Sku?.Name ?? string.Empty,
                     AvailableKg = available,
                     SuggestedKg = documentStatus.Missing.Count == 0 ? suggested : 0,
+                    RawEquivalentKg = rawEq,
+                    YieldRatioUsed = yield,
+                    RemainingFgKg = remainingFg,
+                    RemainingRawKg = Math.Max(0, remainingRaw),
+                    Selected = documentStatus.Missing.Count == 0 && suggested > 0,
                     IsDocumentReady = documentStatus.Missing.Count == 0,
                     RequiredDocuments = documentStatus.Required,
                     SupplementalDocuments = documentStatus.Optional,
@@ -331,12 +341,14 @@ public class SeafoodAllocationService : ITransientDependency
         if (request.OverrideDocumentCheck && string.IsNullOrWhiteSpace(request.OverrideReason))
             throw new GlobalException("Override thiếu giấy tờ phải có lý do.", HttpStatusCode.BadRequest);
 
-        await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var contract = await _db.SalesContracts.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == request.SalesContractId)
             ?? throw new GlobalException("Không tìm thấy hợp đồng.", HttpStatusCode.NotFound);
         var marketCode = await GetMarketCodeAsync(contract.MarketId);
         var etd = request.Etd ?? DateTime.UtcNow;
-        var balances = await _db.InventoryBalances.Include(x => x.Lot)!.ThenInclude(x => x!.Inputs).ToListAsync();
+        var balances = await _db.InventoryBalances.Include(x => x.Lot)!.ThenInclude(x => x!.Inputs)
+            .Include(x => x.Lot)!.ThenInclude(x => x!.Outputs).ToListAsync();
         var lineById = contract.Lines.ToDictionary(x => x.Id);
         var requestedByLine = request.Items.GroupBy(x => x.SalesContractLineId).ToDictionary(x => x.Key, x => x.Sum(y => y.QuantityKg));
         var existingByLine = await _db.StockReservations
@@ -394,7 +406,9 @@ public class SeafoodAllocationService : ITransientDependency
             {
                 SalesContractLineId = item.SalesContractLineId,
                 InventoryBalanceId = item.InventoryBalanceId,
-                QuantityKg = item.QuantityKg
+                QuantityKg = item.QuantityKg,
+                RawEquivalentKg = SeafoodYield.ReverseFromOutput(balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId), item.QuantityKg).RawEquivalentKg,
+                YieldRatioUsed = SeafoodYield.ReverseFromOutput(balance.Lot?.Outputs.FirstOrDefault(o => o.SkuId == line.SkuId), item.QuantityKg).YieldRatio
             });
             _db.TraceabilityLinks.Add(new TraceabilityLink
             {
@@ -407,10 +421,12 @@ public class SeafoodAllocationService : ITransientDependency
             resultItems.Add(item);
         }
 
-        var totalAllocated = await _db.StockReservations.Where(x => x.Status == ReservationStatus.Active && x.SalesContractLine!.ContractId == contract.Id)
-            .SumAsync(x => (decimal?)x.QuantityKg) ?? 0;
+        var totalAllocated = contract.Lines.Sum(x => x.AllocatedKg);
         var totalRequired = contract.Lines.Sum(x => x.QtyKg);
-        contract.Status = totalAllocated + 0.0001m >= totalRequired ? ContractStatus.ReadyDocs : ContractStatus.ReadyStock;
+        var fullyAllocated = totalAllocated + 0.0001m >= totalRequired;
+        contract.Status = fullyAllocated
+            ? (request.OverrideDocumentCheck ? ContractStatus.ReadyStock : ContractStatus.ReadyDocs)
+            : ContractStatus.ReadyStock;
         _db.DomainAuditLogs.Add(new DomainAuditLog
         {
             EntityType = "SalesContract",
@@ -420,7 +436,6 @@ public class SeafoodAllocationService : ITransientDependency
             Reason = request.OverrideDocumentCheck ? request.OverrideReason : null
         });
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
         return new AllocationResultDto
         {
             SalesContractId = contract.Id,
@@ -428,13 +443,15 @@ public class SeafoodAllocationService : ITransientDependency
             MissingKg = Math.Max(0, totalRequired - totalAllocated),
             Items = resultItems
         };
+        });
     }
 
     public async Task ReleaseAsync(AllocationReleaseDto request, int? userId)
     {
         if (request.SalesContractId <= 0)
             throw new GlobalException("Thiếu hợp đồng cần giải phóng reservation.", HttpStatusCode.BadRequest);
-        await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var reservations = await _db.StockReservations.Include(x => x.InventoryBalance)
             .Where(x => x.Status == ReservationStatus.Active && x.SalesContractLine!.ContractId == request.SalesContractId)
             .ToListAsync();
@@ -471,7 +488,7 @@ public class SeafoodAllocationService : ITransientDependency
         contract.Status = ContractStatus.Signed;
         _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "SalesContract", EntityId = request.SalesContractId, Action = "AllocationReleased", UserId = userId, Reason = request.Reason });
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
+        });
     }
 
     private async Task<string> GetMarketCodeAsync(int? marketId)

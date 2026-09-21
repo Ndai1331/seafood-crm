@@ -20,7 +20,9 @@ namespace BootstrapBlazor.Server.Services
             // xuất file đi qua service này đều ném lỗi interop ngay khi bấm.
             var mime = string.Equals(extension, "xlsx", StringComparison.OrdinalIgnoreCase)
                 ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                : null;
+                : string.Equals(extension, "zip", StringComparison.OrdinalIgnoreCase)
+                    ? "application/zip"
+                    : null;
             await _jsInterop.InvokeVoidAsync(
                 "downloadBase64File",
                 $"{fileName}-{DateTime.Now:yyyyMMddHHmmss}.{extension}",

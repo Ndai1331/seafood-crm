@@ -41,7 +41,6 @@ public class SeafoodDocumentController : ControllerBase
         => _documents.ListTypesPageAsync(includeInactive, search, skip, take);
 
     [HttpGet("types/options")]
-    [HasPermission(Permissions.MasterCatalog)]
     public Task<SeafoodSelect2SearchResponseDto> TypeOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         => _documents.SearchTypesAsync(search, page, pageSize);
 

@@ -44,7 +44,7 @@ public static class PageRegistry
                 new() { Text = "Danh mục chung", Icon = "fa-fw fa-solid fa-list", Url = "master-data/catalog", Permission = "master-data.catalog" },
                 new() { Text = "Mặt hàng / SKU", Icon = "fa-fw fa-solid fa-fish", Url = "master-data/products", Permission = "master-data.products" },
                 new() { Text = "Khách hàng", Icon = "fa-fw fa-solid fa-users", Url = "master-data/customers", Permission = "master-data.customers" },
-                new() { Text = "Đối tác & tàu", Icon = "fa-fw fa-solid fa-people-arrows", Url = "master-data/partners", Permission = "master-data.customers" },
+                new() { Text = "Đối tác & tàu", Icon = "fa-fw fa-solid fa-people-arrows", Url = "master-data/partners", Permission = "master-data.partners" },
                 new() { Text = "Điều khoản TT", Icon = "fa-fw fa-solid fa-file-invoice-dollar", Url = "master-data/payment-terms", Permission = "master-data.payment-terms" },
                 new() { Text = "Loại chứng từ", Icon = "fa-fw fa-solid fa-file-lines", Url = "master-data/document-types", Permission = "master-data.document-types" },
                 new() { Text = "Quy tắc chứng từ", Icon = "fa-fw fa-solid fa-certificate", Url = "master-data/document-rules", Permission = "master-data.document-rules" },
@@ -56,6 +56,7 @@ public static class PageRegistry
             Items = new List<PageEntry>
             {
                 new() { Text = "Nhập nguyên liệu", Icon = "fa-fw fa-solid fa-boxes-stacked", Url = "inbound", Permission = "inbound.purchases" },
+                new() { Text = "Hồ sơ lô nguyên liệu", Icon = "fa-fw fa-solid fa-barcode", Url = "inbound/lots", Permission = "inbound.purchases" },
                 new() { Text = "Import dữ liệu Excel", Icon = "fa-fw fa-solid fa-file-excel", Url = "inbound/import", Permission = "inbound.purchases" },
             }
         },
@@ -82,6 +83,7 @@ public static class PageRegistry
             Items = new List<PageEntry>
             {
                 new() { Text = "Báo giá / Hợp đồng", Icon = "fa-fw fa-solid fa-file-signature", Url = "export/quotes", Permission = "export.quotes" },
+                new() { Text = "Xếp lô & chứng từ", Icon = "fa-fw fa-solid fa-layer-group", Url = "export/allocations", Permission = "export.allocations" },
                 new() { Text = "Đơn hàng xuất khẩu", Icon = "fa-fw fa-solid fa-file-export", Url = "export/orders", Permission = "export.orders" },
             }
         },
@@ -91,7 +93,16 @@ public static class PageRegistry
             Items = new List<PageEntry>
             {
                 new() { Text = "Theo dõi thanh toán", Icon = "fa-fw fa-solid fa-money-check-dollar", Url = "finance/payments", Permission = "finance.payments" },
+                new() { Text = "Hóa đơn & công nợ", Icon = "fa-fw fa-solid fa-file-invoice", Url = "finance/invoices", Permission = "finance.invoices" },
                 new() { Text = "Deposit", Icon = "fa-fw fa-solid fa-piggy-bank", Url = "finance/deposits", Permission = "finance.deposits" },
+            }
+        },
+        new()
+        {
+            Text = "Báo cáo", Icon = "fa-solid fa-chart-column",
+            Items = new List<PageEntry>
+            {
+                new() { Text = "Báo cáo quản lý", Icon = "fa-fw fa-solid fa-file-excel", Url = "reports", Permission = "reports.view" },
             }
         },
         new()
@@ -105,6 +116,9 @@ public static class PageRegistry
                 new() { Text = "Phân quyền", Icon = "fa-fw fa-solid fa-lock", Url = "permission-matrix", Permission = "system.permission-matrix" },
                 new() { Text = "Sắp xếp menu", Icon = "fa-fw fa-solid fa-bars", Url = "menu-arrangement", Permission = "system.menu-arrangement" },
                 new() { Text = "Nhật ký hệ thống", Icon = "fa-fw fa-solid fa-clock-rotate-left", Url = "system/audit-log", Permission = "system.audit-log" },
+                new() { Text = "Nhật ký nghiệp vụ", Icon = "fa-fw fa-solid fa-clipboard-list", Url = "system/domain-audit", Permission = "system.audit-log" },
+                new() { Text = "Sao lưu dữ liệu", Icon = "fa-fw fa-solid fa-download", Url = "system/backup", Permission = "system.backup" },
+                new() { Text = "Hướng dẫn & bàn giao", Icon = "fa-fw fa-solid fa-book", Url = "system/help", Permission = "system.help" },
             }
         },
     };

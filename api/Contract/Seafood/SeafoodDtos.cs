@@ -13,6 +13,7 @@ namespace Contract.Seafood
         public int Id { get; set; }
         public string Text { get; set; } = "";
         public string? Description { get; set; }
+        public string? Code { get; set; }
     }
 
     public class SeafoodSelect2SearchResponseDto
@@ -68,6 +69,7 @@ namespace Contract.Seafood
         public string? ExportMarket { get; set; }
         public decimal DefaultUnitPriceUsd { get; set; }
         public bool IsByproduct { get; set; }
+        public ProductKind Kind { get; set; } = ProductKind.FinishedGoods;
         public bool IsActive { get; set; }
     }
 
@@ -196,6 +198,7 @@ namespace Contract.Seafood
         public decimal RawMaterialKg { get; set; }
         public int? TargetMarketId { get; set; }
         public decimal RecoveryRatio { get; set; }
+        public decimal WasteKg { get; set; }
         public string? Note { get; set; }
         public List<string> CertificateCodes { get; set; } = new();
         public List<ProductionInputDto> Inputs { get; set; } = new();
@@ -229,6 +232,11 @@ namespace Contract.Seafood
         public string? CatchMethodCode { get; set; }
         public string? FreezeMethodCode { get; set; }
         public string? OriginCode { get; set; }
+        public string? FishSpeciesCode { get; set; }
+        public string? SensoryCode { get; set; }
+        public int? WarehouseId { get; set; }
+        public string? WarehouseName { get; set; }
+        public List<DocumentAttachmentDto> Documents { get; set; } = new();
     }
 
     public class ProductionOutputDto
@@ -250,10 +258,16 @@ namespace Contract.Seafood
         public string LotNumber { get; set; } = "";
         public int SkuId { get; set; }
         public string SkuName { get; set; } = "";
+        public StockLotKind Kind { get; set; } = StockLotKind.FinishedGoods;
+        public decimal ReceivedKg { get; set; }
+        public decimal UsedKg { get; set; }
+        public decimal ShippedKg { get; set; }
         public decimal OnHandKg { get; set; }
         public decimal AllocatedKg { get; set; }
         public decimal AvailableKg { get; set; }
         public int? WarehouseId { get; set; }
+        public string? WarehouseName { get; set; }
+        public string? SizeCode { get; set; }
         public List<string> Certificates { get; set; } = new();
         public string? Warning { get; set; }
         public List<InventoryMovementDto> Movements { get; set; } = new();
@@ -268,6 +282,15 @@ namespace Contract.Seafood
         public int? ReferenceId { get; set; }
         public DateTime OccurredAt { get; set; }
         public string? Reason { get; set; }
+    }
+
+    public class InventoryTransferDto
+    {
+        public StockLotKind Kind { get; set; } = StockLotKind.FinishedGoods;
+        public int SourceId { get; set; }
+        public int ToWarehouseId { get; set; }
+        public decimal QuantityKg { get; set; }
+        public string Reason { get; set; } = "";
     }
 
     public class InventoryAdjustmentDto
@@ -303,6 +326,11 @@ namespace Contract.Seafood
         public string SkuName { get; set; } = "";
         public decimal AvailableKg { get; set; }
         public decimal SuggestedKg { get; set; }
+        public decimal RawEquivalentKg { get; set; }
+        public decimal YieldRatioUsed { get; set; }
+        public decimal RemainingFgKg { get; set; }
+        public decimal RemainingRawKg { get; set; }
+        public bool Selected { get; set; } = true;
         public bool IsDocumentReady { get; set; }
         public List<string> RequiredDocuments { get; set; } = new();
         public List<string> SupplementalDocuments { get; set; } = new();
@@ -348,17 +376,25 @@ namespace Contract.Seafood
         public int CustomerId { get; set; }
         public string? CustomerName { get; set; }
         public int? MarketId { get; set; }
+        public string? MarketName { get; set; }
+        public int? PaymentTermId { get; set; }
+        public string? PaymentTermName { get; set; }
         public ContractStatus Status { get; set; }
+        public string FulfillmentLabel { get; set; } = "";
+        public decimal RequiredKg { get; set; }
+        public decimal AllocatedKg { get; set; }
+        public decimal ShippedKg { get; set; }
+        public decimal MissingKg { get; set; }
         public decimal SuggestedUnitPriceUsd { get; set; }
         public decimal VarianceVsLastPct { get; set; }
         public decimal VarianceVsPeersPct { get; set; }
         public string? ApprovalNote { get; set; }
         public List<SalesContractLineDto> Lines { get; set; } = new();
-        public decimal AllocatedKg { get; set; }
     }
 
     public class SalesContractLineDto
     {
+        public int Id { get; set; }
         public int SkuId { get; set; }
         public string? SkuName { get; set; }
         public decimal QtyKg { get; set; }
@@ -366,6 +402,8 @@ namespace Contract.Seafood
         public decimal UnitPriceUsd { get; set; }
         public decimal AmountUsd { get; set; }
         public decimal AllocatedKg { get; set; }
+        public decimal ShippedKg { get; set; }
+        public decimal MissingKg { get; set; }
     }
 
     public class PriceSuggestionDto
@@ -394,6 +432,12 @@ namespace Contract.Seafood
         public decimal AmountUsd { get; set; }
         public string? ContainerNo { get; set; }
         public string? ContainerType { get; set; }
+        public int? CarrierId { get; set; }
+        public string? CarrierName { get; set; }
+        public int? PortOfLoadingId { get; set; }
+        public string? PortOfLoadingName { get; set; }
+        public int? PortOfDischargeId { get; set; }
+        public string? PortOfDischargeName { get; set; }
         public string? Route { get; set; }
         public ShipmentStatus Status { get; set; }
         public List<ShipmentContainerDto> Containers { get; set; } = new();
@@ -497,6 +541,9 @@ namespace Contract.Seafood
         public DateTime? DueDate { get; set; }
         public DateTime? ReceivedDate { get; set; }
         public decimal ReceivedAmountUsd { get; set; }
+        public decimal OutstandingUsd { get; set; }
+        public bool IsOverdue { get; set; }
+        public bool IsDueSoon { get; set; }
     }
 
     public class CustomerDepositDto
@@ -516,6 +563,8 @@ namespace Contract.Seafood
         public int Id { get; set; }
         public int? SalesContractId { get; set; }
         public string? ContractNo { get; set; }
+        public int? SalesInvoiceId { get; set; }
+        public string? InvoiceNo { get; set; }
         public decimal AmountUsd { get; set; }
         public bool IsExported { get; set; }
     }
@@ -553,6 +602,7 @@ namespace Contract.Seafood
         public decimal OnHandKg { get; set; }
         public decimal OpenContractUsd { get; set; }
         public decimal OutstandingPaymentUsd { get; set; }
+        public decimal OverduePaymentUsd { get; set; }
         public List<PieSliceDto> StockBySku { get; set; } = new();
         public List<PieSliceDto> ExportByMarket { get; set; } = new();
     }
@@ -561,5 +611,87 @@ namespace Contract.Seafood
     {
         public string Label { get; set; } = "";
         public decimal Value { get; set; }
+    }
+
+    public class SalesInvoiceDto
+    {
+        public int Id { get; set; }
+        public string InvoiceNo { get; set; } = "";
+        public int? SalesContractId { get; set; }
+        public string? ContractNo { get; set; }
+        public int? ShipmentId { get; set; }
+        public int? CustomerId { get; set; }
+        public string? CustomerName { get; set; }
+        public decimal AmountUsd { get; set; }
+        public decimal ReceivedUsd { get; set; }
+        public decimal OutstandingUsd { get; set; }
+        public DateTime IssueDate { get; set; }
+        public DateTime? DueDate { get; set; }
+        public InvoiceStatus Status { get; set; }
+        public bool IsOverdue { get; set; }
+        public bool IsDueSoon { get; set; }
+    }
+
+    public class PaymentAllocateRequestDto
+    {
+        public int CustomerId { get; set; }
+        public decimal AmountUsd { get; set; }
+        public DateTime? ReceivedDate { get; set; }
+        public string? ReferenceNo { get; set; }
+        public string? Note { get; set; }
+        public List<PaymentAllocateItemDto> Items { get; set; } = new();
+    }
+
+    public class PaymentAllocateItemDto
+    {
+        public int? PaymentInstallmentId { get; set; }
+        public int? InvoiceId { get; set; }
+        public decimal AmountUsd { get; set; }
+    }
+
+    public class DepositAllocateRequestDto
+    {
+        public int? SalesContractId { get; set; }
+        public int? SalesInvoiceId { get; set; }
+        public decimal AmountUsd { get; set; }
+    }
+
+    public class ShipmentConfirmDto
+    {
+        public bool OverrideDocumentCheck { get; set; }
+        public string? OverrideReason { get; set; }
+    }
+
+    public class DomainAuditLogDto
+    {
+        public long Id { get; set; }
+        public string EntityType { get; set; } = "";
+        public int EntityId { get; set; }
+        public string Action { get; set; } = "";
+        public int? UserId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? ChangesJson { get; set; }
+        public string? Reason { get; set; }
+    }
+
+    public class ReportQueryDto
+    {
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+        public string Kind { get; set; } = "inbound";
+    }
+
+    public class ReportTableDto
+    {
+        public string Title { get; set; } = "";
+        public List<string> Columns { get; set; } = new();
+        public List<List<string>> Rows { get; set; } = new();
+    }
+
+    public class TraceabilityLookupDto
+    {
+        public string? Code { get; set; }
+        public string? OwnerType { get; set; }
+        public int? OwnerId { get; set; }
     }
 }

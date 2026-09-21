@@ -57,7 +57,8 @@ namespace Application.Seafood
                 {
                     Id = x.Id,
                     Text = x.Code + " — " + x.Name,
-                    Description = x.Description
+                    Description = x.Description,
+                    Code = x.Code
                 }).ToListAsync();
             return new SeafoodSelect2SearchResponseDto { Results = results, More = page * pageSize < total };
         }
@@ -246,7 +247,7 @@ namespace Application.Seafood
                     {
                         Id = s.Id, GroupId = g.Id, GroupName = g.Name, Code = s.Code, Name = s.Name,
                         ExportMarket = s.ExportMarket, DefaultUnitPriceUsd = s.DefaultUnitPriceUsd,
-                        IsByproduct = s.IsByproduct, IsActive = s.IsActive
+                        IsByproduct = s.IsByproduct, Kind = s.Kind, IsActive = s.IsActive
                     }).ToList()
                 }).ToListAsync();
 
@@ -280,7 +281,7 @@ namespace Application.Seafood
                 {
                     Id = s.Id, GroupId = s.GroupId, GroupName = s.Group == null ? null : s.Group.Name,
                     Code = s.Code, Name = s.Name, ExportMarket = s.ExportMarket,
-                    DefaultUnitPriceUsd = s.DefaultUnitPriceUsd, IsByproduct = s.IsByproduct, IsActive = s.IsActive
+                    DefaultUnitPriceUsd = s.DefaultUnitPriceUsd, IsByproduct = s.IsByproduct, Kind = s.Kind, IsActive = s.IsActive
                 }).ToListAsync();
             return new SeafoodPagedResult<ProductSkuDto> { Items = items, TotalCount = total };
         }
@@ -387,6 +388,7 @@ namespace Application.Seafood
             entity.ExportMarket = dto.ExportMarket?.Trim();
             entity.DefaultUnitPriceUsd = dto.DefaultUnitPriceUsd;
             entity.IsByproduct = dto.IsByproduct;
+            entity.Kind = dto.Kind == 0 ? (dto.IsByproduct ? ProductKind.Byproduct : ProductKind.FinishedGoods) : dto.Kind;
             entity.IsActive = dto.IsActive;
             await _db.SaveChangesAsync();
             dto.Id = entity.Id;

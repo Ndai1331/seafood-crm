@@ -1,0 +1,33 @@
+@page "/system/backup"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+@inject DownloadFileService Download
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Sao lưu dữ liệu</h3>
+            <p>Tải ZIP Excel gồm danh mục, nhập hàng, lô NL, sản xuất, tồn, hợp đồng, xuất và công nợ. Không phải dump PostgreSQL.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-download me-1" aria-hidden="true"></i>Backup</span>
+    </div>
+    <div class="sf-panel">
+        <p>File gồm 8 sheet nghiệp vụ để bàn giao hoặc đối chiếu. Nên tải định kỳ trước khi import dữ liệu lớn.</p>
+        <Button Color="Color.Primary" Icon="fa-solid fa-file-zipper" Text="Tải sao lưu Excel ZIP" OnClick="DownloadAsync" />
+    </div>
+</div>
+
+@code {
+    private async Task DownloadAsync()
+    {
+        try
+        {
+            var bytes = await Api.BackupAsync();
+            if (bytes.Length == 0) { await Toast.Error("File sao lưu trống."); return; }
+            await Download.DownloadFileAsync(bytes, "zip", "seafood-backup");
+            await Toast.Success("Đã tải file sao lưu.");
+        }
+        catch (Exception ex) { await Toast.Error("Không tải được sao lưu", ApiErrorMessage.Describe(ex, "Kiểm tra quyền system.backup.")); }
+    }
+}

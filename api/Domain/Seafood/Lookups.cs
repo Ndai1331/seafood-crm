@@ -15,7 +15,16 @@ namespace Domain.Seafood
         Market = 9,
         Warehouse = 10,
         Carrier = 11,
-        ContainerType = 12
+        ContainerType = 12,
+        Port = 13,
+        UnitOfMeasure = 14
+    }
+
+    public enum ProductKind
+    {
+        FinishedGoods = 1,
+        Wip = 2,
+        Byproduct = 3
     }
 
     public enum CustomerKind
@@ -80,6 +89,7 @@ namespace Domain.Seafood
         [MaxLength(64)] public string? ExportMarket { get; set; }
         public decimal DefaultUnitPriceUsd { get; set; }
         public bool IsByproduct { get; set; }
+        public ProductKind Kind { get; set; } = ProductKind.FinishedGoods;
         public bool IsActive { get; set; } = true;
     }
 

@@ -47,6 +47,17 @@ public class SeafoodTraceabilityService : ITransientDependency
             AddEdge(edges, "SalesContract", line.ContractId, "SalesContractLine", line.Id, line.QtyKg, "contract line");
         foreach (var balance in balances)
             AddEdge(edges, "ProductionLot", balance.LotId, "InventoryBalance", balance.Id, balance.OnHandKg, "finished stock");
+        var inboundLots = await _db.RawMaterialLots.AsNoTracking().ToListAsync();
+        foreach (var lot in inboundLots)
+            AddEdge(edges, "InboundPurchase", lot.InboundPurchaseId, "RawMaterialLot", lot.Id, lot.ActualKg, "inbound lot");
+        var invoices = await _db.SalesInvoices.AsNoTracking().ToListAsync();
+        foreach (var invoice in invoices)
+        {
+            if (invoice.SalesContractId is int contractId)
+                AddEdge(edges, "SalesContract", contractId, "SalesInvoice", invoice.Id, 0, "invoice");
+            if (invoice.ShipmentId is int shipmentId)
+                AddEdge(edges, "Shipment", shipmentId, "SalesInvoice", invoice.Id, 0, "invoice");
+        }
 
         var root = (rootType, (long)rootId);
         var adjacency = edges.GroupBy(x => (x.FromType, x.FromId)).ToDictionary(x => x.Key, x => x.ToList());
@@ -87,13 +98,13 @@ public class SeafoodTraceabilityService : ITransientDependency
 
     private static void ValidateRoot(string rootType)
     {
-        if (!new[] { "Shipment", "SalesContract", "SalesContractLine", "ProductionLot", "RawMaterialLot", "InventoryBalance" }
+        if (!new[] { "Shipment", "SalesContract", "SalesContractLine", "ProductionLot", "RawMaterialLot", "InventoryBalance", "InboundPurchase", "SalesInvoice" }
             .Contains(rootType, StringComparer.OrdinalIgnoreCase))
             throw new GlobalException("Loại đối tượng truy xuất không hợp lệ.", HttpStatusCode.BadRequest);
     }
 
     private static string NormalizeRoot(string rootType)
-        => new[] { "Shipment", "SalesContract", "SalesContractLine", "ProductionLot", "RawMaterialLot", "InventoryBalance" }
+        => new[] { "Shipment", "SalesContract", "SalesContractLine", "ProductionLot", "RawMaterialLot", "InventoryBalance", "InboundPurchase", "SalesInvoice" }
             .FirstOrDefault(x => x.Equals(rootType, StringComparison.OrdinalIgnoreCase)) ?? rootType;
 
     private static void AddEdge(List<TraceabilityEdgeDto> edges, string fromType, long fromId, string toType, long toId, decimal quantityKg, string relation)
@@ -111,4 +122,29 @@ public class SeafoodTraceabilityService : ITransientDependency
             "Shipment" when shipments.TryGetValue((int)id, out var shipment) => shipment,
             _ => $"{type} #{id}"
         };
+
+    public async Task<TraceabilityDto> LookupAsync(TraceabilityLookupDto request)
+    {
+        if (request.OwnerId is int id && !string.IsNullOrWhiteSpace(request.OwnerType))
+            return await GetAsync(request.OwnerType, id);
+        var code = request.Code?.Trim();
+        if (string.IsNullOrWhiteSpace(code))
+            throw new GlobalException("Nhập mã lô, số hợp đồng, số container hoặc số hóa đơn.", HttpStatusCode.BadRequest);
+        var raw = await _db.RawMaterialLots.AsNoTracking().FirstOrDefaultAsync(x => x.LotNumber == code);
+        if (raw != null) return await GetAsync("RawMaterialLot", raw.Id);
+        var prod = await _db.ProductionLots.AsNoTracking().FirstOrDefaultAsync(x => x.LotNumber == code);
+        if (prod != null) return await GetAsync("ProductionLot", prod.Id);
+        var contract = await _db.SalesContracts.AsNoTracking().FirstOrDefaultAsync(x => x.ContractNo == code);
+        if (contract != null) return await GetAsync("SalesContract", contract.Id);
+        var shipment = await _db.ExportShipments.AsNoTracking().FirstOrDefaultAsync(x => x.InvoiceNo == code || x.ContainerNo == code);
+        if (shipment == null)
+        {
+            var container = await _db.ShipmentContainers.AsNoTracking().FirstOrDefaultAsync(c => c.ContainerNo == code);
+            if (container != null) shipment = await _db.ExportShipments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == container.ShipmentId);
+        }
+        if (shipment != null) return await GetAsync("Shipment", shipment.Id);
+        var invoice = await _db.SalesInvoices.AsNoTracking().FirstOrDefaultAsync(x => x.InvoiceNo == code);
+        if (invoice != null) return await GetAsync("SalesInvoice", invoice.Id);
+        throw new GlobalException("Không tìm thấy đối tượng với mã đã nhập.", HttpStatusCode.NotFound);
+    }
 }

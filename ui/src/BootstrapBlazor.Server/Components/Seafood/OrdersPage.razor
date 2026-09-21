@@ -7,7 +7,7 @@
     <div class="sf-page-header">
         <div>
             <h3>Đơn hàng xuất khẩu</h3>
-            <p>Khối lượng có thể nhập pound hoặc kg — hệ thống tự quy đổi theo chuẩn.</p>
+            <p>Nhiều container, cảng đi/đến, hãng tàu. Checklist chứng từ trước khi xác nhận xuất.</p>
         </div>
         <div class="sf-page-actions">
             <span class="sf-status sf-status-info"><i class="fa-solid fa-ship me-1" aria-hidden="true"></i>Export logistics</span>
@@ -15,58 +15,103 @@
         </div>
     </div>
 
-    <SeafoodCrudModal @ref="_crudModal" Title="Thêm đơn hàng xuất khẩu" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
-        <SeafoodModalSection Title="Đối tượng & chứng từ" Icon="fa-solid fa-file-invoice">
+    <SeafoodCrudModal @ref="_crudModal" Title="@(_form.Id > 0 ? "Sửa đơn xuất" : "Thêm đơn hàng xuất khẩu")" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
+        <SeafoodModalSection Title="Đối tượng" Icon="fa-solid fa-file-invoice">
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Khách hàng</label>
-                    <SeafoodSelect2 Value="@_form.CustomerId" ValueChanged="OnCustomerChanged" Search="SearchCustomersAsync" Placeholder="Tìm mã hoặc tên khách" />
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Hợp đồng</label>
-                    <SeafoodSelect2 Value="@_form.SalesContractId" ValueChanged="OnContractChanged" Search="SearchContractsAsync" Placeholder="Tìm số hợp đồng hoặc khách" />
-                </div>
-                <div class="col-md-6"><BootstrapInput @bind-Value="_form.InvoiceNo" DisplayText="Số invoice" ShowLabel="true" placeholder="Invoice" /></div>
-                <div class="col-md-6">
-                    <label class="form-label">Điều khoản TT</label>
-                    <SeafoodSelect2 Value="@_form.PaymentTermId" ValueChanged="OnPaymentTermChanged" Search="SearchPaymentTermsAsync" Placeholder="Tìm TT / LC" />
-                </div>
+                <div class="col-md-6"><label class="form-label">Khách hàng</label><SeafoodSelect2 Value="@_form.CustomerId" SelectedText="@_form.CustomerName" ValueChanged="OnCustomerChanged" Search="SearchCustomersAsync" Placeholder="Tìm khách" /></div>
+                <div class="col-md-6"><label class="form-label">Hợp đồng</label><SeafoodSelect2 Value="@_form.SalesContractId" ValueChanged="OnContractChanged" Search="SearchContractsAsync" Placeholder="Tìm HĐ" /></div>
+                <div class="col-md-6"><BootstrapInput @bind-Value="_form.InvoiceNo" DisplayText="Số invoice" ShowLabel="true" /></div>
+                <div class="col-md-6"><label class="form-label">Điều khoản TT</label><SeafoodSelect2 Value="@_form.PaymentTermId" SelectedText="@_form.PaymentTermName" ValueChanged="OnPaymentTermChanged" Search="SearchPaymentTermsAsync" Placeholder="TT / LC" /></div>
             </div>
         </SeafoodModalSection>
         <SeafoodModalSection Title="Hàng & giá trị" Icon="fa-solid fa-weight-scale">
             <div class="row g-3">
-                <div class="col-md-4"><VnNumberInput Value="@_form.QtyKg" ValueChanged="@(value => _form.QtyKg = value ?? 0)" DisplayText="Khối lượng (kg)" ShowLabel="true" Placeholder="Kg" /></div>
-                <div class="col-md-4"><VnNumberInput Value="@_form.QtyLbs" ValueChanged="@(value => _form.QtyLbs = value ?? 0)" DisplayText="Khối lượng (lb)" ShowLabel="true" Placeholder="Lb" /></div>
-                <div class="col-md-4"><VnNumberInput Value="@_form.AmountUsd" ValueChanged="@(value => _form.AmountUsd = value ?? 0)" DisplayText="Giá trị (USD)" ShowLabel="true" Placeholder="USD" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_form.QtyKg" ValueChanged="@(value => _form.QtyKg = value ?? 0)" DisplayText="Kg" ShowLabel="true" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_form.QtyLbs" ValueChanged="@(value => _form.QtyLbs = value ?? 0)" DisplayText="Lb" ShowLabel="true" /></div>
+                <div class="col-md-4"><VnNumberInput Value="@_form.AmountUsd" ValueChanged="@(value => _form.AmountUsd = value ?? 0)" DisplayText="USD" ShowLabel="true" /></div>
             </div>
         </SeafoodModalSection>
-        <SeafoodModalSection Title="Vận chuyển" Icon="fa-solid fa-truck-fast">
+        <SeafoodModalSection Title="Cảng & hãng tàu" Icon="fa-solid fa-anchor">
             <div class="row g-3">
-                <div class="col-md-6"><BootstrapInput @bind-Value="_form.ContainerNo" DisplayText="Container" ShowLabel="true" placeholder="Số container" /></div>
-                <div class="col-md-6"><BootstrapInput @bind-Value="_form.Route" DisplayText="Tuyến" ShowLabel="true" placeholder="Tuyến vận chuyển" /></div>
+                <div class="col-md-4"><DateTimePicker @bind-Value="_etd" DisplayText="ETD" ShowLabel="true" /></div>
+                <div class="col-md-4"><DateTimePicker @bind-Value="_eta" DisplayText="ETA" ShowLabel="true" /></div>
+                <div class="col-md-4"><label class="form-label">Hãng tàu</label><SeafoodSelect2 Value="@_form.CarrierId" SelectedText="@_form.CarrierName" ValueChanged="OnCarrierChanged" Search="SearchCarriersAsync" Placeholder="MSC / MSK" /></div>
+                <div class="col-md-6"><label class="form-label">Cảng đi</label><SeafoodSelect2 Value="@_form.PortOfLoadingId" SelectedText="@_form.PortOfLoadingName" ValueChanged="OnPolChanged" Search="SearchPortsAsync" Placeholder="Cảng xếp" /></div>
+                <div class="col-md-6"><label class="form-label">Cảng đến</label><SeafoodSelect2 Value="@_form.PortOfDischargeId" SelectedText="@_form.PortOfDischargeName" ValueChanged="OnPodChanged" Search="SearchPortsAsync" Placeholder="Cảng dỡ" /></div>
             </div>
+        </SeafoodModalSection>
+        <SeafoodModalSection Title="Container" Icon="fa-solid fa-box">
+            @foreach (var box in _form.Containers)
+            {
+                var current = box;
+                <div class="row g-3 mb-2">
+                    <div class="col-md-3"><BootstrapInput @bind-Value="current.ContainerNo" DisplayText="Số cont" ShowLabel="true" /></div>
+                    <div class="col-md-2"><BootstrapInput @bind-Value="current.ContainerType" DisplayText="Loại" ShowLabel="true" /></div>
+                    <div class="col-md-2"><BootstrapInput @bind-Value="current.SealNo" DisplayText="Seal" ShowLabel="true" /></div>
+                    <div class="col-md-2"><VnNumberInput Value="@current.QtyKg" ValueChanged="v => current.QtyKg = v ?? 0" DisplayText="Kg" ShowLabel="true" /></div>
+                    <div class="col-md-2"><VnIntInput Value="@current.Cartons" ValueChanged="v => current.Cartons = v ?? 0" DisplayText="Carton" ShowLabel="true" /></div>
+                    <div class="col-md-1 d-flex align-items-end"><Button Color="Color.Danger" IsOutline="true" Icon="fa-solid fa-xmark" OnClick="() => RemoveContainer(current)" /></div>
+                </div>
+            }
+            <Button Color="Color.Secondary" IsOutline="true" Icon="fa-solid fa-plus" Text="Thêm container" OnClick="AddContainer" />
         </SeafoodModalSection>
     </SeafoodCrudModal>
 
-    <div class="sf-form-section mb-3">
-        <div class="row g-3 align-items-end">
-            <div class="col-lg-3 col-md-5"><VnIntInput Value="@_confirmShipmentId" ValueChanged="@(value => _confirmShipmentId = value ?? 0)" DisplayText="Shipment cần xác nhận" ShowLabel="true" Placeholder="ID shipment" /></div>
-            <div class="col-auto"><Button Color="Color.Success" OnClick="ConfirmShipmentAsync"><i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>Kiểm tra &amp; xác nhận xuất</Button></div>
-            <div class="col"><small class="text-muted">Chỉ xác nhận khi đã xếp đủ lô, chứng từ Verified còn hạn và tổng container đủ kg.</small></div>
+    @if (_checklist != null)
+    {
+        <div class="sf-panel mb-3">
+            <div class="sf-form-section-title">Checklist chứng từ — @_checklist.MarketCode</div>
+            <ul class="mb-2">
+                @foreach (var item in _checklist.Items)
+                {
+                    <li>@(item.IsRequired ? "Bắt buộc" : "Bổ sung"): @item.DocumentName — @(item.IsValid ? "Đủ" : item.Reason ?? "Thiếu")</li>
+                }
+            </ul>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4"><Switch @bind-Value="_overrideDocs" DisplayText="Override thiếu giấy" ShowLabel="true" /></div>
+                <div class="col-md-5"><BootstrapInput @bind-Value="_overrideReason" DisplayText="Lý do override" ShowLabel="true" /></div>
+                <div class="col-auto"><Button Color="Color.Success" OnClick="ConfirmSelectedAsync">Xác nhận xuất</Button></div>
+            </div>
         </div>
+    }
+
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm invoice, khách, HĐ, container..." />
+    <div class="sf-table-shell">
+        <Table TItem="ExportShipmentDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.InvoiceNo" Text="Invoice" Width="140" />
+                <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.CustomerName" Text="Khách" Width="180" />
+                <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.ContainerNo" Text="Container" Width="160"><Template Context="value">@(value.Row.Containers.Count == 0 ? value.Value : string.Join(", ", value.Row.Containers.Select(c => c.ContainerNo)))</Template></TableColumn>
+                <TableColumn TItem="ExportShipmentDto" TType="string" @bind-Field="@context.CarrierName" Text="Hãng tàu" Width="120" />
+                <TableColumn TItem="ExportShipmentDto" TType="decimal" @bind-Field="@context.QtyKg" Text="Kg" Width="100" Align="Alignment.Right" />
+                <TableColumn TItem="ExportShipmentDto" TType="int" @bind-Field="@context.Status" Text="TT" Width="120"><Template Context="value">@SeafoodLabels.ShipmentStatus(value.Value)</Template></TableColumn>
+                <TableColumn TItem="ExportShipmentDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="260" Align="Alignment.Right">
+                    <Template Context="value">
+                        <Button Color="Color.Primary" IsOutline="true" Size="Size.ExtraSmall" Text="Sửa" OnClick="() => OpenEditAsync(value.Row)" />
+                        <Button Color="Color.Secondary" IsOutline="true" Size="Size.ExtraSmall" Text="Checklist" OnClick="() => LoadChecklistAsync(value.Row)" />
+                        <Button Color="Color.Success" IsOutline="true" Size="Size.ExtraSmall" Text="Xác nhận" OnClick="() => QuickConfirmAsync(value.Row)" />
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
     </div>
-    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm invoice, khách, HĐ, container, tuyến..." />
-    <div class="sf-table-shell"><Table TItem="ExportShipmentDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
 
 @code {
     private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
     private Table<ExportShipmentDto>? _table;
-    private ExportShipmentDto _form = new();
+    private ExportShipmentDto _form = NewForm();
     private SeafoodCrudModal? _crudModal;
     private string _search = "";
-    private int _confirmShipmentId;
     private int _total;
+    private DocumentChecklistDto? _checklist;
+    private ExportShipmentDto? _selected;
+    private bool _overrideDocs;
+    private string _overrideReason = "";
+    private DateTime _etd = DateTime.Today;
+    private DateTime _eta = DateTime.Today.AddDays(20);
+    private static ExportShipmentDto NewForm() => new() { Containers = new() { new() }, Etd = DateTime.Today, Eta = DateTime.Today.AddDays(20) };
+
     private async Task<QueryData<ExportShipmentDto>> OnQueryAsync(QueryPageOptions options)
     {
         var page = await Api.OrdersPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
@@ -75,58 +120,73 @@
         return SeafoodTableQuery.ToQueryData(page, options);
     }
     private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
-
-    private async Task OpenCreateAsync()
+    private async Task OpenCreateAsync() { _form = NewForm(); _etd = DateTime.Today; _eta = DateTime.Today.AddDays(20); if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(ExportShipmentDto item)
     {
-        _form = new();
+        _form = item;
+        if (_form.Containers.Count == 0) _form.Containers.Add(new());
+        _etd = item.Etd?.ToLocalTime() ?? DateTime.Today;
+        _eta = item.Eta?.ToLocalTime() ?? DateTime.Today.AddDays(20);
         if (_crudModal != null) await _crudModal.ShowAsync();
     }
-
+    private void AddContainer() => _form.Containers.Add(new());
+    private void RemoveContainer(ShipmentContainerDto item) { if (_form.Containers.Count > 1) _form.Containers.Remove(item); }
+    private Task OnCustomerChanged(int? value) { _form.CustomerId = value; return Task.CompletedTask; }
+    private Task OnContractChanged(int? value) { _form.SalesContractId = value; return Task.CompletedTask; }
+    private Task OnPaymentTermChanged(int? value) { _form.PaymentTermId = value; return Task.CompletedTask; }
+    private Task OnCarrierChanged(int? value) { _form.CarrierId = value; return Task.CompletedTask; }
+    private Task OnPolChanged(int? value) { _form.PortOfLoadingId = value; return Task.CompletedTask; }
+    private Task OnPodChanged(int? value) { _form.PortOfDischargeId = value; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize) => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchContractsAsync(string term, int page, int pageSize) => await Api.SearchContractOptionsAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchPaymentTermsAsync(string term, int page, int pageSize) => await Api.SearchPaymentTermsAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCarriersAsync(string term, int page, int pageSize) => await Api.SearchLookupOptionsAsync(11, term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchPortsAsync(string term, int page, int pageSize) => await Api.SearchLookupOptionsAsync(13, term, page, pageSize) ?? new();
     private async Task<bool> SaveAsync()
     {
-        var saved = await Api.SaveOrderAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được đơn xuất"); return false; }
-        await Toast.Success($"Đã lưu đơn {saved.InvoiceNo}: {saved.QtyKg:N1} kg / {saved.QtyLbs:N1} lbs");
-        _form = new();
-        await RefreshAsync();
-        return true;
+        _form.Containers = _form.Containers.Where(x => !string.IsNullOrWhiteSpace(x.ContainerNo)).ToList();
+        _form.Etd = _etd;
+        _form.Eta = _eta;
+        if (_form.Containers.Count > 0) { _form.ContainerNo = string.Join(",", _form.Containers.Select(x => x.ContainerNo)); _form.QtyKg = _form.QtyKg > 0 ? _form.QtyKg : _form.Containers.Sum(x => x.QtyKg); }
+        try
+        {
+            var saved = await Api.SaveOrderAsync(_form);
+            if (saved == null) { await Toast.Error("Không lưu được đơn xuất"); return false; }
+            await Toast.Success($"Đã lưu đơn {saved.InvoiceNo}");
+            await RefreshAsync();
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không lưu được đơn xuất", ApiErrorMessage.Describe(ex, "Kiểm tra container và hợp đồng.")); return false; }
     }
-
-    private Task OnCustomerChanged(int? value)
+    private async Task LoadChecklistAsync(ExportShipmentDto row)
     {
-        _form.CustomerId = value;
-        return Task.CompletedTask;
+        _selected = row;
+        var market = row.Route ?? "USA";
+        _checklist = await Api.DocumentChecklistAsync("Shipment", row.Id, market, row.Etd);
+        if (_checklist == null) await Toast.Warning("Chưa có checklist cho shipment này.");
     }
-
-    private Task OnContractChanged(int? value)
+    private async Task ConfirmSelectedAsync()
     {
-        _form.SalesContractId = value;
-        return Task.CompletedTask;
+        if (_selected == null) return;
+        await ConfirmAsync(_selected.Id);
     }
-
-    private Task OnPaymentTermChanged(int? value)
+    private async Task QuickConfirmAsync(ExportShipmentDto row)
     {
-        _form.PaymentTermId = value;
-        return Task.CompletedTask;
+        _selected = row;
+        await LoadChecklistAsync(row);
+        await ConfirmAsync(row.Id);
     }
-
-    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize)
-        => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
-
-    private async Task<SeafoodSelect2SearchResponseDto> SearchContractsAsync(string term, int page, int pageSize)
-        => await Api.SearchContractOptionsAsync(term, page, pageSize) ?? new();
-
-    private async Task<SeafoodSelect2SearchResponseDto> SearchPaymentTermsAsync(string term, int page, int pageSize)
-        => await Api.SearchPaymentTermsAsync(term, page, pageSize) ?? new();
-
-    private async Task ConfirmShipmentAsync()
+    private async Task ConfirmAsync(int id)
     {
-        if (_confirmShipmentId <= 0) { await Toast.Warning("Nhập ID shipment cần xác nhận."); return; }
-        var saved = await Api.ConfirmOrderAsync(_confirmShipmentId);
-        if (saved == null) { await Toast.Error("Shipment chưa đủ điều kiện xuất."); return; }
-        await Toast.Success($"Đã xác nhận shipment {saved.Id} xuất hàng.");
-        await RefreshAsync();
+        try
+        {
+            var saved = await Api.ConfirmOrderAsync(id, _overrideDocs, _overrideReason);
+            if (saved == null) { await Toast.Error("Shipment chưa đủ điều kiện xuất."); return; }
+            await Toast.Success($"Đã xác nhận shipment {saved.Id} xuất hàng.");
+            _checklist = null;
+            await RefreshAsync();
+        }
+        catch (Exception ex) { await Toast.Error("Không xác nhận được", ApiErrorMessage.Describe(ex, "Thiếu giấy bắt buộc — cần override có lý do.")); }
     }
-
     private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }

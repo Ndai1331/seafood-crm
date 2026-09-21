@@ -1,0 +1,50 @@
+@page "/finance/invoices"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Hóa đơn &amp; công nợ</h3>
+            <p>Hạn thanh toán, đã thu, còn thiếu, cảnh báo đến hạn và quá hạn.</p>
+        </div>
+        <span class="sf-status sf-status-warning"><i class="fa-solid fa-file-invoice me-1" aria-hidden="true"></i>AR</span>
+    </div>
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm số hóa đơn, HĐ, khách..." />
+    <div class="sf-table-shell">
+        <Table TItem="SalesInvoiceDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="SalesInvoiceDto" TType="string" @bind-Field="@context.InvoiceNo" Text="Hóa đơn" Width="150" />
+                <TableColumn TItem="SalesInvoiceDto" TType="string" @bind-Field="@context.ContractNo" Text="HĐ" Width="140" />
+                <TableColumn TItem="SalesInvoiceDto" TType="string" @bind-Field="@context.CustomerName" Text="Khách" Width="180" />
+                <TableColumn TItem="SalesInvoiceDto" TType="decimal" @bind-Field="@context.AmountUsd" Text="Giá trị" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="SalesInvoiceDto" TType="decimal" @bind-Field="@context.ReceivedUsd" Text="Đã thu" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="SalesInvoiceDto" TType="decimal" @bind-Field="@context.OutstandingUsd" Text="Còn thiếu" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="SalesInvoiceDto" TType="DateTime?" @bind-Field="@context.DueDate" Text="Hạn TT" Width="130"><Template Context="value">@(value.Value?.ToLocalTime().ToString("dd/MM/yyyy") ?? "—")</Template></TableColumn>
+                <TableColumn TItem="SalesInvoiceDto" TType="int" @bind-Field="@context.Status" Text="Cảnh báo" Width="160">
+                    <Template Context="value">
+                        @if (value.Row.IsOverdue) { <span class="sf-status sf-status-warning">Quá hạn</span> }
+                        else if (value.Row.IsDueSoon) { <span class="sf-status sf-status-info">Sắp đến hạn</span> }
+                        else { <span>@SeafoodLabels.InvoiceStatus(value.Value)</span> }
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<SalesInvoiceDto>? _table;
+    private string _search = "";
+    private int _total;
+    private async Task<QueryData<SalesInvoiceDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.InvoicesPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+}

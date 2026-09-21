@@ -11,8 +11,12 @@ public class SeafoodApiService
         => RequestClient.GetAPIAsync<List<CatalogLookupDto>>(category == null ? "seafood/catalog" : $"seafood/catalog?category={category}");
     public Task<SeafoodPagedResult<CatalogLookupDto>?> CatalogPageAsync(int? category, string? search, int skip, int take)
         => RequestClient.GetAPIAsync<SeafoodPagedResult<CatalogLookupDto>>(PageEndpoint("seafood/catalog/page", search, skip, take, category));
-    public Task<SeafoodSelect2SearchResponseDto?> SearchLookupOptionsAsync(int category, string? search, int page = 1, int pageSize = 20)
-        => SearchOptionsAsync($"seafood/select-options/lookups/{category}", search, page, pageSize);
+    public async Task<SeafoodSelect2SearchResponseDto?> SearchLookupOptionsAsync(int category, string? search, int page = 1, int pageSize = 20)
+    {
+        var result = await SearchOptionsAsync($"seafood/select-options/lookups/{category}", search, page, pageSize);
+        SeafoodLookupCodes.Remember(result);
+        return result;
+    }
     public Task<CatalogLookupDto?> SaveCatalogAsync(CatalogLookupDto dto) => RequestClient.PostAPIAsync<CatalogLookupDto>("seafood/catalog", dto);
     public Task<bool> DeleteCatalogAsync(int id) => RequestClient.DeleteAPIAsync<bool>($"seafood/catalog/{id}");
     public Task<List<MarketCertificateRuleDto>?> MarketDocumentRulesAsync() => RequestClient.GetAPIAsync<List<MarketCertificateRuleDto>>("seafood/market-document-rules");
@@ -46,6 +50,8 @@ public class SeafoodApiService
         => RequestClient.GetAPIAsync<SeafoodPagedResult<BusinessPartnerDto>>(PageEndpoint("seafood/partners/page", search, skip, take, role));
     public Task<SeafoodSelect2SearchResponseDto?> SearchPartnerOptionsAsync(string? search, int? role = null, int page = 1, int pageSize = 20)
         => RequestClient.GetAPIAsync<SeafoodSelect2SearchResponseDto>($"seafood/select-options/partners{(role.HasValue ? $"?role={role}&" : "?")}search={Uri.EscapeDataString(search?.Trim() ?? "")}&page={Math.Max(1, page)}&pageSize={Math.Clamp(pageSize, 1, 100)}");
+    public Task<SeafoodSelect2SearchResponseDto?> SearchVesselOptionsAsync(string? search, int page = 1, int pageSize = 20)
+        => SearchOptionsAsync("seafood/select-options/vessels", search, page, pageSize);
     public Task<BusinessPartnerDto?> SavePartnerAsync(BusinessPartnerDto dto) => RequestClient.PostAPIAsync<BusinessPartnerDto>("seafood/partners", dto);
     public Task<bool> DeletePartnerAsync(int id) => RequestClient.DeleteAPIAsync<bool>($"seafood/partners/{id}");
     public Task<List<VesselDto>?> VesselsAsync() => RequestClient.GetAPIAsync<List<VesselDto>>("seafood/vessels");
@@ -71,14 +77,18 @@ public class SeafoodApiService
     public Task<ProductionLotDto?> SaveProductionAsync(ProductionLotDto dto) => RequestClient.PostAPIAsync<ProductionLotDto>("seafood/production", dto);
     public Task<List<RawMaterialLotDto>?> RawLotsAsync(string? search = null)
         => RequestClient.GetAPIAsync<List<RawMaterialLotDto>>($"seafood/raw-lots{(string.IsNullOrWhiteSpace(search) ? "" : $"?search={Uri.EscapeDataString(search)}")}");
+    public Task<SeafoodPagedResult<RawMaterialLotDto>?> RawLotsPageAsync(string? search, int skip, int take)
+        => RequestClient.GetAPIAsync<SeafoodPagedResult<RawMaterialLotDto>>(PageEndpoint("seafood/raw-lots/page", search, skip, take));
     public Task<SeafoodSelect2SearchResponseDto?> SearchRawLotOptionsAsync(string? search, int page = 1, int pageSize = 20)
         => SearchOptionsAsync("seafood/select-options/raw-lots", search, page, pageSize);
     public Task<List<InventoryRowDto>?> InventoryAsync(string? search = null, int skip = 0, int take = 100)
         => RequestClient.GetAPIAsync<List<InventoryRowDto>>($"seafood/inventory?skip={skip}&take={take}{(string.IsNullOrWhiteSpace(search) ? "" : $"&search={Uri.EscapeDataString(search)}")}");
-    public Task<SeafoodPagedResult<InventoryRowDto>?> InventoryPageAsync(string? search, int skip, int take)
-        => RequestClient.GetAPIAsync<SeafoodPagedResult<InventoryRowDto>>(PageEndpoint("seafood/inventory/page", search, skip, take));
+    public Task<SeafoodPagedResult<InventoryRowDto>?> InventoryPageAsync(string? search, int skip, int take, int? kind = null, int? warehouseId = null)
+        => RequestClient.GetAPIAsync<SeafoodPagedResult<InventoryRowDto>>(PageEndpoint("seafood/inventory/page", search, skip, take) + (kind.HasValue ? $"&kind={kind}" : "") + (warehouseId.HasValue ? $"&warehouseId={warehouseId}" : ""));
     public Task<InventoryRowDto?> AdjustInventoryAsync(InventoryAdjustmentDto request)
         => RequestClient.PostAPIAsync<InventoryRowDto>("seafood/inventory/adjust", request);
+    public Task<bool> TransferInventoryAsync(InventoryTransferDto request)
+        => RequestClient.PostAPIAsync<bool>("seafood/inventory/transfer", request);
     public Task<AllocationPreviewDto?> PreviewAllocationAsync(AllocationPreviewRequestDto request)
         => RequestClient.PostAPIAsync<AllocationPreviewDto>("seafood/allocation/preview", request);
     public Task<AllocationResultDto?> ConfirmAllocationAsync(AllocationConfirmDto request)
@@ -90,6 +100,8 @@ public class SeafoodApiService
         => RequestClient.GetAPIAsync<SeafoodPagedResult<SalesContractDto>>(PageEndpoint("seafood/quotes/page", search, skip, take));
     public Task<SeafoodSelect2SearchResponseDto?> SearchContractOptionsAsync(string? search, int page = 1, int pageSize = 20)
         => SearchOptionsAsync("seafood/select-options/contracts", search, page, pageSize);
+    public Task<SeafoodSelect2SearchResponseDto?> SearchInvoiceOptionsAsync(string? search, int page = 1, int pageSize = 20)
+        => SearchOptionsAsync("seafood/select-options/invoices", search, page, pageSize);
     public Task<SalesContractDto?> SaveQuoteAsync(SalesContractDto dto) => RequestClient.PostAPIAsync<SalesContractDto>("seafood/quotes", dto);
     public Task<PriceSuggestionDto?> SuggestPriceAsync(int customerId, int skuId)
         => RequestClient.GetAPIAsync<PriceSuggestionDto>($"seafood/quotes/suggest-price?customerId={customerId}&skuId={skuId}");
@@ -98,7 +110,8 @@ public class SeafoodApiService
     public Task<SeafoodPagedResult<ExportShipmentDto>?> OrdersPageAsync(string? search, int skip, int take)
         => RequestClient.GetAPIAsync<SeafoodPagedResult<ExportShipmentDto>>(PageEndpoint("seafood/orders/page", search, skip, take));
     public Task<ExportShipmentDto?> SaveOrderAsync(ExportShipmentDto dto) => RequestClient.PostAPIAsync<ExportShipmentDto>("seafood/orders", dto);
-    public Task<ExportShipmentDto?> ConfirmOrderAsync(int id) => RequestClient.PostAPIAsync<ExportShipmentDto>($"seafood/orders/{id}/confirm", "");
+    public Task<ExportShipmentDto?> ConfirmOrderAsync(int id, bool overrideDocs = false, string? reason = null)
+        => RequestClient.PostAPIAsync<ExportShipmentDto>($"seafood/orders/{id}/confirm", new ShipmentConfirmDto { OverrideDocumentCheck = overrideDocs, OverrideReason = reason });
     public Task<List<DocumentTypeDto>?> DocumentTypesAsync(bool includeInactive = true) => RequestClient.GetAPIAsync<List<DocumentTypeDto>>($"seafood/documents/types?includeInactive={includeInactive.ToString().ToLowerInvariant()}");
     public Task<SeafoodPagedResult<DocumentTypeDto>?> DocumentTypesPageAsync(bool includeInactive, string? search, int skip, int take)
         => RequestClient.GetAPIAsync<SeafoodPagedResult<DocumentTypeDto>>(PageEndpoint("seafood/documents/types/page", search, skip, take, includeInactive));
@@ -124,14 +137,27 @@ public class SeafoodApiService
         => RequestClient.GetAPIAsync<SeafoodPagedResult<PaymentInstallmentDto>>(PageEndpoint("seafood/payments/page", search, skip, take));
     public Task<PaymentInstallmentDto?> ReceivePaymentAsync(int id, decimal amount)
         => RequestClient.PostAPIAsync<PaymentInstallmentDto>($"seafood/payments/{id}/receive?amount={amount}", "");
+    public Task<bool> AllocatePaymentAsync(PaymentAllocateRequestDto request)
+        => RequestClient.PostAPIAsync<bool>("seafood/payments/allocate", request);
     public Task<List<CustomerDepositDto>?> DepositsAsync() => RequestClient.GetAPIAsync<List<CustomerDepositDto>>("seafood/deposits");
     public Task<SeafoodPagedResult<CustomerDepositDto>?> DepositsPageAsync(string? search, int skip, int take)
         => RequestClient.GetAPIAsync<SeafoodPagedResult<CustomerDepositDto>>(PageEndpoint("seafood/deposits/page", search, skip, take));
     public Task<CustomerDepositDto?> SaveDepositAsync(CustomerDepositDto dto) => RequestClient.PostAPIAsync<CustomerDepositDto>("seafood/deposits", dto);
-    public Task<CustomerDepositDto?> AllocateDepositAsync(int id, int contractId, decimal amount)
-        => RequestClient.PostAPIAsync<CustomerDepositDto>($"seafood/deposits/{id}/allocate?contractId={contractId}&amount={amount}", "");
+    public Task<CustomerDepositDto?> AllocateDepositAsync(int id, int? contractId, decimal amount, int? invoiceId = null)
+        => RequestClient.PostAPIAsync<CustomerDepositDto>($"seafood/deposits/{id}/allocate?amount={amount}{(contractId.HasValue ? $"&contractId={contractId}" : "")}{(invoiceId.HasValue ? $"&invoiceId={invoiceId}" : "")}", "");
     public Task<TraceabilityDto?> TraceabilityAsync(string ownerType, int ownerId)
         => RequestClient.GetAPIAsync<TraceabilityDto>($"seafood/traceability/{Uri.EscapeDataString(ownerType)}/{ownerId}");
+    public Task<TraceabilityDto?> TraceabilityLookupAsync(string? code, string? ownerType = null, int? ownerId = null)
+        => RequestClient.PostAPIAsync<TraceabilityDto>("seafood/traceability/lookup", new TraceabilityLookupDto { Code = code, OwnerType = ownerType, OwnerId = ownerId });
+    public Task<SeafoodPagedResult<SalesInvoiceDto>?> InvoicesPageAsync(string? search, int skip, int take)
+        => RequestClient.GetAPIAsync<SeafoodPagedResult<SalesInvoiceDto>>(PageEndpoint("seafood/invoices", search, skip, take));
+    public Task<ReportTableDto?> ReportAsync(string kind, DateTime? from, DateTime? to)
+        => RequestClient.GetAPIAsync<ReportTableDto>($"seafood/reports?kind={Uri.EscapeDataString(kind)}{(from.HasValue ? $"&from={from:O}" : "")}{(to.HasValue ? $"&to={to:O}" : "")}");
+    public Task<byte[]> ReportExcelAsync(string kind, DateTime? from, DateTime? to)
+        => RequestClient.GetAPIBytesAsync($"seafood/reports/excel?kind={Uri.EscapeDataString(kind)}{(from.HasValue ? $"&from={from:O}" : "")}{(to.HasValue ? $"&to={to:O}" : "")}");
+    public Task<SeafoodPagedResult<DomainAuditLogDto>?> DomainAuditPageAsync(string? search, int skip, int take)
+        => RequestClient.GetAPIAsync<SeafoodPagedResult<DomainAuditLogDto>>(PageEndpoint("seafood/audit", search, skip, take));
+    public Task<byte[]> BackupAsync() => RequestClient.GetAPIBytesAsync("seafood/backup");
 
     public Task<ApiResponseBase<AppHistorySearchResponseDto>?> SearchAuditLogsAsync(AppHistoryFilterPagingDto filter)
         => RequestClient.PostAPIAsync<ApiResponseBase<AppHistorySearchResponseDto>>("appHistories/search", filter);
@@ -150,6 +176,44 @@ public class SeafoodApiService
         }
         return $"{endpoint}?{string.Join("&", query)}";
     }
+}
+
+public static class SeafoodLookupCodes
+{
+    private static readonly Dictionary<int, string> Codes = new();
+    public static void Remember(SeafoodSelect2SearchResponseDto? result)
+    {
+        if (result?.Results == null) return;
+        foreach (var item in result.Results)
+        {
+            var code = !string.IsNullOrWhiteSpace(item.Code)
+                ? item.Code
+                : item.Text.Contains('—') ? item.Text.Split('—')[0].Trim() : item.Text;
+            Codes[item.Id] = code;
+        }
+    }
+    public static string? CodeOf(int? id) => id is int i && Codes.TryGetValue(i, out var code) ? code : null;
+}
+
+public static class SeafoodLabels
+{
+    public static string ContractStatus(int status) => status switch
+    {
+        0 => "Nháp", 1 => "Chờ duyệt", 2 => "Đã ký", 3 => "Đủ hàng", 4 => "Đủ giấy",
+        5 => "Đã xuất", 6 => "Đã thanh toán", 7 => "Thanh toán một phần", 9 => "Hủy", _ => $"#{status}"
+    };
+    public static string ShipmentStatus(int status) => status switch
+    {
+        0 => "Nháp", 1 => "Sẵn sàng", 2 => "Đã xác nhận", 3 => "Đã xuất", 9 => "Hủy", _ => $"#{status}"
+    };
+    public static string InvoiceStatus(int status) => status switch
+    {
+        0 => "Nháp", 1 => "Đã phát hành", 2 => "Thu một phần", 3 => "Đã thu", 9 => "Hủy", _ => $"#{status}"
+    };
+    public static string ProductKind(int kind) => kind switch { 2 => "Bán thành phẩm", 3 => "Phụ phẩm", _ => "Thành phẩm" };
+    public static string StockKind(int kind) => kind switch { 1 => "Nguyên liệu", 3 => "Phụ phẩm", 4 => "Bán thành phẩm", _ => "Thành phẩm" };
+    public static string LotStage(decimal actual, decimal consumed) =>
+        consumed <= 0 ? "Đã nhập" : consumed + 0.0001m >= actual ? "Đã đưa SX hết" : "Còn lại sau SX";
 }
 
 public class SeafoodPagedResult<T>
@@ -179,6 +243,7 @@ public class DashboardDto
     public decimal OnHandKg { get; set; }
     public decimal OpenContractUsd { get; set; }
     public decimal OutstandingPaymentUsd { get; set; }
+    public decimal OverduePaymentUsd { get; set; }
     public List<PieSliceDto> StockBySku { get; set; } = new();
     public List<PieSliceDto> ExportByMarket { get; set; } = new();
 }
@@ -187,6 +252,7 @@ public class SeafoodSelectOptionDto
     public int Id { get; set; }
     public string Text { get; set; } = "";
     public string? Description { get; set; }
+    public string? Code { get; set; }
 }
 public class SeafoodSelect2SearchResponseDto
 {
@@ -238,6 +304,7 @@ public class ProductSkuDto
     public string? ExportMarket { get; set; }
     public decimal DefaultUnitPriceUsd { get; set; }
     public bool IsByproduct { get; set; }
+    public int Kind { get; set; } = 1;
     public bool IsActive { get; set; } = true;
 }
 public class CustomerDto
@@ -318,6 +385,8 @@ public class InboundPurchaseDto
     public decimal CustomsFeeUsd { get; set; }
     public decimal InfrastructureFeeUsd { get; set; }
     public string? ContainerNo { get; set; }
+    public string? ContainerType { get; set; }
+    public string? Note { get; set; }
     public decimal TotalKg { get; set; }
     public decimal TotalAmountUsd { get; set; }
     public List<DocumentAttachmentDto> Documents { get; set; } = new();
@@ -357,6 +426,7 @@ public class ProductionLotDto
     public decimal RawMaterialKg { get; set; }
     public int? TargetMarketId { get; set; }
     public decimal RecoveryRatio { get; set; }
+    public decimal WasteKg { get; set; }
     public string? Note { get; set; }
     public List<string> CertificateCodes { get; set; } = new();
     public List<ProductionInputDto> Inputs { get; set; } = new();
@@ -365,6 +435,7 @@ public class ProductionLotDto
 }
 public class ProductionOutputDto
 {
+    public int Id { get; set; }
     public int SkuId { get; set; }
     public string? SkuName { get; set; }
     public decimal RecoveredKg { get; set; }
@@ -398,17 +469,29 @@ public class RawMaterialLotDto
     public string? CatchMethodCode { get; set; }
     public string? FreezeMethodCode { get; set; }
     public string? OriginCode { get; set; }
+    public string? FishSpeciesCode { get; set; }
+    public string? SensoryCode { get; set; }
+    public int? WarehouseId { get; set; }
+    public string? WarehouseName { get; set; }
+    public List<DocumentAttachmentDto> Documents { get; set; } = new();
 }
 public class InventoryRowDto
 {
     public int Id { get; set; }
     public int LotId { get; set; }
     public string LotNumber { get; set; } = "";
+    public int SkuId { get; set; }
     public string SkuName { get; set; } = "";
+    public int Kind { get; set; } = 2;
+    public decimal ReceivedKg { get; set; }
+    public decimal UsedKg { get; set; }
+    public decimal ShippedKg { get; set; }
     public decimal OnHandKg { get; set; }
     public decimal AllocatedKg { get; set; }
     public decimal AvailableKg { get; set; }
     public int? WarehouseId { get; set; }
+    public string? WarehouseName { get; set; }
+    public string? SizeCode { get; set; }
     public List<string> Certificates { get; set; } = new();
     public string? Warning { get; set; }
     public List<InventoryMovementDto> Movements { get; set; } = new();
@@ -424,6 +507,7 @@ public class InventoryMovementDto
     public string? Reason { get; set; }
 }
 public class InventoryAdjustmentDto { public int InventoryBalanceId { get; set; } public decimal QuantityKg { get; set; } public string Reason { get; set; } = ""; }
+public class InventoryTransferDto { public int Kind { get; set; } = 2; public int SourceId { get; set; } public int ToWarehouseId { get; set; } public decimal QuantityKg { get; set; } public string Reason { get; set; } = ""; }
 public class AllocationPreviewRequestDto { public int SalesContractId { get; set; } public DateTime? Etd { get; set; } }
 public class AllocationPreviewDto
 {
@@ -444,6 +528,11 @@ public class AllocationCandidateDto
     public string SkuName { get; set; } = "";
     public decimal AvailableKg { get; set; }
     public decimal SuggestedKg { get; set; }
+    public decimal RawEquivalentKg { get; set; }
+    public decimal YieldRatioUsed { get; set; }
+    public decimal RemainingFgKg { get; set; }
+    public decimal RemainingRawKg { get; set; }
+    public bool Selected { get; set; } = true;
     public bool IsDocumentReady { get; set; }
     public List<string> RequiredDocuments { get; set; } = new();
     public List<string> SupplementalDocuments { get; set; } = new();
@@ -465,17 +554,28 @@ public class SalesContractDto
 {
     public int Id { get; set; }
     public string ContractNo { get; set; } = "";
+    public string? CustomerContractNo { get; set; }
     public int CustomerId { get; set; }
     public string? CustomerName { get; set; }
+    public int? MarketId { get; set; }
+    public string? MarketName { get; set; }
+    public int? PaymentTermId { get; set; }
+    public string? PaymentTermName { get; set; }
     public int Status { get; set; }
+    public string FulfillmentLabel { get; set; } = "";
+    public decimal RequiredKg { get; set; }
+    public decimal AllocatedKg { get; set; }
+    public decimal ShippedKg { get; set; }
+    public decimal MissingKg { get; set; }
     public decimal SuggestedUnitPriceUsd { get; set; }
     public decimal VarianceVsLastPct { get; set; }
     public decimal VarianceVsPeersPct { get; set; }
+    public string? ApprovalNote { get; set; }
     public List<SalesContractLineDto> Lines { get; set; } = new();
-    public decimal AllocatedKg { get; set; }
 }
 public class SalesContractLineDto
 {
+    public int Id { get; set; }
     public int SkuId { get; set; }
     public string? SkuName { get; set; }
     public decimal QtyKg { get; set; }
@@ -483,6 +583,8 @@ public class SalesContractLineDto
     public decimal UnitPriceUsd { get; set; }
     public decimal AmountUsd { get; set; }
     public decimal AllocatedKg { get; set; }
+    public decimal ShippedKg { get; set; }
+    public decimal MissingKg { get; set; }
 }
 public class PriceSuggestionDto
 {
@@ -497,6 +599,7 @@ public class ExportShipmentDto
     public int? CustomerId { get; set; }
     public string? CustomerName { get; set; }
     public string? ProductionNoticeNo { get; set; }
+    public DateTime? PackingDate { get; set; }
     public DateTime? Etd { get; set; }
     public DateTime? Eta { get; set; }
     public string? InvoiceNo { get; set; }
@@ -508,6 +611,12 @@ public class ExportShipmentDto
     public decimal AmountUsd { get; set; }
     public string? ContainerNo { get; set; }
     public string? ContainerType { get; set; }
+    public int? CarrierId { get; set; }
+    public string? CarrierName { get; set; }
+    public int? PortOfLoadingId { get; set; }
+    public string? PortOfLoadingName { get; set; }
+    public int? PortOfDischargeId { get; set; }
+    public string? PortOfDischargeName { get; set; }
     public string? Route { get; set; }
     public int Status { get; set; }
     public List<ShipmentContainerDto> Containers { get; set; } = new();
@@ -578,6 +687,9 @@ public class PaymentInstallmentDto
     public DateTime? DueDate { get; set; }
     public DateTime? ReceivedDate { get; set; }
     public decimal ReceivedAmountUsd { get; set; }
+    public decimal OutstandingUsd { get; set; }
+    public bool IsOverdue { get; set; }
+    public bool IsDueSoon { get; set; }
 }
 public class CustomerDepositDto
 {
@@ -588,6 +700,17 @@ public class CustomerDepositDto
     public DateTime ReceivedDate { get; set; } = DateTime.UtcNow;
     public string? Note { get; set; }
     public decimal AllocatedUsd { get; set; }
+    public List<DepositAllocationDto> Allocations { get; set; } = new();
+}
+public class DepositAllocationDto
+{
+    public int Id { get; set; }
+    public int? SalesContractId { get; set; }
+    public string? ContractNo { get; set; }
+    public int? SalesInvoiceId { get; set; }
+    public string? InvoiceNo { get; set; }
+    public decimal AmountUsd { get; set; }
+    public bool IsExported { get; set; }
 }
 public class TraceabilityDto
 {
@@ -598,3 +721,55 @@ public class TraceabilityDto
 }
 public class TraceabilityNodeDto { public string Type { get; set; } = ""; public long Id { get; set; } public string Label { get; set; } = ""; }
 public class TraceabilityEdgeDto { public string FromType { get; set; } = ""; public long FromId { get; set; } public string ToType { get; set; } = ""; public long ToId { get; set; } public decimal QuantityKg { get; set; } public string Relation { get; set; } = ""; }
+public class TraceabilityLookupDto { public string? Code { get; set; } public string? OwnerType { get; set; } public int? OwnerId { get; set; } }
+public class ShipmentConfirmDto { public bool OverrideDocumentCheck { get; set; } public string? OverrideReason { get; set; } }
+public class SalesInvoiceDto
+{
+    public int Id { get; set; }
+    public string InvoiceNo { get; set; } = "";
+    public int? SalesContractId { get; set; }
+    public string? ContractNo { get; set; }
+    public int? ShipmentId { get; set; }
+    public int? CustomerId { get; set; }
+    public string? CustomerName { get; set; }
+    public decimal AmountUsd { get; set; }
+    public decimal ReceivedUsd { get; set; }
+    public decimal OutstandingUsd { get; set; }
+    public DateTime IssueDate { get; set; }
+    public DateTime? DueDate { get; set; }
+    public int Status { get; set; }
+    public bool IsOverdue { get; set; }
+    public bool IsDueSoon { get; set; }
+}
+public class PaymentAllocateRequestDto
+{
+    public int CustomerId { get; set; }
+    public decimal AmountUsd { get; set; }
+    public DateTime? ReceivedDate { get; set; }
+    public string? ReferenceNo { get; set; }
+    public string? Note { get; set; }
+    public List<PaymentAllocateItemDto> Items { get; set; } = new();
+}
+public class PaymentAllocateItemDto
+{
+    public int? PaymentInstallmentId { get; set; }
+    public int? InvoiceId { get; set; }
+    public decimal AmountUsd { get; set; }
+}
+public class DomainAuditLogDto
+{
+    public long Id { get; set; }
+    public string EntityType { get; set; } = "";
+    public int EntityId { get; set; }
+    public string Action { get; set; } = "";
+    public int? UserId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string? ChangesJson { get; set; }
+    public string? Reason { get; set; }
+}
+public class ReportTableDto
+{
+    public string Title { get; set; } = "";
+    public List<string> Columns { get; set; } = new();
+    public List<List<string>> Rows { get; set; } = new();
+}

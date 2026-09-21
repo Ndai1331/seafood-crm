@@ -7,7 +7,7 @@
     <div class="sf-page-header">
         <div>
             <h3>Báo giá / Hợp đồng</h3>
-            <p>Tạo hợp đồng xuất khẩu, kiểm tra giá tham chiếu và theo dõi trạng thái duyệt.</p>
+            <p>Sửa/duyệt trên dòng. Theo dõi chờ hàng, đủ hàng, đủ giấy, đã xuất và còn thiếu.</p>
         </div>
         <div class="sf-page-actions">
             <span class="sf-status sf-status-info"><i class="fa-solid fa-file-signature me-1" aria-hidden="true"></i>Export sales</span>
@@ -15,50 +15,50 @@
         </div>
     </div>
 
-    <SeafoodCrudModal @ref="_crudModal" Title="Thêm báo giá / hợp đồng" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
+    <SeafoodCrudModal @ref="_crudModal" Title="@(_form.Id > 0 ? "Sửa hợp đồng" : "Thêm báo giá / hợp đồng")" OnSaveAsync="SaveAsync" Size="Size.ExtraExtraLarge">
         <SeafoodModalSection Title="Thông tin hợp đồng" Icon="fa-solid fa-file-signature">
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Khách hàng</label>
-                    <SeafoodSelect2 Value="@(_form.CustomerId > 0 ? (int?)_form.CustomerId : null)" ValueChanged="OnCustomerChanged"
-                                   Search="SearchCustomersAsync" Placeholder="Tìm mã hoặc tên khách" />
-                </div>
+                <div class="col-md-6"><label class="form-label">Khách hàng</label><SeafoodSelect2 Value="@(_form.CustomerId > 0 ? (int?)_form.CustomerId : null)" SelectedText="@_form.CustomerName" ValueChanged="OnCustomerChanged" Search="SearchCustomersAsync" Placeholder="Tìm khách" /></div>
                 <div class="col-md-6"><BootstrapInput @bind-Value="_form.ContractNo" DisplayText="Số hợp đồng" ShowLabel="true" placeholder="Để trống để tự sinh" /></div>
+                <div class="col-md-6"><label class="form-label">Thị trường</label><SeafoodSelect2 Value="@_form.MarketId" SelectedText="@_form.MarketName" ValueChanged="OnMarketChanged" Search="SearchMarketsAsync" Placeholder="USA / EU" /></div>
+                <div class="col-md-6"><label class="form-label">Điều khoản TT</label><SeafoodSelect2 Value="@_form.PaymentTermId" SelectedText="@_form.PaymentTermName" ValueChanged="OnPaymentTermChanged" Search="SearchPaymentTermsAsync" Placeholder="TT / LC" /></div>
             </div>
         </SeafoodModalSection>
-
         <SeafoodModalSection Title="Dòng hàng" Icon="fa-solid fa-boxes-stacked">
             <div class="row g-3 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label">SKU</label>
-                    <SeafoodSelect2 Value="@(_line.SkuId > 0 ? (int?)_line.SkuId : null)" ValueChanged="OnSkuChanged"
-                                   Search="SearchSkusAsync" Placeholder="Tìm mã hoặc tên SKU" />
-                </div>
-                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKg" ValueChanged="@(value => _line.QtyKg = value ?? 0)" DisplayText="Khối lượng (kg)" ShowLabel="true" Placeholder="Kg" /></div>
-                <div class="col-md-3"><VnNumberInput Value="@_line.QtyLbs" ValueChanged="@(value => _line.QtyLbs = value ?? 0)" DisplayText="Khối lượng (lb)" ShowLabel="true" Placeholder="Lb" /></div>
-                <div class="col-md-4"><VnNumberInput Value="@_line.UnitPriceUsd" ValueChanged="@(value => _line.UnitPriceUsd = value ?? 0)" DisplayText="Đơn giá (USD/kg)" ShowLabel="true" Placeholder="Đơn giá" /></div>
-                <div class="col-md-4 d-flex align-items-end"><Button Color="Color.Secondary" OnClick="SuggestAsync"><i class="fa-solid fa-wand-magic-sparkles me-1" aria-hidden="true"></i>Gợi ý giá</Button></div>
+                <div class="col-md-6"><label class="form-label">SKU</label><SeafoodSelect2 Value="@(_line.SkuId > 0 ? (int?)_line.SkuId : null)" SelectedText="@_line.SkuName" ValueChanged="OnSkuChanged" Search="SearchSkusAsync" Placeholder="Tìm SKU" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.QtyKg" ValueChanged="@(value => _line.QtyKg = value ?? 0)" DisplayText="Kg" ShowLabel="true" /></div>
+                <div class="col-md-3"><VnNumberInput Value="@_line.UnitPriceUsd" ValueChanged="@(value => _line.UnitPriceUsd = value ?? 0)" DisplayText="USD/kg" ShowLabel="true" /></div>
+                <div class="col-md-4"><Button Color="Color.Secondary" OnClick="SuggestAsync"><i class="fa-solid fa-wand-magic-sparkles me-1" aria-hidden="true"></i>Gợi ý giá</Button></div>
             </div>
         </SeafoodModalSection>
-
         @if (_hint != null)
         {
-            <div class="alert alert-info mt-4 mb-0" role="status">
-                Giá gần nhất cùng khách + SKU: <strong>@_hint.LastPriceForCustomer</strong> (@_hint.LastContractNo). Trung bình khách khác 2 tháng: @_hint.PeerAvgLastTwoMonths
-            </div>
+            <div class="alert alert-info mt-4 mb-0">Giá gần nhất: <strong>@_hint.LastPriceForCustomer</strong> (@_hint.LastContractNo). Trung bình khách khác: @_hint.PeerAvgLastTwoMonths</div>
         }
     </SeafoodCrudModal>
 
-    <div class="sf-panel">
-        <div class="sf-form-section-title">Duyệt hợp đồng</div>
-        <div class="row g-3 align-items-end">
-            <div class="col-lg-3 col-md-6"><VnIntInput Value="@_approveId" ValueChanged="@(value => _approveId = value ?? 0)" DisplayText="Hợp đồng cần duyệt" ShowLabel="true" Placeholder="Contract Id" /></div>
-            <div class="col-lg-3 col-md-6"><Button Color="Color.Success" OnClick="ApproveAsync"><i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i>Duyệt hợp đồng</Button></div>
-        </div>
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm số HĐ, khách, SKU..." />
+    <div class="sf-table-shell">
+        <Table TItem="SalesContractDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.ContractNo" Text="Số HĐ" Width="150" />
+                <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.CustomerName" Text="Khách" Width="180" />
+                <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.MarketName" Text="Thị trường" Width="120" />
+                <TableColumn TItem="SalesContractDto" TType="string" @bind-Field="@context.FulfillmentLabel" Text="Thực hiện" Width="140"><Template Context="value"><span class="sf-status sf-status-info">@(string.IsNullOrWhiteSpace(value.Value) ? SeafoodLabels.ContractStatus(value.Row.Status) : value.Value)</span></Template></TableColumn>
+                <TableColumn TItem="SalesContractDto" TType="decimal" @bind-Field="@context.RequiredKg" Text="Cần giao" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="SalesContractDto" TType="decimal" @bind-Field="@context.AllocatedKg" Text="Đã xếp" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="SalesContractDto" TType="decimal" @bind-Field="@context.ShippedKg" Text="Đã giao" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="SalesContractDto" TType="decimal" @bind-Field="@context.MissingKg" Text="Còn thiếu" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="SalesContractDto" TType="int" @bind-Field="@context.Id" Text="Thao tác" Width="220" Align="Alignment.Right">
+                    <Template Context="value">
+                        <Button Color="Color.Primary" IsOutline="true" Size="Size.ExtraSmall" Icon="fa-solid fa-pen-to-square" Text="Sửa" OnClick="() => OpenEditAsync(value.Row)" />
+                        <Button Color="Color.Success" IsOutline="true" Size="Size.ExtraSmall" Icon="fa-solid fa-circle-check" Text="Duyệt" OnClick="() => ApproveAsync(value.Row.Id)" />
+                    </Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
     </div>
-
-    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm số HĐ, khách hàng, SKU, trạng thái..." />
-    <div class="sf-table-shell"><Table TItem="SalesContractDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="true" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table" /></div>
 </div>
 
 @code {
@@ -68,10 +68,9 @@
     private SalesContractLineDto _line = new();
     private SeafoodCrudModal? _crudModal;
     private PriceSuggestionDto? _hint;
-    private int _approveId;
     private string _search = "";
-
     private int _total;
+
     private async Task<QueryData<SalesContractDto>> OnQueryAsync(QueryPageOptions options)
     {
         var page = await Api.QuotesPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
@@ -80,59 +79,51 @@
         return SeafoodTableQuery.ToQueryData(page, options);
     }
     private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
-
-    private async Task OpenCreateAsync()
+    private async Task OpenCreateAsync() { _form = new(); _line = new(); _hint = null; if (_crudModal != null) await _crudModal.ShowAsync(); }
+    private async Task OpenEditAsync(SalesContractDto item)
     {
-        _form = new();
-        _line = new();
+        _form = item;
+        _line = item.Lines.FirstOrDefault() ?? new();
         _hint = null;
         if (_crudModal != null) await _crudModal.ShowAsync();
     }
-
     private async Task SuggestAsync()
     {
         if (_form.CustomerId == 0 || _line.SkuId == 0) return;
         _hint = await Api.SuggestPriceAsync(_form.CustomerId, _line.SkuId);
         if (_hint?.LastPriceForCustomer is decimal price) _line.UnitPriceUsd = price;
     }
-
-    private Task OnCustomerChanged(int? value)
-    {
-        _form.CustomerId = value ?? 0;
-        return Task.CompletedTask;
-    }
-
-    private Task OnSkuChanged(int? value)
-    {
-        _line.SkuId = value ?? 0;
-        return Task.CompletedTask;
-    }
-
-    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize)
-        => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
-
-    private async Task<SeafoodSelect2SearchResponseDto> SearchSkusAsync(string term, int page, int pageSize)
-        => await Api.SearchSkusAsync(term, page, pageSize) ?? new();
-
+    private Task OnCustomerChanged(int? value) { _form.CustomerId = value ?? 0; return Task.CompletedTask; }
+    private Task OnMarketChanged(int? value) { _form.MarketId = value; return Task.CompletedTask; }
+    private Task OnPaymentTermChanged(int? value) { _form.PaymentTermId = value; return Task.CompletedTask; }
+    private Task OnSkuChanged(int? value) { _line.SkuId = value ?? 0; return Task.CompletedTask; }
+    private async Task<SeafoodSelect2SearchResponseDto> SearchCustomersAsync(string term, int page, int pageSize) => await Api.SearchCustomersAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchSkusAsync(string term, int page, int pageSize) => await Api.SearchSkusAsync(term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchMarketsAsync(string term, int page, int pageSize) => await Api.SearchLookupOptionsAsync(9, term, page, pageSize) ?? new();
+    private async Task<SeafoodSelect2SearchResponseDto> SearchPaymentTermsAsync(string term, int page, int pageSize) => await Api.SearchPaymentTermsAsync(term, page, pageSize) ?? new();
     private async Task<bool> SaveAsync()
     {
         _form.Lines = new List<SalesContractLineDto> { _line };
-        var saved = await Api.SaveQuoteAsync(_form);
-        if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return false; }
-        await Toast.Success($"Đã lưu {saved.ContractNo}. Lệch vs HĐ cũ {saved.VarianceVsLastPct}% / khách khác {saved.VarianceVsPeersPct}%");
-        _form = new();
-        _line = new();
-        await RefreshAsync();
-        return true;
+        try
+        {
+            var saved = await Api.SaveQuoteAsync(_form);
+            if (saved == null) { await Toast.Error("Không lưu được hợp đồng"); return false; }
+            await Toast.Success($"Đã lưu {saved.ContractNo}");
+            await RefreshAsync();
+            return true;
+        }
+        catch (Exception ex) { await Toast.Error("Không lưu được hợp đồng", ApiErrorMessage.Describe(ex, "Kiểm tra khách và SKU.")); return false; }
     }
-
-    private async Task ApproveAsync()
+    private async Task ApproveAsync(int id)
     {
-        var saved = await Api.ApproveAsync(_approveId);
-        if (saved == null) { await Toast.Error("Không duyệt được"); return; }
-        await Toast.Success($"Đã duyệt {saved.ContractNo}");
-        await RefreshAsync();
+        try
+        {
+            var saved = await Api.ApproveAsync(id);
+            if (saved == null) { await Toast.Error("Không duyệt được"); return; }
+            await Toast.Success($"Đã duyệt {saved.ContractNo}");
+            await RefreshAsync();
+        }
+        catch (Exception ex) { await Toast.Error("Không duyệt được", ApiErrorMessage.Describe(ex, "Chỉ duyệt hợp đồng hợp lệ.")); }
     }
-
     private async Task RefreshAsync() { if (_table != null) await _table.QueryAsync(1); }
 }

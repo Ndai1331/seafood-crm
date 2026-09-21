@@ -25,6 +25,7 @@ namespace WebApi.Controllers.Seafood
         private readonly SeafoodPartnerService _partners;
         private readonly SeafoodRawLotService _rawLots;
         private readonly SeafoodTraceabilityService _traceability;
+        private readonly SeafoodOpsService _ops;
 
         public SeafoodController(
             SeafoodCatalogService catalog,
@@ -37,7 +38,8 @@ namespace WebApi.Controllers.Seafood
             SeafoodAllocationService allocation,
             SeafoodPartnerService partners,
             SeafoodRawLotService rawLots,
-            SeafoodTraceabilityService traceability)
+            SeafoodTraceabilityService traceability,
+            SeafoodOpsService ops)
         {
             _catalog = catalog;
             _inbound = inbound;
@@ -50,6 +52,7 @@ namespace WebApi.Controllers.Seafood
             _partners = partners;
             _rawLots = rawLots;
             _traceability = traceability;
+            _ops = ops;
         }
 
         [HttpGet("dashboard")]
@@ -66,7 +69,6 @@ namespace WebApi.Controllers.Seafood
             => _catalog.GetLookupsPageAsync(category, search, skip, take);
 
         [HttpGet("select-options/lookups/{category:int}")]
-        [HasPermission(Permissions.MasterCatalog)]
         public Task<SeafoodSelect2SearchResponseDto> LookupOptions(int category, [FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchLookupsAsync((LookupCategory)category, search, page, pageSize);
 
@@ -111,12 +113,10 @@ namespace WebApi.Controllers.Seafood
             => _catalog.GetProductSkusPageAsync(groupId, search, skip, take);
 
         [HttpGet("select-options/skus")]
-        [HasPermission(Permissions.MasterProducts)]
         public Task<SeafoodSelect2SearchResponseDto> SkuOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchSkusAsync(search, page, pageSize);
 
         [HttpGet("select-options/product-groups")]
-        [HasPermission(Permissions.MasterProducts)]
         public Task<SeafoodSelect2SearchResponseDto> ProductGroupOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchProductGroupsAsync(search, page, pageSize);
 
@@ -146,7 +146,6 @@ namespace WebApi.Controllers.Seafood
             => _catalog.GetCustomersPageAsync(search, skip, take);
 
         [HttpGet("select-options/customers")]
-        [HasPermission(Permissions.MasterCustomers)]
         public Task<SeafoodSelect2SearchResponseDto> CustomerOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchCustomersAsync(search, page, pageSize);
 
@@ -159,42 +158,45 @@ namespace WebApi.Controllers.Seafood
         public Task<bool> DeleteCustomer(int id) => _catalog.DeleteCustomerAsync(id);
 
         [HttpGet("partners")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<List<BusinessPartnerDto>> Partners([FromQuery] BusinessPartnerRole? role) => _partners.ListPartnersAsync(role);
 
         [HttpGet("partners/page")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<SeafoodPagedResult<BusinessPartnerDto>> PartnersPage([FromQuery] BusinessPartnerRole? role, [FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
             => _partners.ListPartnersPageAsync(role, search, skip, take);
 
         [HttpGet("select-options/partners")]
-        [HasPermission(Permissions.MasterCustomers)]
         public Task<SeafoodSelect2SearchResponseDto> PartnerOptions([FromQuery] BusinessPartnerRole? role, [FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _partners.SearchOptionsAsync(role, search, page, pageSize);
 
+        [HttpGet("select-options/vessels")]
+        public Task<SeafoodSelect2SearchResponseDto> VesselOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+            => _partners.SearchVesselsAsync(search, page, pageSize);
+
         [HttpPost("partners")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<BusinessPartnerDto> SavePartner([FromBody] BusinessPartnerDto dto) => _partners.SavePartnerAsync(dto);
 
         [HttpDelete("partners/{id:int}")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<bool> DeletePartner(int id) => _partners.DeletePartnerAsync(id);
 
         [HttpGet("vessels")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<List<VesselDto>> Vessels() => _partners.ListVesselsAsync();
 
         [HttpGet("vessels/page")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<SeafoodPagedResult<VesselDto>> VesselsPage([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
             => _partners.ListVesselsPageAsync(search, skip, take);
 
         [HttpPost("vessels")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<VesselDto> SaveVessel([FromBody] VesselDto dto) => _partners.SaveVesselAsync(dto);
 
         [HttpDelete("vessels/{id:int}")]
-        [HasPermission(Permissions.MasterCustomers)]
+        [HasPermission(Permissions.MasterPartners)]
         public Task<bool> DeleteVessel(int id) => _partners.DeleteVesselAsync(id);
 
         [HttpGet("payment-terms")]
@@ -207,7 +209,6 @@ namespace WebApi.Controllers.Seafood
             => _catalog.GetPaymentTermsPageAsync(search, skip, take);
 
         [HttpGet("select-options/payment-terms")]
-        [HasPermission(Permissions.MasterPaymentTerms)]
         public Task<SeafoodSelect2SearchResponseDto> PaymentTermOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchPaymentTermsAsync(search, page, pageSize);
 
@@ -253,8 +254,16 @@ namespace WebApi.Controllers.Seafood
 
         [HttpGet("inventory/page")]
         [HasPermission(Permissions.Inventory)]
-        public Task<SeafoodPagedResult<InventoryRowDto>> InventoryPage([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
-            => _inventory.PageAsync(search, skip, take);
+        public Task<SeafoodPagedResult<InventoryRowDto>> InventoryPage([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20, [FromQuery] StockLotKind? kind = null, [FromQuery] int? warehouseId = null)
+            => _inventory.PageAsync(search, skip, take, kind, warehouseId);
+
+        [HttpPost("inventory/transfer")]
+        [HasPermission(Permissions.Inventory)]
+        public async Task<IActionResult> TransferInventory([FromBody] InventoryTransferDto request)
+        {
+            await _ops.TransferAsync(request, CurrentUserId());
+            return Ok(true);
+        }
 
         [HttpPost("inventory/adjust")]
         [HasPermission(Permissions.Inventory)]
@@ -266,8 +275,12 @@ namespace WebApi.Controllers.Seafood
         public Task<List<RawMaterialLotDto>> RawLots([FromQuery] string? search)
             => _rawLots.ListAsync(search);
 
+        [HttpGet("raw-lots/page")]
+        [HasPermission(Permissions.Inbound)]
+        public Task<SeafoodPagedResult<RawMaterialLotDto>> RawLotsPage([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
+            => _rawLots.PageAsync(search, skip, take);
+
         [HttpGet("select-options/raw-lots")]
-        [HasPermission(Permissions.Production)]
         public Task<SeafoodSelect2SearchResponseDto> RawLotOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _rawLots.SearchOptionsAsync(search, page, pageSize);
 
@@ -294,6 +307,11 @@ namespace WebApi.Controllers.Seafood
         public Task<TraceabilityDto> Traceability(string ownerType, int ownerId)
             => _traceability.GetAsync(ownerType, ownerId);
 
+        [HttpPost("traceability/lookup")]
+        [HasPermission(Permissions.Inventory)]
+        public Task<TraceabilityDto> TraceabilityLookup([FromBody] TraceabilityLookupDto request)
+            => _traceability.LookupAsync(request);
+
         [HttpGet("quotes")]
         [HasPermission(Permissions.ExportQuotes)]
         public Task<List<SalesContractDto>> Quotes() => _export.ListContractsAsync();
@@ -304,9 +322,12 @@ namespace WebApi.Controllers.Seafood
             => _export.PageContractsAsync(search, skip, take);
 
         [HttpGet("select-options/contracts")]
-        [HasPermission(Permissions.ExportOrders)]
         public Task<SeafoodSelect2SearchResponseDto> ContractOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
             => _catalog.SearchContractsAsync(search, page, pageSize);
+
+        [HttpGet("select-options/invoices")]
+        public Task<SeafoodSelect2SearchResponseDto> InvoiceOptions([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+            => _ops.SearchInvoicesAsync(search, page, pageSize);
 
         [HttpPost("quotes")]
         [HasPermission(Permissions.ExportQuotes)]
@@ -337,7 +358,47 @@ namespace WebApi.Controllers.Seafood
 
         [HttpPost("orders/{id:int}/confirm")]
         [HasPermission(Permissions.ExportOrders)]
-        public Task<ExportShipmentDto> ConfirmOrder(int id) => _export.ConfirmShipmentAsync(id, CurrentUserId());
+        public Task<ExportShipmentDto> ConfirmOrder(int id, [FromBody] ShipmentConfirmDto? request)
+            => _export.ConfirmShipmentAsync(id, CurrentUserId(), request);
+
+        [HttpGet("invoices")]
+        [HasPermission(Permissions.FinanceInvoices)]
+        public Task<SeafoodPagedResult<SalesInvoiceDto>> Invoices([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
+            => _ops.PageInvoicesAsync(search, skip, take);
+
+        [HttpPost("payments/allocate")]
+        [HasPermission(Permissions.FinancePayments)]
+        public async Task<IActionResult> AllocatePayment([FromBody] PaymentAllocateRequestDto request)
+        {
+            await _ops.AllocatePaymentAsync(request, CurrentUserId());
+            return Ok(true);
+        }
+
+        [HttpGet("reports")]
+        [HasPermission(Permissions.ReportsView)]
+        public Task<ReportTableDto> Report([FromQuery] string kind, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+            => _ops.GetReportAsync(new ReportQueryDto { Kind = kind, From = from, To = to });
+
+        [HttpGet("reports/excel")]
+        [HasPermission(Permissions.ReportsView)]
+        public async Task<IActionResult> ReportExcel([FromQuery] string kind, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            var bytes = await _ops.ExportReportExcelAsync(new ReportQueryDto { Kind = kind, From = from, To = to });
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"bao-cao-{kind}.xlsx");
+        }
+
+        [HttpGet("audit")]
+        [HasPermission(Permissions.SystemAudit)]
+        public Task<SeafoodPagedResult<DomainAuditLogDto>> DomainAudit([FromQuery] string? search, [FromQuery] int skip = 0, [FromQuery] int take = 20)
+            => _ops.PageAuditAsync(search, skip, take);
+
+        [HttpGet("backup")]
+        [HasPermission(Permissions.SystemBackup)]
+        public async Task<IActionResult> Backup()
+        {
+            var bytes = await _ops.BackupZipAsync();
+            return File(bytes, "application/zip", $"seafood-backup-{DateTime.UtcNow:yyyyMMdd}.zip");
+        }
 
         [HttpGet("payments")]
         [HasPermission(Permissions.FinancePayments)]
@@ -368,9 +429,9 @@ namespace WebApi.Controllers.Seafood
 
         [HttpPost("deposits/{id:int}/allocate")]
         [HasPermission(Permissions.FinanceDeposits)]
-        public async Task<CustomerDepositDto> Allocate(int id, [FromQuery] int contractId, [FromQuery] decimal amount)
+        public async Task<CustomerDepositDto> Allocate(int id, [FromQuery] int? contractId, [FromQuery] decimal amount, [FromQuery] int? invoiceId)
         {
-            await _finance.AllocateAsync(depositId: id, contractId, amount);
+            await _finance.AllocateAsync(depositId: id, contractId, amount, invoiceId);
             var rows = await _finance.ListDepositsAsync();
             return rows.First(d => d.Id == id);
         }

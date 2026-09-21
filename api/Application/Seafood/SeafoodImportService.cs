@@ -79,6 +79,29 @@ public class SeafoodImportService : ITransientDependency
         if (batch.Status != ImportBatchStatus.Preview)
             throw new GlobalException("Batch import đã được xử lý trước đó.", HttpStatusCode.Conflict);
         batch.Status = ImportBatchStatus.Confirmed;
+        var inboundService = new InboundService(_db);
+        foreach (var row in batch.Rows.Where(x => x.IsValid && x.SheetName.Contains("nhập", StringComparison.OrdinalIgnoreCase)))
+        {
+            var values = JsonConvert.DeserializeObject<Dictionary<string, string>>(row.PayloadJson) ?? new();
+            var qty = values.Values.Select(v => decimal.TryParse(v.Replace(",", ""), out var n) ? n : 0m).FirstOrDefault(n => n > 0);
+            if (qty <= 0) continue;
+            var bl = values.FirstOrDefault(x => x.Key.Contains("BL", StringComparison.OrdinalIgnoreCase)).Value;
+            var container = values.FirstOrDefault(x => x.Key.Contains("CONTAINER", StringComparison.OrdinalIgnoreCase)).Value;
+            await inboundService.SaveAsync(new InboundPurchaseDto
+            {
+                BlNumber = string.IsNullOrWhiteSpace(bl) ? $"IMP-{batch.Id}-{row.RowNumber}" : bl,
+                ContainerNo = container,
+                Note = $"Imported from {batch.FileName} row {row.RowNumber}",
+                Lines = new List<InboundLineDto>
+                {
+                    new()
+                    {
+                        Commodity = values.FirstOrDefault(x => x.Key.Contains("HÀNG", StringComparison.OrdinalIgnoreCase) || x.Key.Contains("COMMODITY", StringComparison.OrdinalIgnoreCase)).Value ?? "NL",
+                        QtyKg = qty
+                    }
+                }
+            });
+        }
         _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "ImportBatch", EntityId = id, Action = "Confirmed", UserId = userId, Reason = request.Note });
         await _db.SaveChangesAsync();
         return Map(batch);

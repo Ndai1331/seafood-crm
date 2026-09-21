@@ -1,0 +1,49 @@
+@page "/inbound/lots"
+@layout PageLayout
+@inject SeafoodApiService Api
+@inject ToastService Toast
+
+<div class="sf-page">
+    <div class="sf-page-header">
+        <div>
+            <h3>Hồ sơ lô nguyên liệu</h3>
+            <p>Theo dõi lô đã nhập, đã đưa sản xuất, còn lại và chứng từ kèm theo.</p>
+        </div>
+        <span class="sf-status sf-status-info"><i class="fa-solid fa-barcode me-1" aria-hidden="true"></i>Raw lots</span>
+    </div>
+    <SeafoodFilterBar Search="@_search" SearchChanged="OnSearchChangedAsync" ResultCount="@_total" Placeholder="Tìm mã lô, loài, size, NCC..." />
+    <div class="sf-table-shell">
+        <Table TItem="RawMaterialLotDto" PageItemsSource="@PageItemsSource" AutoGenerateColumns="false" IsBordered="true" IsStriped="true" IsPagination="true" ShowToolbar="false" ShowSearch="false" ShowLoading="true" OnQueryAsync="@OnQueryAsync" @ref="_table">
+            <TableColumns>
+                <TableColumn TItem="RawMaterialLotDto" TType="string" @bind-Field="@context.LotNumber" Text="Mã lô" Width="180"><Template Context="value"><span class="code-chip">@value.Value</span></Template></TableColumn>
+                <TableColumn TItem="RawMaterialLotDto" TType="string" @bind-Field="@context.SupplierName" Text="NCC / tàu" Width="220"><Template Context="value">@(value.Row.SupplierName ?? "—")<div class="small text-muted">@(value.Row.VesselName ?? "")</div></Template></TableColumn>
+                <TableColumn TItem="RawMaterialLotDto" TType="string" @bind-Field="@context.FishSpeciesCode" Text="Loài / size" Width="160"><Template Context="value">@(value.Row.FishSpeciesCode ?? "—") · @(value.Row.SizeCode ?? "")</Template></TableColumn>
+                <TableColumn TItem="RawMaterialLotDto" TType="decimal" @bind-Field="@context.ActualKg" Text="Đã nhập" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="RawMaterialLotDto" TType="decimal" @bind-Field="@context.ConsumedKg" Text="Đã đưa SX" Width="120" Align="Alignment.Right" />
+                <TableColumn TItem="RawMaterialLotDto" TType="decimal" @bind-Field="@context.AvailableKg" Text="Còn lại" Width="110" Align="Alignment.Right" />
+                <TableColumn TItem="RawMaterialLotDto" TType="string" @bind-Field="@context.WarehouseName" Text="Kho" Width="140" />
+                <TableColumn TItem="RawMaterialLotDto" TType="int" @bind-Field="@context.Id" Text="Trạng thái" Width="160">
+                    <Template Context="value"><span class="sf-status sf-status-info">@SeafoodLabels.LotStage(value.Row.ActualKg, value.Row.ConsumedKg)</span></Template>
+                </TableColumn>
+                <TableColumn TItem="RawMaterialLotDto" TType="int" @bind-Field="@context.InboundPurchaseId" Text="Giấy tờ" Width="140">
+                    <Template Context="value">@(value.Row.Documents.Count == 0 ? "Chưa có" : $"{value.Row.Documents.Count} file")</Template>
+                </TableColumn>
+            </TableColumns>
+        </Table>
+    </div>
+</div>
+
+@code {
+    private static readonly IEnumerable<int> PageItemsSource = new[] { 10, 20, 40, 80 };
+    private Table<RawMaterialLotDto>? _table;
+    private string _search = "";
+    private int _total;
+    private async Task<QueryData<RawMaterialLotDto>> OnQueryAsync(QueryPageOptions options)
+    {
+        var page = await Api.RawLotsPageAsync(_search, Math.Max(0, options.PageIndex - 1) * options.PageItems, options.PageItems);
+        _total = page?.TotalCount ?? 0;
+        await InvokeAsync(StateHasChanged);
+        return SeafoodTableQuery.ToQueryData(page, options);
+    }
+    private async Task OnSearchChangedAsync(string value) { _search = value; if (_table != null) await _table.QueryAsync(1); }
+}
