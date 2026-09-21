@@ -341,7 +341,8 @@ public class SeafoodAllocationService : ITransientDependency
         if (request.OverrideDocumentCheck && string.IsNullOrWhiteSpace(request.OverrideReason))
             throw new GlobalException("Override thiếu giấy tờ phải có lý do.", HttpStatusCode.BadRequest);
 
-        await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        return await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var contract = await _db.SalesContracts.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == request.SalesContractId)
             ?? throw new GlobalException("Không tìm thấy hợp đồng.", HttpStatusCode.NotFound);
         var marketCode = await GetMarketCodeAsync(contract.MarketId);
@@ -433,7 +434,6 @@ public class SeafoodAllocationService : ITransientDependency
             Reason = request.OverrideDocumentCheck ? request.OverrideReason : null
         });
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
         return new AllocationResultDto
         {
             SalesContractId = contract.Id,
@@ -441,13 +441,15 @@ public class SeafoodAllocationService : ITransientDependency
             MissingKg = Math.Max(0, totalRequired - totalAllocated),
             Items = resultItems
         };
+        });
     }
 
     public async Task ReleaseAsync(AllocationReleaseDto request, int? userId)
     {
         if (request.SalesContractId <= 0)
             throw new GlobalException("Thiếu hợp đồng cần giải phóng reservation.", HttpStatusCode.BadRequest);
-        await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var reservations = await _db.StockReservations.Include(x => x.InventoryBalance)
             .Where(x => x.Status == ReservationStatus.Active && x.SalesContractLine!.ContractId == request.SalesContractId)
             .ToListAsync();
@@ -484,7 +486,7 @@ public class SeafoodAllocationService : ITransientDependency
         contract.Status = ContractStatus.Signed;
         _db.DomainAuditLogs.Add(new DomainAuditLog { EntityType = "SalesContract", EntityId = request.SalesContractId, Action = "AllocationReleased", UserId = userId, Reason = request.Reason });
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
+        });
     }
 
     private async Task<string> GetMarketCodeAsync(int? marketId)

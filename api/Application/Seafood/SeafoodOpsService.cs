@@ -106,7 +106,8 @@ public class SeafoodOpsService : ITransientDependency
             return;
         }
 
-        await using var tx = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var source = await _db.InventoryBalances.Include(x => x.Sku).FirstOrDefaultAsync(x => x.Id == dto.SourceId)
             ?? throw new GlobalException("Không tìm thấy dòng tồn.", HttpStatusCode.NotFound);
         if (source.WarehouseId == dto.ToWarehouseId)
@@ -140,7 +141,7 @@ public class SeafoodOpsService : ITransientDependency
             Reason = dto.Reason, ChangesJson = JsonConvert.SerializeObject(new { from = source.Id, to = dest.Id, dto.QuantityKg })
         });
         await _db.SaveChangesAsync();
-        await tx.CommitAsync();
+        });
     }
 
     public async Task<SeafoodSelect2SearchResponseDto> SearchInvoicesAsync(string? search, int page = 1, int pageSize = 20)
@@ -190,7 +191,8 @@ public class SeafoodOpsService : ITransientDependency
             throw new GlobalException("Cần số tiền và ít nhất một dòng phân bổ.", HttpStatusCode.BadRequest);
         if (Math.Abs(request.Items.Sum(x => x.AmountUsd) - request.AmountUsd) > 0.01m)
             throw new GlobalException("Tổng phân bổ phải bằng số tiền nhận.", HttpStatusCode.BadRequest);
-        await using var tx = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        await SeafoodTransactions.ExecuteAsync(_db, async () =>
+        {
         var payment = new PaymentTransaction
         {
             CustomerId = request.CustomerId, AmountUsd = request.AmountUsd,
@@ -231,7 +233,7 @@ public class SeafoodOpsService : ITransientDependency
             UserId = userId, ChangesJson = JsonConvert.SerializeObject(request)
         });
         await _db.SaveChangesAsync();
-        await tx.CommitAsync();
+        });
     }
 
     public async Task<SeafoodPagedResult<DomainAuditLogDto>> PageAuditAsync(string? search, int skip, int take)
